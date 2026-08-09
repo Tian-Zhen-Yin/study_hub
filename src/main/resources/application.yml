@@ -1,0 +1,71 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+      force-response: true
+
+spring:
+  web:
+    resources:
+      static-locations: classpath:/static/, file:./data/uploads/
+  datasource:
+    url: jdbc:mysql://localhost:3306/study_hub?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+app:
+  exam-date: 2026-10-24
+  week-start-date: 2026-07-28
+
+studyhub:
+  # mock 数据开关: 设为 true 时加载 25 道题+作答记录, 用于本地验证
+  mock:
+    enabled: ${MOCK_ENABLED:false}
+  # LLM 提供商(仅决定首次启动播种哪一行为生效;之后可在前端「AI 模型」页运行时切换):
+  # ark(火山引擎) | zhipu(智谱 GLM) | deepseek(DeepSeek 官方) | mock(无需 API Key)
+  llm:
+    provider: ${LLM_PROVIDER:ark}
+    cache:
+      enabled: true
+      max-size: 500
+      ttl-hours: 168
+  ark:
+    api-key: ${ARK_API_KEY:}
+    base-url: https://ark.cn-beijing.volces.com/api/v3
+    model: ${ARK_MODEL:doubao-seed-2-0-mini-260428}
+    timeout-seconds: 30
+  zhipu:
+    api-key: ${ZHIPU_API_KEY:}
+    base-url: https://open.bigmodel.cn/api/paas/v4
+    model: ${ZHIPU_MODEL:glm-4-flash}
+    timeout-seconds: 30
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: https://api.deepseek.com/v1
+    model: ${DEEPSEEK_MODEL:deepseek-chat}
+    timeout-seconds: 30
+  diagnosis:
+    auto-generate: true
+    cron: "0 0 22 ? * SUN"
+    min-records: 20
+
+# ===== 本地验证配置示例 =====
+# 1. 无需 API Key 验证完整流程:
+#    设置环境变量 MOCK_ENABLED=true 和 LLM_PROVIDER=mock
+# 2. 真实 AI 验证(任选其一,启动后也可在前端「AI 模型」页随时切换/补填 Key):
+#    ARK_API_KEY=你的key      (LLM_PROVIDER=ark, 默认)
+#    ZHIPU_API_KEY=你的key    (LLM_PROVIDER=zhipu, 模型可填 glm-5.2 / glm-4-flash 等)
+#    DEEPSEEK_API_KEY=你的key (LLM_PROVIDER=deepseek)
+# 3. 清空重来: 删除 MySQL study_hub 数据库后重启即可自动重建

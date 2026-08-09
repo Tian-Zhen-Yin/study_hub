@@ -1,0 +1,820 @@
+{
+  "project": {
+    "resolvedLane": "library_bound",
+    "selectedIntentWorkflowRead": true,
+    "contextRequirementsLoaded": [
+      {
+        "path": "shared-runtime/runtime-boundaries/lane-runtime-contracts.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "shared-runtime/agent-dispatch-runtime/lane-dispatch-index.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/page-rendering-quality-gate.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/design-artifact-validation.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "delivery-quality/delivery-evidence-contract.md",
+        "readStatus": "loaded",
+        "bodyRead": true
+      },
+      {
+        "path": "visual-experience/visual-experience-guidelines.md",
+        "readStatus": "loaded",
+        "bodyRead": false,
+        "reason": "fallback only — Library evidence covers all visual decisions"
+      }
+    ],
+    "contextReadScope": "library-bound-lane-only",
+    "validationRunDiscipline": "main-agent-only",
+    "lowValueCallWatchdog": {
+      "noProgressNextAction": "proceed-to-dispatch"
+    },
+    "styleContinuityAnchors": {
+      "colorSystem": "Primary #1664FF (源力蓝); semantic tokens --color-primary, --color-text-1..4, --color-bg-1..9, --color-border-2/3, --color-success/danger/warning; dark game HUD uses --foundation-inverse-surface gradient",
+      "shapeSystem": "Radius scale: 4px/8px/12px/16px via --radius-sm/md/lg/xl; cards use --radius-lg; buttons use --radius-sm; pill badges use --radius-full",
+      "typographySystem": "PingFang SC / Microsoft YaHei sans-serif; scale: display(24px) h1(20px) h2(18px) h3(16px) h4(14px) body(12px) lead(13px) caption(10px); weights 400/500/600",
+      "spacingSystem": "4px grid: --space-1(4) --space-2(8) --space-3(12) --space-4(16) --space-5(20) --space-6(24) --space-8(32) --space-10(40) --space-12(48) --space-16(64)",
+      "componentLanguage": "Volcengine TopNav(48px) + Sidenav(200px) + Content(flex:1); cards with --shadow-1; buttons with --color-primary; badges with --color-warning/success; progress bars with --color-primary",
+      "surfaceAndDepth": "Light mode; static cards use --shadow-1 (alpha 0.05); floating layers use --shadow-3/4; game HUD uses dark gradient on --foundation-inverse-surface",
+      "imageryAndIconography": "Volcengine multi-color SVG icons from assets/icons/volcengine/; rendered via CSS mask-image; no Lucide/emoji for UI icons",
+      "interactionTone": "Hover: --color-bg-hover; active: --color-bg-active; focus: --state-focus; transitions 0.15s; game feedback animations for correct/wrong answers"
+    },
+    "sharedProjectShellContract": {
+      "frame": "TopNav(48px height, white bg, shadow-card) + Sidenav(200px width, --bg-sidebar) + Content(flex:1, 32px padding)",
+      "header": "TopNav with hamburger + logo + search + avatar; Sidenav with product name + menu items + collapse button",
+      "navStructure": "3 nav items: 仪表盘(dashboard), 刷题战斗(quiz), 数据管理(data); active state via --color-primary bg + white text",
+      "colorSystem": "Volcengine tokens only — no hardcoded hex outside SVG fill/stroke",
+      "typeStack": "var(--font-family-base); .type-h1/.type-h2/.type-h3/.type-h4/.type-body/.type-caption utility classes",
+      "radiusScale": "--radius-sm(4px) for controls, --radius-md(8px) for small cards, --radius-lg(12px) for main cards, --radius-full for badges",
+      "ctaStyle": "Primary button: --color-primary bg, white text, --radius-sm; Secondary: transparent bg, --color-primary text, 1px solid --color-primary"
+    },
+    "dispatchPreflightManifest": [
+      {
+        "nodeId": "page-dashboard",
+        "htmlSrc": "pages/dashboard.html",
+        "packetType": "LibraryBoundPagePacket",
+        "allowedWritePaths": [
+          "pages/dashboard.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/dashboard.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-quiz",
+        "htmlSrc": "pages/quiz.html",
+        "packetType": "LibraryBoundPagePacket",
+        "allowedWritePaths": [
+          "pages/quiz.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/quiz.html"
+          ]
+        }
+      },
+      {
+        "nodeId": "page-data",
+        "htmlSrc": "pages/data.html",
+        "packetType": "LibraryBoundPagePacket",
+        "allowedWritePaths": [
+          "pages/data.html"
+        ],
+        "toolPolicy": {
+          "todoWriteAllowed": false,
+          "validationScriptsAllowed": false,
+          "previewAllowed": false,
+          "helperScriptsAllowed": false,
+          "designFileWriteAllowed": false,
+          "allowedWritePaths": [
+            "pages/data.html"
+          ]
+        }
+      }
+    ],
+    "expectedDispatches": [
+      {
+        "nodeId": "page-quiz",
+        "pageId": "page-quiz",
+        "targetPageId": "page-quiz",
+        "htmlSrc": "pages/quiz.html",
+        "packetType": "LibraryBoundPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/quiz.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "dispatch-quiz-rpg-20260729c",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        },
+        "recordedAt": "2026-07-29T08:29:38.091Z",
+        "source": "record-dispatch-completion.mjs"
+      },
+      {
+        "nodeId": "page-dashboard",
+        "pageId": "page-dashboard",
+        "targetPageId": "page-dashboard",
+        "htmlSrc": "pages/dashboard.html",
+        "packetType": "LibraryBoundPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/dashboard.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "dispatch-dashboard-rpg-20260729c",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        },
+        "recordedAt": "2026-07-29T08:29:37.970Z",
+        "source": "record-dispatch-completion.mjs"
+      },
+      {
+        "nodeId": "page-data",
+        "pageId": "page-data",
+        "targetPageId": "page-data",
+        "htmlSrc": "pages/data.html",
+        "packetType": "LibraryBoundPagePacket",
+        "status": "completed",
+        "changedFiles": [
+          "pages/data.html"
+        ],
+        "toolCallLedger": {
+          "source": "main-agent-runtime-trace",
+          "traceDigest": "dispatch-data-rpg-20260729c",
+          "todoWriteCalls": 0,
+          "previewCalls": 0,
+          "validationScriptCalls": 0,
+          "helperScriptWrites": 0
+        },
+        "recordedAt": "2026-07-29T08:29:38.232Z",
+        "source": "record-dispatch-completion.mjs"
+      }
+    ],
+    "mainAgentPostDispatchMutations": [],
+    "validationHistory": [
+      {
+        "reportPath": "validation-report.json",
+        "reportHash": "bff77584050636cad719d45f6df676b89dc672815347731491e37341411f3dca",
+        "checkedAt": "2026-07-29T07:51:49.802Z",
+        "success": false,
+        "exitCode": 1,
+        "renderBlockingErrorCount": 9,
+        "repairPlanHints": [
+          "hardcoded-color-in-body",
+          "hardcoded-color-in-body",
+          "hardcoded-color-in-body"
+        ],
+        "errorSignatures": [
+          {
+            "errorClass": "artifact-readiness",
+            "normalized": "[design-file] Validation failed for .design file batch: ======================================== [FAIL] Validation failed ---------------------------------------- Found 19 issues: 1. [data[0].title] must be a string 2. [data[0].version] must be a positive integer 3. [data[0].createdAt] must be a positive integer (timestamp) 4. [data[0].canvasData.group] must be a non-negative integer 5. [data[1].title] must be a string 6. [data[1].version] must be a positive integer 7. [data[1].createdAt] must be a positive integer (timestamp) 8. [data[1].canvasData.group] must be a non-negative integer 9. [data[2].title] must be a string 10. [data[2].version] must be a positive integer 11. [data[2].createdAt] must be a positive integer (timestamp) 12. [data[2].canvasData.group] must be a non-negative integer 13. [data[0].devMetadata.interactions[0].domId] domId \"nav-quiz\" is registered in .design but not found in HTML file \"pages/dashboard.html\". Fix: add data-dom-id=\"nav-quiz\" to the corresponding element in the HTML file, or remove this interaction entry if the link no longer exists. 14. [data[0].devMetadata.interactions[1].domId] domId \"nav-data\" is registered in .design but not found in HTML file \"pages/dashboard.html\". Fix: add data-dom-id=\"nav-data\" to the corresponding element in the HTML file, or remove this interaction entry if the link no longer exists. 15. [data[0].devMetadata.interactions[2].domId] domId \"cta-start-quiz\" is registered in .design but not found in HTML file \"pages/dashboard.html\". Fix: add data-dom-id=\"cta-start-quiz\" to the corresponding element in the HTML file, or remove this interaction entry if the link no longer exists. 16. [data[1].devMetadata.interactions[0].domId] domId \"nav-dashboard\" is registered in .design but not found in HTML file \"pages/quiz.html\". Fix: add data-dom-id=\"nav-dashboard\" to the corresponding element in the HTML file, or remove this interaction entry if the link no longer exists. 17. [data[1].devMetadata.interactions[1].domId] domId \"nav-data\" is registered in .design but not found in HTML file \"pages/quiz.html\". Fix: add data-dom-id=\"nav-data\" to the corresponding element in the HTML file, or remove this interaction entry if the link no longer exists. 18. [data[2].devMetadata.interactions[0].domId] domId \"nav-dashboard\" is registered in .design but not found in HTML file \"pages/data.html\". Fix: add data-dom-id=\"nav-dashboard\" to the corresponding element in the HTML file, or remove this interaction entry if the link no longer exists. 19. [data[2].devMetadata.interactions[1].domId] domId \"nav-quiz\" is registered in .design but not found in HTML file \"pages/data.html\". Fix: add data-dom-id=\"nav-quiz\" to the corresponding element in the HTML file, or remove this interaction entry if the link no longer exists. ========================================",
+            "signature": "ae5389517e5d70b6b7de3a13b244940d41433669fe5dd975f31fec9dd14caab2"
+          },
+          {
+            "errorClass": "dispatch-preflight-or-ownership",
+            "normalized": "[dispatch-changed-files] page-dashboard: changed file outside allowedWritePaths[]: pages/data.html",
+            "signature": "5964773acd52b4fcaeffc0f9195f44026acc3987c3b9132563c66c9e2edb9dd5"
+          },
+          {
+            "errorClass": "dispatch-preflight-or-ownership",
+            "normalized": "[dispatch-changed-files] page-quiz: changed file outside allowedWritePaths[]: pages/data.html",
+            "signature": "6c44fef93f20de11071944b51774d536ab95488cf826af29d7c1f582b022c950"
+          },
+          {
+            "errorClass": "head-infrastructure",
+            "normalized": "[html-quality] dashboard.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+            "signature": "dd285df148b2959807b5cd957414c893e70441ec8c708f19c417278bcc918610"
+          },
+          {
+            "errorClass": "head-infrastructure",
+            "normalized": "[html-quality] data.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+            "signature": "69ed6d51949e41daf4fa43b64c19455a8fcf3593ca3f60fc81bc873f3d8cc0f1"
+          },
+          {
+            "errorClass": "html-quality",
+            "normalized": "[html-quality] data.html: image references missing asset file: ../assets/icons/volcengine/target.svg",
+            "signature": "8e28a4028865038f69eb28403c669cdee8b73f8c6860c85a3a7c7e17c897e826"
+          },
+          {
+            "errorClass": "html-quality",
+            "normalized": "[html-quality] data.html: image references missing asset file: ../assets/icons/volcengine/medal.svg",
+            "signature": "2436c00b16d96bee3166b401c36ac12a21b359c2d3ebbda4be7b062bdb18dd54"
+          },
+          {
+            "errorClass": "html-quality",
+            "normalized": "[html-quality] data.html: image references missing asset file: ../assets/icons/volcengine/trophy.svg",
+            "signature": "f9ccc0d09723d68b33418161f0746dd560ff544c3fbe2a26eb835a8fe654d9f6"
+          },
+          {
+            "errorClass": "head-infrastructure",
+            "normalized": "[html-quality] quiz.html: hardcoded colors are forbidden outside <style id=\"theme-vars\">. Use brand CSS variables from the token reference.",
+            "signature": "90abc46d5081f1cc59c27846e4afa185430302939b8ac1904ff85dcb724d7cf7"
+          }
+        ],
+        "terminalState": null
+      }
+    ],
+    "validationRepairLedger": [
+      {
+        "failedReportPath": "validation-report.json",
+        "failedReportHash": "bff77584050636cad719d45f6df676b89dc672815347731491e37341411f3dca",
+        "repairWorkflowReadPath": "intent-workflows/intent-project-mutation/main-agent-repair-workflow.md",
+        "repairStartedAt": "2026-07-29T07:53:42.129Z",
+        "repairEntryStatus": "started-awaiting-owner-batch-repair",
+        "ownerTriage": [
+          {
+            "owner": "sub-agent",
+            "errorClass": "hardcoded-color-in-body",
+            "affectedFiles": [
+              "dashboard.html"
+            ],
+            "repairScope": "targeted-token-replace",
+            "strategy": "targeted_token_replace_once"
+          },
+          {
+            "owner": "sub-agent",
+            "errorClass": "hardcoded-color-in-body",
+            "affectedFiles": [
+              "data.html"
+            ],
+            "repairScope": "targeted-token-replace",
+            "strategy": "targeted_token_replace_once"
+          },
+          {
+            "owner": "sub-agent",
+            "errorClass": "hardcoded-color-in-body",
+            "affectedFiles": [
+              "quiz.html"
+            ],
+            "repairScope": "targeted-token-replace",
+            "strategy": "targeted_token_replace_once"
+          }
+        ],
+        "repairPlanHints": [
+          {
+            "errorClass": "hardcoded-color-in-body",
+            "owner": "sub-agent",
+            "repairScope": "targeted-token-replace",
+            "strategy": "targeted_token_replace_once",
+            "affectedFiles": [
+              "dashboard.html"
+            ],
+            "repairReportPath": null,
+            "repairAlreadyAttempted": false,
+            "allowSourceRead": "no-full-html-read",
+            "maxValidationRuns": 2
+          },
+          {
+            "errorClass": "hardcoded-color-in-body",
+            "owner": "sub-agent",
+            "repairScope": "targeted-token-replace",
+            "strategy": "targeted_token_replace_once",
+            "affectedFiles": [
+              "data.html"
+            ],
+            "repairReportPath": null,
+            "repairAlreadyAttempted": false,
+            "allowSourceRead": "no-full-html-read",
+            "maxValidationRuns": 2
+          },
+          {
+            "errorClass": "hardcoded-color-in-body",
+            "owner": "sub-agent",
+            "repairScope": "targeted-token-replace",
+            "strategy": "targeted_token_replace_once",
+            "affectedFiles": [
+              "quiz.html"
+            ],
+            "repairReportPath": null,
+            "repairAlreadyAttempted": false,
+            "allowSourceRead": "no-full-html-read",
+            "maxValidationRuns": 2
+          }
+        ],
+        "repairActions": [],
+        "revalidationReportPath": null,
+        "revalidationReportHash": null,
+        "revalidationSuccess": null,
+        "blockedReason": null
+      }
+    ],
+    "repairEntryEvidence": [
+      {
+        "failedReportPath": "validation-report.json",
+        "failedReportHash": "bff77584050636cad719d45f6df676b89dc672815347731491e37341411f3dca",
+        "repairWorkflowReadPath": "intent-workflows/intent-project-mutation/main-agent-repair-workflow.md",
+        "repairStartedAt": "2026-07-29T07:53:42.129Z",
+        "ledgerIndex": 0,
+        "ownerTriageCount": 3,
+        "repairActionCount": 0,
+        "revalidationReportPath": null,
+        "revalidationReportHash": null,
+        "revalidationSuccess": null
+      }
+    ]
+  },
+  "designSource": {
+    "operatingMode": "library-bound",
+    "libraryIdentity": {
+      "name": "源力",
+      "id": "dl_builtin_volcengine",
+      "version": "",
+      "scope": "built-in-global",
+      "path": "c:\\Users\\17402\\.trae-cn\\design_libraries\\dl_builtin_volcengine",
+      "versionSource": "metadata.json"
+    },
+    "brandPrefix": "",
+    "cssPath": "colors_and_type.css",
+    "tokenFidelity": "strict",
+    "componentConformance": "strict",
+    "actualTokenNameReference": [
+      "--color-primary",
+      "--color-primary-hover",
+      "--color-primary-click",
+      "--color-primary-disabled",
+      "--color-primary-bg",
+      "--color-primary-tag-bg",
+      "--color-danger",
+      "--color-danger-hover",
+      "--color-danger-click",
+      "--color-danger-bg",
+      "--color-success",
+      "--color-success-hover",
+      "--color-success-click",
+      "--color-success-bg",
+      "--color-warning",
+      "--color-warning-hover",
+      "--color-warning-click",
+      "--color-warning-bg",
+      "--color-link",
+      "--color-link-hover",
+      "--color-link-click",
+      "--color-text-1",
+      "--color-text-2",
+      "--color-text-3",
+      "--color-text-4",
+      "--color-white",
+      "--color-text-primary",
+      "--color-text-secondary",
+      "--color-text-tertiary",
+      "--color-text-disabled",
+      "--color-text-placeholder",
+      "--color-fill-1",
+      "--color-fill-2",
+      "--color-fill-3",
+      "--color-fill-4",
+      "--color-fill-5",
+      "--color-fill-6",
+      "--color-bg-1",
+      "--color-bg-2",
+      "--color-bg-3",
+      "--color-bg-4",
+      "--color-bg-5",
+      "--color-bg-7",
+      "--color-bg-8",
+      "--color-bg-9",
+      "--color-bg-page",
+      "--color-bg-card",
+      "--color-bg-hover",
+      "--color-bg-active",
+      "--color-bg-subtle",
+      "--color-bg-white",
+      "--color-border-2",
+      "--color-border-3",
+      "--primary-1",
+      "--primary-2",
+      "--primary-3",
+      "--primary-4",
+      "--primary-5",
+      "--primary-6",
+      "--primary-7",
+      "--primary-8",
+      "--success-1",
+      "--success-2",
+      "--success-3",
+      "--success-4",
+      "--success-5",
+      "--success-6",
+      "--success-7",
+      "--success-8",
+      "--warning-1",
+      "--warning-2",
+      "--warning-3",
+      "--warning-4",
+      "--warning-5",
+      "--warning-6",
+      "--warning-7",
+      "--warning-8",
+      "--danger-1",
+      "--danger-2",
+      "--danger-3",
+      "--danger-4",
+      "--danger-5",
+      "--danger-6",
+      "--danger-7",
+      "--danger-8",
+      "--text-yuanliNeutral-1",
+      "--text-yuanliNeutral-2",
+      "--text-yuanliNeutral-3",
+      "--text-yuanliNeutral-4",
+      "--text-yuanliNeutral-5",
+      "--text-yuanliNeutral-6",
+      "--text-yuanliNeutral-7",
+      "--text-yuanliNeutral-8",
+      "--text-yuanliNeutral-9",
+      "--text-yuanliNeutral-10",
+      "--text-yuanliNeutral-11",
+      "--space-1",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-8",
+      "--space-10",
+      "--space-12",
+      "--space-16",
+      "--radius-sm",
+      "--radius-md",
+      "--radius-lg",
+      "--radius-xl",
+      "--radius-full",
+      "--shadow-1",
+      "--shadow-2",
+      "--shadow-3",
+      "--shadow-4",
+      "--shadow-5",
+      "--font-size-display",
+      "--font-size-h1",
+      "--font-size-h2",
+      "--font-size-h3",
+      "--font-size-h4",
+      "--font-size-body",
+      "--font-size-lead",
+      "--font-size-caption",
+      "--font-size-eyebrow",
+      "--line-height-display",
+      "--line-height-h1",
+      "--line-height-h2",
+      "--line-height-h3",
+      "--line-height-h4",
+      "--line-height-body",
+      "--line-height-lead",
+      "--line-height-caption",
+      "--line-height-eyebrow",
+      "--font-weight-regular",
+      "--font-weight-medium",
+      "--font-weight-semibold",
+      "--font-display",
+      "--font-heading",
+      "--font-body",
+      "--font-mono",
+      "--font-family-base",
+      "--max-content",
+      "--nav-height",
+      "--sidebar-width"
+    ],
+    "designDecisionSummary": "源力设计系统 (Volcengine Yuanli Design System) — B2B enterprise admin design system. Primary color #1664FF (源力蓝). 4px grid base. 32px control height. 48px nav height. Light mode only. 32 components with preview HTML templates. Game feel is layered ON TOP of Volcengine tokens: dark gradient HUD bar uses --foundation-inverse-surface, XP/level progress bars use --color-primary, achievement badges use --color-warning/success, battle feedback uses --color-success/--color-danger. All structural components (TopNav, Sidenav, PageHeader, Table, Button, Tabs, Progress, Badge) come from Volcengine preview templates. Game atmosphere is achieved through layout composition, dark HUD, gradient accents, and RPG terminology — NOT through breaking the token system.",
+    "componentIndexSummary": "32 components: alert, anchor, avatar, badge, breadcrumb, button, cascader, checkbox, descriptions, drawer, dropdown, form, icon, input, message, modal, page-header, pagination, popconfirm, progress, segmented-picker, select, sidenav, slider, status-tag, steps, switch, table, tabs, timepicker, tooltip, topnav",
+    "uiKitSummary": "5 UI Kits: data-dashboard, list-page, list-page-no-tabs, detail-basic-page, detail-with-sidebar, config-page",
+    "allowedComponents": [
+      "topnav",
+      "sidenav",
+      "page-header",
+      "button",
+      "table",
+      "tabs",
+      "progress",
+      "badge",
+      "avatar",
+      "status-tag",
+      "breadcrumb",
+      "steps",
+      "form",
+      "input",
+      "select",
+      "checkbox",
+      "modal",
+      "drawer",
+      "alert",
+      "message",
+      "tooltip",
+      "pagination",
+      "descriptions",
+      "dropdown"
+    ],
+    "forbiddenInventedComponents": [],
+    "iconAssets": {
+      "source": "assets/icons",
+      "projectIconDir": "assets/icons/volcengine",
+      "libraryKey": "volcengine",
+      "renderMethod": "css-mask",
+      "pathTemplate": "../assets/icons/volcengine/{name}.svg",
+      "availableNames": [
+        "award",
+        "book",
+        "book-fill",
+        "book-alt",
+        "brain",
+        "check-circle",
+        "check-circle-fill",
+        "check-circle-blue",
+        "close-circle",
+        "close-circle-fill",
+        "chart",
+        "data-analysis",
+        "data-visualization",
+        "calendar",
+        "calendar-fill",
+        "bulb",
+        "compass",
+        "heart",
+        "energy",
+        "currency",
+        "education",
+        "course",
+        "assignment",
+        "clock-circle",
+        "alert-triangle",
+        "download",
+        "upload",
+        "arrow-left",
+        "arrow-right",
+        "arrow-up",
+        "arrow-down",
+        "caret-right",
+        "caret-left",
+        "settings",
+        "config",
+        "user",
+        "search",
+        "star",
+        "flag",
+        "done",
+        "complete",
+        "analysis",
+        "chart-fill",
+        "trophy",
+        "target",
+        "fire",
+        "lightning",
+        "crown",
+        "shield",
+        "sword",
+        "map",
+        "treasure",
+        "quest",
+        "battle",
+        "victory",
+        "defeat",
+        "medal",
+        "ribbon"
+      ],
+      "totalCount": 597,
+      "coloringRule": "currentColor by default; override with Library token when needed"
+    }
+  },
+  "pages": [
+    {
+      "nodeId": "page-dashboard",
+      "htmlSrc": "pages/dashboard.html",
+      "title": "仪表盘 —冒险者大厅",
+      "pageType": "information-dense",
+      "visualNorthStar": "RPG冒险者大厅 — 玩家进入即看到自己的等级、经验条、金币、连续登录天数、今日任务列表、成就墙、领地地图概览。整体氛围是游戏HUD感的专业仪表盘，深色HUD条+白色内容卡片+源力蓝主色调",
+      "designRead": "游戏化仪表盘;深色HUD条显示角色状态;白色卡片展示任务/成就/领地;源力蓝progress条显示经验进度",
+      "componentPlan": [
+        {
+          "slug": "topnav",
+          "previewFile": "preview/component-topnav.html",
+          "contractFile": "components/topnav.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "sidenav",
+          "previewFile": "preview/component-sidenav.html",
+          "contractFile": "components/sidenav.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "page-header",
+          "previewFile": "preview/component-page-header.html",
+          "contractFile": "components/page-header.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "progress",
+          "previewFile": "preview/component-progress.html",
+          "contractFile": "components/progress.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "badge",
+          "previewFile": "preview/component-badge.html",
+          "contractFile": "components/badge.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "avatar",
+          "previewFile": "preview/component-avatar.html",
+          "contractFile": "components/avatar.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "table",
+          "previewFile": "preview/component-table.html",
+          "contractFile": "components/table.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "button",
+          "previewFile": "preview/component-button.html",
+          "contractFile": "components/button.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "status-tag",
+          "previewFile": "preview/component-status-tag.html",
+          "contractFile": "components/status-tag.json",
+          "contractKind": "legacy-json"
+        }
+      ],
+      "uiKitPath": "ui_kits/data-dashboard/index.html",
+      "domIdsRequired": [
+        "nav-quiz",
+        "nav-data",
+        "cta-start-quiz"
+      ],
+      "tokenFidelity": "strict"
+    },
+    {
+      "nodeId": "page-quiz",
+      "htmlSrc": "pages/quiz.html",
+      "title": "刷题战斗 —知识竞技场",
+      "pageType": "task-driven",
+      "visualNorthStar": "RPG战斗界面 — 中央是题目卡片(如怪物), 四个选项是攻击招式, 答对=暴击+连击数+1, 答错=受到伤害。左侧是答题进度地图(章节领地), 右侧是答题卡(已征服的领地)。顶部HUD显示HP/MP/连击数/当前章节。整体是战斗沉浸感+源力设计系统专业感的平衡",
+      "designRead": "战斗化刷题;深色HUD条显示连击/HP;题目卡片居中;选项按钮带状态反馈;侧栏显示进度地图和答题卡",
+      "componentPlan": [
+        {
+          "slug": "topnav",
+          "previewFile": "preview/component-topnav.html",
+          "contractFile": "components/topnav.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "sidenav",
+          "previewFile": "preview/component-sidenav.html",
+          "contractFile": "components/sidenav.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "page-header",
+          "previewFile": "preview/component-page-header.html",
+          "contractFile": "components/page-header.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "button",
+          "previewFile": "preview/component-button.html",
+          "contractFile": "components/button.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "progress",
+          "previewFile": "preview/component-progress.html",
+          "contractFile": "components/progress.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "badge",
+          "previewFile": "preview/component-badge.html",
+          "contractFile": "components/badge.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "status-tag",
+          "previewFile": "preview/component-status-tag.html",
+          "contractFile": "components/status-tag.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "steps",
+          "previewFile": "preview/component-steps.html",
+          "contractFile": "components/steps.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "tabs",
+          "previewFile": "preview/component-tabs.html",
+          "contractFile": "components/tabs.json",
+          "contractKind": "legacy-json"
+        }
+      ],
+      "uiKitPath": "ui_kits/detail-basic-page/index.html",
+      "domIdsRequired": [
+        "nav-dashboard",
+        "nav-data"
+      ],
+      "tokenFidelity": "strict"
+    },
+    {
+      "nodeId": "page-data",
+      "htmlSrc": "pages/data.html",
+      "title": "数据管理 —冒险者档案",
+      "pageType": "information-dense",
+      "visualNorthStar": "RPG冒险者档案室 — 游戏统计面板(等级/经验/金币/最高连击/连续登录), 成就墙展示已获得的徽章, 导出/导入进度区域(类似存档管理), AI诊断报告区域。整体是数据展示+游戏成就感的融合, 使用表格和卡片组合",
+      "designRead": "数据管理面板;统计卡片网格;成就墙;导入导出操作区;AI诊断区;表格展示详细数据",
+      "componentPlan": [
+        {
+          "slug": "topnav",
+          "previewFile": "preview/component-topnav.html",
+          "contractFile": "components/topnav.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "sidenav",
+          "previewFile": "preview/component-sidenav.html",
+          "contractFile": "components/sidenav.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "page-header",
+          "previewFile": "preview/component-page-header.html",
+          "contractFile": "components/page-header.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "table",
+          "previewFile": "preview/component-table.html",
+          "contractFile": "components/table.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "button",
+          "previewFile": "preview/component-button.html",
+          "contractFile": "components/button.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "badge",
+          "previewFile": "preview/component-badge.html",
+          "contractFile": "components/badge.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "status-tag",
+          "previewFile": "preview/component-status-tag.html",
+          "contractFile": "components/status-tag.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "tabs",
+          "previewFile": "preview/component-tabs.html",
+          "contractFile": "components/tabs.json",
+          "contractKind": "legacy-json"
+        },
+        {
+          "slug": "descriptions",
+          "previewFile": "preview/component-descriptions.html",
+          "contractFile": "components/descriptions.json",
+          "contractKind": "legacy-json"
+        }
+      ],
+      "uiKitPath": "ui_kits/list-page/index.html",
+      "domIdsRequired": [
+        "nav-dashboard",
+        "nav-quiz"
+      ],
+      "tokenFidelity": "strict"
+    }
+  ]
+}

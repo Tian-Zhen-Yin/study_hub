@@ -1,0 +1,102 @@
+﻿import json
+
+# Read the plan tasks from a structured format
+tasks = []
+
+tasks.append({
+    "title": "Task 2: 知识域实体 + 数据初始化",
+    "files": ["src/main/java/com/studyhub/entity/Domain.java", "src/main/java/com/studyhub/repository/DomainRepository.java", "src/main/java/com/studyhub/config/DataInitializer.java"],
+    "steps": [
+        "创建 Domain 实体 (JPA Entity, 5 fields: id, name, pct, priority, state)",
+        "创建 DomainRepository (JPA Repository, findByName method)",
+        "创建 DataInitializer (CommandLineRunner, 预置9个知识域)",
+        "验证: mvn spring-boot:run, SELECT * FROM domains => 9 rows",
+        "Commit"
+    ]
+})
+
+tasks.append({
+    "title": "Task 3: 题库实体 Question + 仓库",
+    "files": ["src/main/java/com/studyhub/entity/Question.java", "src/main/java/com/studyhub/repository/QuestionRepository.java"],
+    "steps": [
+        "创建 Question 实体 (JPA Entity, 10 fields, indexes on domain_id and source)",
+        "创建 QuestionRepository (findByDomainId, findRandomByDomain, countByDomainId)",
+        "验证: DESC questions => 表创建成功",
+        "Commit"
+    ]
+})
+
+tasks.append({
+    "title": "Task 4: Markdown 题库导入器",
+    "files": ["scripts/parse_markdown_questions.py", "src/main/java/com/studyhub/adapter/QuestionImporter.java", "src/main/java/com/studyhub/adapter/MarkdownImporter.java", "src/main/java/com/studyhub/dto/ImportResultDTO.java"],
+    "steps": [
+        "创建 Python 解析脚本 parse_markdown_questions.py (解析 exam-bank/*.md, 输出 JSON)",
+        "测试: python parse_markdown_questions.py <dir> => 454 题",
+        "创建 ImportResultDTO (total, imported, skipped, source)",
+        "创建 QuestionImporter 接口 (importQuestions, getSourceType)",
+        "创建 MarkdownImporter (调用 Python 脚本, 读取 JSON, 批量入库)",
+        "Commit"
+    ]
+})
+
+tasks.append({
+    "title": "Task 5: PDF 真题导入器",
+    "files": ["scripts/parse_pdf_questions.py", "src/main/java/com/studyhub/adapter/PdfImporter.java"],
+    "steps": [
+        "安装依赖: pip install pdfplumber",
+        "创建 PDF 解析脚本 parse_pdf_questions.py (解析历年真题 PDF, 关键词自动分类知识域)",
+        "创建 PdfImporter (调用 Python 脚本, 读取 JSON, 批量入库)",
+        "Commit"
+    ]
+})
+
+tasks.append({
+    "title": "Task 6: 题库 Service + REST API",
+    "files": ["src/main/java/com/studyhub/service/QuestionService.java", "src/main/java/com/studyhub/controller/QuestionController.java", "src/main/java/com/studyhub/dto/QuestionDTO.java"],
+    "steps": [
+        "创建 QuestionDTO (id, source, subject, domainId, domainName, stem, optionsJson, answer, analysis, examYear, sourceFile)",
+        "创建 QuestionService (getQuestions, importMarkdown, importPdf, countByDomain)",
+        "创建 QuestionController (GET /api/questions, GET /api/questions/count, POST /api/questions/import/markdown, POST /api/questions/import/pdf)",
+        "验证: curl localhost:8080/api/questions?domainId=1&count=5",
+        "Commit"
+    ]
+})
+
+tasks.append({
+    "title": "Task 7: 知识域 API + CORS",
+    "files": ["src/main/java/com/studyhub/service/DomainService.java", "src/main/java/com/studyhub/controller/DomainController.java", "src/main/java/com/studyhub/dto/DomainDTO.java", "src/main/java/com/studyhub/config/CorsConfig.java"],
+    "steps": [
+        "创建 DomainDTO (id, name, pct, priority, state)",
+        "创建 DomainService (getAllDomains, updateDomain)",
+        "创建 DomainController (GET /api/domains, PUT /api/domains/{id})",
+        "创建 CorsConfig (allow all origins for local dev)",
+        "验证: curl localhost:8080/api/domains => 9 个知识域",
+        "Commit"
+    ]
+})
+
+tasks.append({
+    "title": "Task 8: 前端 API 封装 + 在线刷题页",
+    "files": ["src/main/frontend/js/api.js", "src/main/frontend/js/pages/quiz.js", "src/main/frontend/css/quiz.css"],
+    "steps": [
+        "创建 api.js (统一 fetchAPI 封装, api.getDomains, api.getQuestions, api.importMarkdown, api.importPdf)",
+        "创建 quiz.js (QuizPage 对象: init, renderQuestion, selectAnswer, nextQuestion, prevQuestion, showResult)",
+        "创建 quiz.css (选项样式, 选中态, 正确/错误解析样式, 结果页样式)",
+        "Commit"
+    ]
+})
+
+tasks.append({
+    "title": "Task 9: 集成测试与数据导入",
+    "files": [],
+    "steps": [
+        "克隆 PeterGuy326 仓库, 导入 Markdown 自编题: POST /api/questions/import/markdown => 454 题",
+        "克隆 xiaomabenten 仓库, 导入 PDF 真题: POST /api/questions/import/pdf",
+        "验证数据: GET /api/questions/count?domainId=1, GET /api/questions?domainId=3&count=5",
+        "前端验证: 浏览器打开 index.html, 验证完整刷题流程",
+        "Commit"
+    ]
+})
+
+print(json.dumps(tasks, ensure_ascii=False, indent=2))
+print(f"\nTotal tasks: {len(tasks)}")
