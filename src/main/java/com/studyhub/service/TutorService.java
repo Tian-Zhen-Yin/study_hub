@@ -109,7 +109,7 @@ public class TutorService {
         String system = prompts.render("tutor-system", Map.of());
         String user = prompts.render("tutor-explain", vars);
 
-        return new LlmRequest(system, user, 0.7, 800).withJsonMode();
+        return new LlmRequest(system, user, 0.7, 8000).withJsonMode();
     }
 
     private String getFallbackAnalysis(AnswerRecord record) {

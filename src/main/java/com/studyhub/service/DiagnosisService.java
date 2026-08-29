@@ -127,7 +127,7 @@ public class DiagnosisService {
 
         LlmResponse resp;
         try {
-            LlmRequest request = new LlmRequest(system, user, 0.3, 2000).withJsonMode();
+            LlmRequest request = new LlmRequest(system, user, 0.3, 8000).withJsonMode();
             resp = llm.chat(request);
         } catch (LlmUnavailableException e) {
             log.warn("诊断 LLM 降级 reason={}", e.getReasonCode());

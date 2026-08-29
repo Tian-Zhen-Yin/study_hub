@@ -33,8 +33,13 @@ public abstract class AbstractAnthropicLlmClient implements LlmClient {
 
     @PostConstruct
     void initClient() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory =
+            new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout((int) java.time.Duration.ofSeconds(timeoutSeconds()).toMillis());
+        factory.setReadTimeout((int) java.time.Duration.ofSeconds(timeoutSeconds()).toMillis());
         this.restClient = RestClient.builder()
             .baseUrl(baseUrl())
+            .requestFactory(factory)
             .defaultHeader("x-api-key", apiKey())
             .defaultHeader("anthropic-version", ANTHROPIC_VERSION)
             .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -168,7 +173,9 @@ public abstract class AbstractAnthropicLlmClient implements LlmClient {
     private ObjectNode buildRequestBody(LlmRequest request) {
         ObjectNode body = objectMapper.createObjectNode();
         body.put("model", model());
-        body.put("max_tokens", request.maxTokens() != null ? request.maxTokens() : 4096);
+        // 注意：智谱 GLM-5.x 经 Anthropic 端点会默认输出 thinking 块并消耗 max_tokens 预算，
+        // 且该端点忽略 thinking:{type:disabled} 参数，因此调用方必须给足 max_tokens（建议 8000+）
+        body.put("max_tokens", request.maxTokens() != null ? request.maxTokens() : 8192);
 
         if (request.systemPrompt() != null && !request.systemPrompt().isBlank()) {
             body.put("system", request.systemPrompt());

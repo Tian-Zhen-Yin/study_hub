@@ -33,6 +33,7 @@ public class QuizController {
         List<QuestionDTO> dtos = questions.stream()
             .map(questionService::toDTOPublic)
             .collect(Collectors.toList());
+        questionService.annotateAnsweredStatus(dtos);
         return ResponseEntity.ok(dtos);
     }
 

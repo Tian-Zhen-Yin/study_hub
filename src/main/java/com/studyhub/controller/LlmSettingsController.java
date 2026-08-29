@@ -108,7 +108,7 @@ public class LlmSettingsController {
         LlmClient client = registry.buildTransientClient(cfg);
         LlmRequest probe = new LlmRequest(
             "你是一个连通性测试助手,只回复简短内容。",
-            "请回复:pong", 0.0, 16, false);
+            "请回复:pong", 0.0, 256, false);
         try {
             LlmResponse resp = client.chat(probe);
             return ResponseEntity.ok(Map.of("code", 200, "data", Map.of(

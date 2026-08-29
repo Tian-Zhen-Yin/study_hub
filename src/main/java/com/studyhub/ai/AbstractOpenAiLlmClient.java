@@ -31,8 +31,13 @@ public abstract class AbstractOpenAiLlmClient implements LlmClient {
 
     @PostConstruct
     void initClient() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory =
+            new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout((int) java.time.Duration.ofSeconds(timeoutSeconds()).toMillis());
+        factory.setReadTimeout((int) java.time.Duration.ofSeconds(timeoutSeconds()).toMillis());
         this.restClient = RestClient.builder()
             .baseUrl(baseUrl())
+            .requestFactory(factory)
             .defaultHeader("Authorization", "Bearer " + apiKey())
             .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .build();

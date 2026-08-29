@@ -251,34 +251,142 @@ function renderTerritories(territories, domains) {
   if (!el) return;
   if (!territories.length) { el.innerHTML = '<div class="text-muted">暂无领地数据</div>'; return; }
   el.innerHTML = territories.map(function(t) {
-    var d = domains.find(function(dd) { return dd.id === t.domainId; }) || {};
-    var name = d.name || ("领域 " + t.domainId);
+    var name = t.domainName || ("领域 " + t.domainId);
+    var answered = t.questionsAnswered || 0;
+    var total = t.totalQuestions || 0;
+    var accPct = answered > 0 ? Math.round((t.accuracy || 0) * 100) : 0;
+    // 进度：已答题数占总题数的比例（用于配色渐变）
+    var progressPct = total > 0 ? Math.min(100, Math.round(answered / total * 100)) : 0;
+
+    // 按进度 HSL 渐变：0%灰 → 30%红 → 60%橙 → 100%绿
+    var hue, sat, lightBg, lightBar, lightText;
+    if (answered === 0) {
+      hue = 0; sat = 0; lightBg = 90; lightBar = 65; lightText = 55;
+    } else if (t.bossDefeated) {
+      hue = 140; sat = 60; lightBg = 88; lightBar = 42; lightText = 35;
+    } else {
+      // 进度 0→100 映射到色相 0→120（红→橙→黄→绿）
+      hue = Math.round(progressPct * 1.2);
+      sat = 70;
+      lightBg = 92;
+      lightBar = 50;
+      lightText = 38;
+    }
+    var bg = 'hsl(' + hue + ',' + sat + '%,' + lightBg + '%)';
+    var bar = 'hsl(' + hue + ',' + sat + '%,' + lightBar + '%)';
+    var txt = 'hsl(' + hue + ',' + (sat > 0 ? 60 : 0) + '%,' + lightText + '%)';
+
     var cls = "locked";
-    if (t.bossDefeated) cls = "conquered";
-    else if (t.questionsAnswered > 0) cls = "in-progress";
-    var pct = t.totalQuestions ? Math.round(t.accuracy * 100) : 0;
-    return '<div class="territory-item ' + cls + '" style="cursor:pointer" onclick="navigate(\'quiz\')">' +
-      '<div class="territory-icon">' + (t.bossDefeated ? "✓" : (t.questionsAnswered > 0 ? "⏳" : "🔒")) + '</div>' +
-      '<div class="territory-info"><div class="territory-name">' + name + '</div>' +
-      '<div class="territory-progress-text">' + (t.bossDefeated ? "已征服" : (t.questionsAnswered > 0 ? pct + "%" : "迷雾")) + ' · ' + (t.totalQuestions || 0) + '题</div></div></div>';
+    var icon = "🔒";
+    var statusText = "迷雾未开";
+    if (t.bossDefeated) {
+      cls = "conquered"; icon = "✓"; statusText = "已征服";
+    } else if (answered > 0 && accPct >= 80) {
+      cls = "in-progress"; icon = "⚔️"; statusText = "Boss 已解锁";
+    } else if (answered > 0 && progressPct >= 60) {
+      cls = "in-progress"; icon = "⚔️"; statusText = "深入征伐";
+    } else if (answered > 0 && progressPct >= 20) {
+      cls = "in-progress"; icon = "⏳"; statusText = "征伐中";
+    } else if (answered > 0) {
+      cls = "in-progress"; icon = "🌱"; statusText = "初探";
+    }
+
+    var barWidth = Math.max(progressPct, answered > 0 ? 6 : 0);
+
+    return '<div class="territory-item ' + cls + '" style="cursor:pointer;background:' + bg + ';border-left:4px solid ' + bar + ';border-radius:8px;padding:10px 12px;transition:all .25s" onclick="navigate(\'quiz\')">' +
+      '<div class="territory-icon">' + icon + '</div>' +
+      '<div class="territory-info" style="flex:1;min-width:0">' +
+        '<div class="territory-name">' + name + '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-top:5px">' +
+          '<div style="flex:1;height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;min-width:40px">' +
+            '<div style="height:100%;width:' + barWidth + '%;background:' + bar + ';border-radius:3px;transition:width .4s"></div>' +
+          '</div>' +
+          '<span style="font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap">' + answered + '/' + total + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:11px;margin-top:4px">' +
+          '<span style="color:' + txt + ';font-weight:500">' + statusText + '</span>' +
+          '<span style="color:var(--text-3,#555);font-weight:500">' + (answered > 0 ? '正确率 ' + accPct + '%' : '—') + '</span>' +
+        '</div>' +
+      '</div></div>';
   }).join("");
 }
 
-function renderTrendChart() {
+async function renderTrendChart() {
   var canvas = document.getElementById("trend-chart");
   if (!canvas || typeof Chart === "undefined") return;
+  var ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#888";
+  ctx.font = "13px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("加载中...", canvas.width / 2, 40);
+
+  var labels = [], answeredArr = [], correctArr = [];
+  var totalAnswered = 0, totalCorrect = 0, overallAcc = 0;
+  try {
+    var res = await apiGet("/dashboard/trend");
+    var data = res && res.data ? res.data : res;
+    var series = data.series || [];
+    series.forEach(function(p) {
+      labels.push(p.weekday);
+      answeredArr.push(p.answered);
+      correctArr.push(p.correct);
+    });
+    totalAnswered = data.totalAnswered || 0;
+    totalCorrect = data.totalCorrect || 0;
+    overallAcc = data.overallAccuracy || 0;
+  } catch (e) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ef4444";
+    ctx.fillText("数据加载失败", canvas.width / 2, 40);
+    return;
+  }
+
+  // 重画 chart
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   new Chart(canvas, {
     type: "bar",
     data: {
-      labels: ["周一","周二","周三","周四","周五","周六","周日"],
-      datasets: [{ label: "答题数", data: [12,25,18,30,22,35,28], backgroundColor: "rgba(22,100,255,0.6)", borderRadius: 4 }]
+      labels: labels,
+      datasets: [
+        { label: "答题数", data: answeredArr, backgroundColor: "rgba(124,58,237,0.55)", borderRadius: 4, order: 2 },
+        { label: "答对数", data: correctArr, backgroundColor: "rgba(16,185,129,0.7)", borderRadius: 4, order: 1 }
+      ]
     },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true, position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } },
+        tooltip: { callbacks: {
+          footer: function(items) {
+            var idx = items[0].dataIndex;
+            var a = answeredArr[idx], c = correctArr[idx];
+            return a > 0 ? "正确率 " + Math.round(c * 1000 / a) / 10 + "%" : "正确率 —";
+          }
+        } }
+      },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
   });
+
+  // 在标题旁补充本周汇总
+  var headerSpan = document.querySelector("#trend-chart").closest(".content-card").querySelector(".content-card-header .text-muted");
+  if (headerSpan) {
+    headerSpan.textContent = "近7天 " + totalAnswered + " 题 · 正确率 " + overallAcc + "%";
+  } else {
+    var header = document.querySelector("#trend-chart").closest(".content-card").querySelector(".content-card-header");
+    if (header) {
+      var span = document.createElement("span");
+      span.className = "text-muted";
+      span.style.fontSize = "12px";
+      span.textContent = "近7天 " + totalAnswered + " 题 · 正确率 " + overallAcc + "%";
+      header.appendChild(span);
+    }
+  }
 }
 
 /* ===== Quiz Battle ===== */
-var quizState = { mode: "practice", domainId: null, questions: [], currentIdx: 0, answers: [], combo: 0, maxCombo: 0, hp: 100, startTime: 0 };
+var quizState = { mode: "practice", domainId: null, questions: [], currentIdx: 0, answers: [], combo: 0, maxCombo: 0, hp: 100, startTime: 0, timer: null };
 
 async function renderQuiz(c) {
   var domains = state.domains.length ? state.domains : await loadDomains();
@@ -290,16 +398,77 @@ async function renderQuiz(c) {
     return '<button class="quiz-mode-btn" data-mode="' + m + '" onclick="startQuiz(\'' + m + '\')" style="padding:12px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-card);cursor:pointer;text-align:left;transition:all .15s"><div style="font-weight:600">' + modeNames[m] + '</div><div class="text-muted">' + modeDescs[m] + '</div></button>';
   }).join("");
 
-  c.innerHTML = '<div style="display:grid;grid-template-columns:260px 1fr 260px;gap:20px;min-height:calc(100vh - 160px)">' +
-    '<div class="content-card" style="max-height:calc(100vh - 160px);overflow-y:auto"><div class="content-card-header"><div class="content-card-title">领地征伐</div></div><div class="content-card-body" id="quiz-territories"></div></div>' +
+  c.innerHTML = '<div id="quiz-layout-grid" style="display:grid;grid-template-columns:260px 1fr 260px;gap:20px;min-height:calc(100vh - 160px);transition:grid-template-columns .25s">' +
+    '<div class="content-card" id="quiz-territory-card" style="max-height:calc(100vh - 160px);overflow-y:auto"><div class="content-card-header" style="cursor:pointer;user-select:none" onclick="toggleTerritoryPanel()"><div class="content-card-title">领地征伐</div><span id="quiz-territory-toggle" style="font-size:12px;color:var(--text-secondary);transition:transform .2s">▼</span></div><div class="content-card-body" id="quiz-territories"></div></div>' +
     '<div class="stack">' +
       '<div class="content-card" style="background:linear-gradient(135deg,var(--hud-bg-1),var(--hud-bg-2));color:var(--hud-text);border:none"><div class="content-card-body"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><div style="font-size:var(--font-size-h4);font-weight:600" id="quiz-mode-label">选择模式</div><div style="font-size:var(--font-size-caption);color:var(--hud-text-dim)" id="quiz-progress">--</div></div><div style="display:flex;flex-direction:column;gap:6px;flex:1;max-width:300px"><div class="hud-stat-row"><span class="hud-stat-label">HP</span><div class="stat-bar"><div class="stat-bar-fill hp" id="quiz-hp-bar" style="width:100%"></div></div><span id="quiz-hp-text" style="color:var(--hud-text);font-size:12px">100</span></div><div class="hud-stat-row"><span class="hud-stat-label">⚡</span><div class="stat-bar"><div class="stat-bar-fill exp" id="quiz-combo-bar" style="width:0%"></div></div><span id="quiz-combo-text" style="color:var(--hud-text);font-size:12px">Combo x0</span></div></div></div></div></div>' +
       '<div class="content-card" id="quiz-mode-select"><div class="content-card-header"><div class="content-card-title">选择战斗模式</div></div><div class="content-card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + modeBtns + '</div><div style="margin-top:12px;display:flex;gap:10px;align-items:center"><label style="font-size:14px;white-space:nowrap">领域：</label><select id="quiz-domain-select" style="flex:1;padding:8px;border:1px solid var(--border-2);border-radius:6px">' + domainOpts + '</select><button onclick="startBossBattle()" style="padding:8px 16px;background:linear-gradient(135deg,var(--danger-5),var(--danger-6));color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Boss 战</button></div></div></div>' +
-      '<div class="content-card" id="quiz-question-card" style="display:none"><div class="content-card-header"><div class="content-card-title" id="quiz-q-num">第 1 题</div><span class="text-muted" id="quiz-q-source"></span></div><div class="content-card-body"><div id="quiz-q-image" class="quiz-stem-image"></div><div style="font-size:16px;line-height:1.7;margin-bottom:20px" id="quiz-q-stem"></div><div id="quiz-options" style="display:flex;flex-direction:column;gap:10px"></div><div id="quiz-feedback" style="display:none;margin-top:16px;padding:12px;border-radius:8px"></div><div style="margin-top:16px;display:flex;gap:10px"><button id="quiz-next-btn" style="display:none;padding:10px 24px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600" onclick="nextQuestion()">下一题</button><button id="quiz-finish-btn" style="display:none;padding:10px 24px;background:var(--success-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600" onclick="finishQuiz()">完成战斗</button></div></div></div>' +
+      '<div class="content-card" id="quiz-question-card" style="display:none"><div class="content-card-header"><div class="content-card-title" id="quiz-q-num">第 1 题</div><span class="text-muted" id="quiz-q-source"></span><span id="quiz-q-history"></span><span id="quiz-flag-area" style="margin-left:auto"></span><span id="quiz-timer" style="display:none;font-size:14px;font-weight:700;padding:2px 10px;border-radius:6px;background:var(--danger-2);color:var(--danger-6)">⏱ 30s</span></div><div class="content-card-body"><div id="quiz-flag-panel" style="display:none;margin-bottom:14px;padding:12px;border:1px solid var(--danger-3,#fa9ea3);border-radius:8px;background:var(--danger-1,#fef4f4)"></div><div id="quiz-q-image" class="quiz-stem-image"></div><div style="font-size:16px;line-height:1.7;margin-bottom:20px" id="quiz-q-stem"></div><div id="quiz-options" style="display:flex;flex-direction:column;gap:10px"></div><div id="quiz-feedback" style="display:none;margin-top:16px;padding:12px;border-radius:8px"></div><div style="margin-top:16px;display:flex;gap:10px"><button id="quiz-next-btn" style="display:none;padding:10px 24px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600" onclick="nextQuestion()">下一题</button><button id="quiz-finish-btn" style="display:none;padding:10px 24px;background:var(--success-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600" onclick="finishQuiz()">完成战斗</button></div></div></div>' +
     '</div>' +
     '<div class="content-card" style="max-height:calc(100vh - 160px);overflow-y:auto"><div class="content-card-header"><div class="content-card-title">答题阵法</div><span class="text-muted" id="quiz-sheet-progress" style="font-size:12px"></span></div><div class="content-card-body"><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="quiz-sheet-grid"></div><div id="quiz-sheet-legend" style="margin-top:10px;display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-2)"><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--success-2);border:1.5px solid var(--success-5)"></span><span>已答对</span></div><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--danger-2);border:1.5px solid var(--danger-5)"></span><span>已答错</span></div><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--bg-card);border:1.5px solid var(--border-2)"></span><span>未作答</span></div></div></div></div>' +
     '</div>';
   renderQuizTerritories(territories, domains);
+  restoreTerritoryPanel();
+}
+
+function toggleTerritoryPanel() {
+  var card = document.getElementById("quiz-territory-card");
+  var toggle = document.getElementById("quiz-territory-toggle");
+  var title = card ? card.querySelector(".content-card-title") : null;
+  var body = document.getElementById("quiz-territories");
+  var grid = document.getElementById("quiz-layout-grid");
+  if (!card || !toggle) return;
+  var collapsed = card.classList.contains("collapsed");
+  if (collapsed) {
+    card.classList.remove("collapsed");
+    if (title) title.style.display = "";
+    if (body) body.style.display = "";
+    card.style.padding = "";
+    card.querySelector(".content-card-header").style.flexDirection = "";
+    card.querySelector(".content-card-header").style.justifyContent = "";
+    toggle.textContent = "▼";
+    toggle.style.transform = "rotate(0deg)";
+    if (grid) grid.style.gridTemplateColumns = "260px 1fr 260px";
+    localStorage.setItem("quiz-territory-collapsed", "0");
+  } else {
+    card.classList.add("collapsed");
+    if (title) title.style.display = "none";
+    if (body) body.style.display = "none";
+    card.style.padding = "0";
+    var header = card.querySelector(".content-card-header");
+    header.style.flexDirection = "column";
+    header.style.justifyContent = "center";
+    header.style.padding = "12px 0";
+    toggle.textContent = "▶";
+    toggle.style.transform = "rotate(0deg)";
+    if (grid) grid.style.gridTemplateColumns = "36px 1fr 260px";
+    localStorage.setItem("quiz-territory-collapsed", "1");
+  }
+}
+
+function restoreTerritoryPanel() {
+  var collapsed = localStorage.getItem("quiz-territory-collapsed") === "1";
+  if (collapsed) {
+    var card = document.getElementById("quiz-territory-card");
+    var toggle = document.getElementById("quiz-territory-toggle");
+    var title = card ? card.querySelector(".content-card-title") : null;
+    var body = document.getElementById("quiz-territories");
+    var grid = document.getElementById("quiz-layout-grid");
+    if (card) {
+      card.classList.add("collapsed");
+      card.style.padding = "0";
+      var header = card.querySelector(".content-card-header");
+      if (header) {
+        header.style.flexDirection = "column";
+        header.style.justifyContent = "center";
+        header.style.padding = "12px 0";
+      }
+    }
+    if (title) title.style.display = "none";
+    if (body) body.style.display = "none";
+    if (toggle) toggle.textContent = "▶";
+    if (grid) grid.style.gridTemplateColumns = "36px 1fr 260px";
+  }
 }
 
 function renderQuizTerritories(territories, domains) {
@@ -307,10 +476,35 @@ function renderQuizTerritories(territories, domains) {
   if (!el) return;
   if (!territories.length) { el.innerHTML = '<div class="text-muted">暂无数据</div>'; return; }
   el.innerHTML = territories.map(function(t) {
-    var d = domains.find(function(dd) { return dd.id === t.domainId; }) || {};
-    var cls = t.bossDefeated ? "conquered" : (t.questionsAnswered > 0 ? "in-progress" : "locked");
-    var pct = t.totalQuestions ? Math.round(t.accuracy * 100) : 0;
-    return '<div class="territory-item ' + cls + '" style="margin-bottom:6px;cursor:pointer" onclick="document.getElementById(\'quiz-domain-select\').value=\'' + t.domainId + '\'"><div class="territory-icon">' + (t.bossDefeated ? "✓" : (t.questionsAnswered > 0 ? "⏳" : "🔒")) + '</div><div class="territory-info"><div class="territory-name">' + (d.name || ("领域 " + t.domainId)) + '</div><div class="territory-progress-text">' + pct + '% · ' + (t.totalQuestions || 0) + '题</div></div></div>';
+    var name = t.domainName || ((domains.find(function(dd) { return dd.id === t.domainId; }) || {}).name) || ("领域 " + t.domainId);
+    var answered = t.questionsAnswered || 0;
+    var total = t.totalQuestions || 0;
+    var accPct = answered > 0 ? Math.round((t.accuracy || 0) * 100) : 0;
+    var progressPct = total > 0 ? Math.min(100, Math.round(answered / total * 100)) : 0;
+    // 颜色按进度 HSL 平滑渐变：0% 红 → 50% 黄 → 100% 绿
+    var hue = Math.round(progressPct * 1.2);
+    var sat = progressPct === 0 ? 0 : 65;
+    var bg = 'hsl(' + hue + ',' + sat + '%,95%)';
+    var border = 'hsl(' + hue + ',' + sat + '%,55%)';
+    var text = 'hsl(' + hue + ',' + sat + '%,35%)';
+    var icon = progressPct === 0 ? "🔒" : progressPct < 50 ? "⏳" : progressPct < 100 ? "⚔️" : "✓";
+    var statusText = progressPct === 0 ? "迷雾未开" : progressPct < 50 ? "初探" : progressPct < 80 ? "深入" : progressPct < 100 ? "将克" : "已征服";
+    if (t.bossDefeated) { icon = "✓"; statusText = "已征服"; }
+    return '<div class="territory-item" style="margin-bottom:6px;cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:' + bg + ';border:1px solid ' + border + ';border-left:4px solid ' + border + ';transition:all .2s" onclick="document.getElementById(\'quiz-domain-select\').value=\'' + t.domainId + '\'">' +
+      '<div style="font-size:18px;width:24px;text-align:center">' + icon + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-weight:600;font-size:13px;color:var(--text-primary)">' + name + '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-top:3px">' +
+          '<div style="flex:1;height:4px;background:rgba(0,0,0,0.08);border-radius:2px;overflow:hidden;min-width:30px">' +
+            '<div style="height:100%;width:' + Math.max(progressPct, answered > 0 ? 4 : 0) + '%;background:' + border + ';border-radius:2px"></div>' +
+          '</div>' +
+          '<span style="font-size:10px;color:' + text + ';white-space:nowrap;font-weight:600">' + progressPct + '%</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:10px;margin-top:2px;color:var(--text-secondary)">' +
+          '<span>' + statusText + ' · ' + answered + '/' + total + '</span>' +
+          '<span>' + (answered > 0 ? '准' + accPct + '%' : '—') + '</span>' +
+        '</div>' +
+      '</div></div>';
   }).join("");
 }
 
@@ -339,8 +533,12 @@ async function startQuiz(mode) {
 function renderQuizSheet() {
   var grid = document.getElementById("quiz-sheet-grid");
   if (!grid) return;
-  grid.innerHTML = quizState.questions.map(function(_, i) {
-    return '<div id="sheet-' + i + '" style="position:relative;width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border-2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--bg-card);color:var(--text-1);transition:background .2s,border-color .2s,color .2s,transform .2s,outline .2s;user-select:none" onclick="quizState.currentIdx=' + i + ';showQuestion()">' + (i+1) + '</div>';
+  grid.innerHTML = quizState.questions.map(function(q, i) {
+    var histClass = '';
+    if (q.answered === true) {
+      histClass = q.lastCorrect === true ? ' hist-correct' : ' hist-wrong';
+    }
+    return '<div id="sheet-' + i + '" class="sheet-cell' + histClass + '" style="position:relative;width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border-2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--bg-card);color:var(--text-1);transition:background .2s,border-color .2s,color .2s,transform .2s,outline .2s;user-select:none" onclick="quizState.currentIdx=' + i + ';showQuestion()">' + (i+1) + '</div>';
   }).join("");
 }
 
@@ -360,9 +558,14 @@ function updateQuizSheet() {
     if (ans) {
       answered++;
       var qa = quizState.questions[si];
-      var correctAns = (qa && qa.answer != null) ? String(qa.answer).trim().toUpperCase() : "";
-      var userAns = String(ans).trim().toUpperCase();
-      var correct = correctAns !== "" && userAns === correctAns;
+      // 优先用会话内记录的判分结果（主观题自评没有字母可比对）
+      var correct;
+      if (qa && qa.answered === true) {
+        correct = qa.lastCorrect === true;
+      } else {
+        var correctAns = (qa && qa.answer != null) ? String(qa.answer).trim().toUpperCase() : "";
+        correct = correctAns !== "" && String(ans).trim().toUpperCase() === correctAns;
+      }
       if (correct) {
         correctCount++;
         cell.style.background = "var(--success-2)";
@@ -394,10 +597,25 @@ function updateQuizSheet() {
   var prog = document.getElementById("quiz-sheet-progress");
   if (prog) {
     var total = quizState.questions.length || 0;
-    prog.innerHTML = '<span style="color:var(--success-6);font-weight:600">' + correctCount + '</span>' +
-      ' / <span style="color:var(--danger-6);font-weight:600">' + wrongCount + '</span>' +
+    var sessCorrect = 0, sessWrong = 0, histCorrect = 0, histWrong = 0, histAnswered = 0;
+    quizState.questions.forEach(function(q, qi) {
+      var sessAns = quizState.answers[qi];
+      if (sessAns) {
+        // 当前会话已答：以会话内判分结果为准（主观题自评无字母可比对）
+        if (q.answered === true && q.lastCorrect === true) sessCorrect++;
+        else if (q.answered !== true && q.answer && String(sessAns).toUpperCase() === String(q.answer).toUpperCase()) sessCorrect++;
+        else sessWrong++;
+      } else if (q.answered === true) {
+        // 仅有历史记录
+        histAnswered++;
+        if (q.lastCorrect === true) histCorrect++; else histWrong++;
+      }
+    });
+    var sessTotal = sessCorrect + sessWrong;
+    prog.innerHTML = '<span style="color:var(--success-6);font-weight:600">' + sessCorrect + ' 答对</span>' +
+      ' / <span style="color:var(--danger-6);font-weight:600">' + sessWrong + ' 答错</span>' +
       ' / ' + total +
-      ' <span style="color:var(--text-3)">(' + answered + ' 已答)</span>';
+      (histAnswered > 0 ? ' <span style="color:var(--text-3)">(历史 ' + histCorrect + '对/' + histWrong + '错)</span>' : '');
   }
 }
 
@@ -407,19 +625,44 @@ function showQuestion() {
   if (!q) return;
   document.getElementById("quiz-q-num").textContent = "第 " + (i+1) + "/" + quizState.questions.length + " 题";
   document.getElementById("quiz-q-source").textContent = q.source || q.examYear || "";
+  var histEl = document.getElementById("quiz-q-history");
+  if (histEl) {
+    if (q.answered === true) {
+      var ok = q.lastCorrect === true;
+      histEl.innerHTML = '<span style="font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600;' + (ok ? 'background:var(--success-2);color:var(--success-7)' : 'background:var(--danger-2);color:var(--danger-7)') + '">' + (ok ? '✓ 历史答对' : '✗ 历史答错') + '</span>';
+    } else {
+      histEl.innerHTML = '<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--bg-surface-high);color:var(--text-3);font-weight:600">未答过</span>';
+    }
+  }
+  updateFlagArea(q);
   var imgEl = document.getElementById("quiz-q-image");
   if (imgEl) {
     var html = (typeof renderQuestionImageHtml === "function") ? renderQuestionImageHtml(q.imageUrl) : "";
     imgEl.innerHTML = html;
     imgEl.style.display = html ? "" : "none";
   }
-  document.getElementById("quiz-q-stem").textContent = q.stem || "";
+  var stemEl = document.getElementById("quiz-q-stem");
+  stemEl.textContent = q.stem || "";
+  var qType = q.type || "MCQ";
+  var isSubjective = qType === "CASE" || qType === "ESSAY";
+  stemEl.style.whiteSpace = isSubjective ? "pre-wrap" : "";
   document.getElementById("quiz-progress").textContent = (i+1) + "/" + quizState.questions.length;
 
   var answered = quizState.answers[i];
   var options = [];
   try { options = typeof q.optionsJson === "string" ? JSON.parse(q.optionsJson) : (q.optionsJson || []); } catch(e) {}
-  if (!options.length) options = ["A","B","C","D"];
+  if (!options.length && !isSubjective) options = ["A","B","C","D"];
+
+  if (isSubjective) {
+    renderSubjective(i, q, qType, !!answered);
+    document.getElementById("quiz-feedback").style.display = answered ? "" : "none";
+    document.getElementById("quiz-next-btn").style.display = answered ? "" : "none";
+    document.getElementById("quiz-finish-btn").style.display = (answered && i === quizState.questions.length - 1) ? "" : "none";
+    updateQuizSheet();
+    updateQuizHUD();
+    startQuestionTimer(answered);
+    return;
+  }
 
   document.getElementById("quiz-options").innerHTML = options.map(function(opt, oi) {
     var letter = String.fromCharCode(65 + oi);
@@ -438,6 +681,285 @@ function showQuestion() {
 
   updateQuizSheet();
   updateQuizHUD();
+  startQuestionTimer(answered);
+}
+
+/* ===== 题目问题打标 ===== */
+var FLAG_TYPES = [
+  { code: "INCOMPLETE_STEM", name: "题干不全" },
+  { code: "MISSING_IMAGE", name: "缺图/图失效" },
+  { code: "BROKEN_OPTIONS", name: "选项不全" },
+  { code: "WRONG_ANSWER", name: "答案错误" },
+  { code: "MISSING_ANALYSIS", name: "解析缺失" },
+  { code: "OTHER", name: "其他" }
+];
+var flagSelectedType = null;
+
+function flagTypeName(code) {
+  var t = FLAG_TYPES.find(function(x) { return x.code === code; });
+  return t ? t.name : code;
+}
+
+function currentQuizQuestion() {
+  return quizState.questions[quizState.currentIdx];
+}
+
+// 刷新题目卡片头部的标记按钮状态
+function updateFlagArea(q) {
+  var area = document.getElementById("quiz-flag-area");
+  if (!area) return;
+  hideFlagPanel();
+  if (q && q.flagType) {
+    area.innerHTML = '<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--danger-2);color:var(--danger-6);font-weight:600;cursor:pointer" title="点击取消标记，恢复该题" onclick="unflagCurrent()">🚩 已标记·' + flagTypeName(q.flagType) + ' ✕</span>';
+  } else {
+    area.innerHTML = '<span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--bg-surface-high);color:var(--text-3);font-weight:600;cursor:pointer" title="信息不完整？标记后不再出现" onclick="toggleFlagPanel()">🚩 标记问题</span>';
+  }
+}
+
+function hideFlagPanel() {
+  var panel = document.getElementById("quiz-flag-panel");
+  if (panel) { panel.style.display = "none"; panel.innerHTML = ""; }
+  flagSelectedType = null;
+}
+
+function toggleFlagPanel() {
+  var panel = document.getElementById("quiz-flag-panel");
+  if (!panel) return;
+  if (panel.style.display !== "none") { hideFlagPanel(); return; }
+  flagSelectedType = null;
+  var btns = FLAG_TYPES.map(function(t) {
+    return '<button type="button" data-flag-type="' + t.code + '" onclick="selectFlagType(this)" style="padding:6px 12px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg-card);cursor:pointer;font-size:12px">' + t.name + '</button>';
+  }).join("");
+  panel.innerHTML =
+    '<div style="font-size:13px;font-weight:600;color:var(--danger-6);margin-bottom:8px">🚩 标记本题（标记后将不再出现在抽题范围）</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">' + btns + '</div>' +
+    '<input id="quiz-flag-note" placeholder="备注（可选），如：缺少图3" style="width:100%;padding:6px 10px;border:1px solid var(--border-2);border-radius:6px;font-size:12px;margin-bottom:8px" />' +
+    '<div style="display:flex;gap:8px">' +
+      '<button onclick="submitFlag()" style="padding:6px 16px;background:var(--danger-5);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px">确认标记</button>' +
+      '<button onclick="hideFlagPanel()" style="padding:6px 16px;background:var(--bg-card);border:1px solid var(--border-2);border-radius:6px;cursor:pointer;font-size:12px">取消</button>' +
+    '</div>';
+  panel.style.display = "";
+}
+
+function selectFlagType(btn) {
+  flagSelectedType = btn.getAttribute("data-flag-type");
+  var panel = document.getElementById("quiz-flag-panel");
+  if (!panel) return;
+  panel.querySelectorAll("button[data-flag-type]").forEach(function(b) {
+    var on = b === btn;
+    b.style.background = on ? "var(--danger-5)" : "var(--bg-card)";
+    b.style.color = on ? "#fff" : "";
+    b.style.borderColor = on ? "var(--danger-5)" : "var(--border-2)";
+  });
+}
+
+async function submitFlag() {
+  var q = currentQuizQuestion();
+  if (!q || !q.id) return;
+  if (!flagSelectedType) { alert("请先选择问题类型"); return; }
+  var note = "";
+  var noteEl = document.getElementById("quiz-flag-note");
+  if (noteEl) note = noteEl.value.trim();
+  try {
+    await apiPost("/questions/" + q.id + "/flag", { type: flagSelectedType, note: note });
+    q.flagType = flagSelectedType;
+    q.flagNote = note;
+    updateFlagArea(q);
+  } catch (e) {
+    alert("标记失败：" + e.message);
+  }
+}
+
+async function unflagCurrent() {
+  var q = currentQuizQuestion();
+  if (!q || !q.id) return;
+  try {
+    await apiDelete("/questions/" + q.id + "/flag");
+    q.flagType = null;
+    q.flagNote = null;
+    updateFlagArea(q);
+  } catch (e) {
+    alert("取消标记失败：" + e.message);
+  }
+}
+
+function startQuestionTimer(answered) {
+  if (quizState.timer) { clearInterval(quizState.timer); quizState.timer = null; }
+  var timerEl = document.getElementById("quiz-timer");
+  var cur = quizState.questions[quizState.currentIdx];
+  var subjective = cur && (cur.type === "CASE" || cur.type === "ESSAY");
+  if (quizState.mode === "timed" && !answered && !subjective) {
+    var remaining = 30;
+    if (timerEl) {
+      timerEl.style.display = "";
+      timerEl.textContent = "⏱ " + remaining + "s";
+    }
+    quizState.timer = setInterval(function() {
+      remaining--;
+      if (timerEl) timerEl.textContent = "⏱ " + remaining + "s";
+      if (remaining <= 5 && timerEl) timerEl.style.background = "var(--danger-5)";
+      if (remaining <= 0) {
+        clearInterval(quizState.timer);
+        quizState.timer = null;
+        var idx = quizState.currentIdx;
+        if (!quizState.answers[idx]) {
+          var q = quizState.questions[idx];
+          var wrongAns = "A";
+          if (q && q.answer) {
+            var opts = ["A","B","C","D"];
+            wrongAns = opts.find(function(o) { return o !== q.answer; }) || "A";
+          }
+          selectAnswer(idx, wrongAns);
+        }
+      }
+    }, 1000);
+  } else {
+    if (timerEl) timerEl.style.display = "none";
+  }
+}
+
+/* ===== 主观题（案例 CASE / 论文 ESSAY）作答与自评 ===== */
+function subjectTypeName(t) { return t === "ESSAY" ? "论文题" : "案例分析"; }
+
+function renderSubjective(i, q, qType, answered) {
+  var el = document.getElementById("quiz-options");
+  if (!el) return;
+  var parts = [];
+  try { parts = typeof q.optionsJson === "string" ? JSON.parse(q.optionsJson) : (q.optionsJson || []); } catch(e) {}
+  if (!Array.isArray(parts)) parts = [];
+
+  var html = '<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px">' +
+    '<span style="font-size:11px;padding:2px 10px;border-radius:10px;background:var(--primary-1);color:var(--primary-6);font-weight:600">' + subjectTypeName(qType) + '</span>' +
+    '<span style="font-size:12px;color:var(--text-secondary)">作答后对照参考答案自评（AI 批改即将接入）</span></div>';
+
+  if (qType === "CASE") {
+    // 小问列表 + 每问作答框
+    parts.forEach(function(p, k) {
+      html += '<div style="margin-bottom:12px;padding:12px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-surface,#fafafa)">' +
+        '<div style="font-weight:600;font-size:14px;margin-bottom:8px">问题' + (p.no || (k + 1)) + (p.score ? '（' + p.score + '分）' : '') + '：' + escMem(p.q || p.question || "") + '</div>' +
+        subjectiveAnswerBox(i, k, answered) +
+        '</div>';
+    });
+  } else {
+    // 论文：写作要求 + 大作答框
+    if (parts.length) {
+      html += '<div style="padding:10px 12px;border-left:3px solid var(--primary-5);background:var(--primary-1);border-radius:6px;margin-bottom:12px">' +
+        '<div style="font-weight:600;font-size:13px;margin-bottom:4px">写作要求</div>' +
+        parts.map(function(p) { return '<div style="font-size:12px;color:var(--text-2);margin:3px 0">· <strong>' + escMem(p.label || '') + '</strong> ' + escMem(p.req || p.requirement || String(p)) + '</div>'; }).join("") +
+        '</div>';
+    }
+    html += subjectiveAnswerBox(i, 0, answered, true);
+  }
+
+  // 未作答：提交按钮；已作答：参考答案 + 评分标准 + 自评结果
+  if (!answered) {
+    html += '<div style="margin-top:14px;display:flex;gap:10px">' +
+      '<button onclick="revealSubjectiveAnswer(' + i + ')" style="padding:10px 24px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">提交作答，对照参考答案</button>' +
+      '<button onclick="revealSubjectiveAnswer(' + i + ',true)" style="padding:10px 24px;background:var(--bg-card);border:1px solid var(--border-2);border-radius:8px;cursor:pointer">略过作答，直接看答案</button>' +
+      '</div>';
+  } else {
+    html += subjectiveReviewPanel(i, q);
+  }
+  el.innerHTML = html;
+}
+
+function subjectiveAnswerBox(i, k, answered, isEssay) {
+  if (answered) {
+    var mine = (quizState.subjectiveAnswers || {})[i + "-" + k];
+    return '<div style="font-size:13px;line-height:1.7;padding:10px;border-radius:6px;background:var(--bg-card);border:1px dashed var(--border-2);white-space:pre-wrap">' +
+      (mine ? '我的作答：' + escMem(mine) : '<span style="color:var(--text-3)">（本次未作答，直接查看了参考答案）</span>') + '</div>';
+  }
+  return '<textarea id="subq-' + i + '-' + k + '" placeholder="' + (isEssay ? "写下论文提纲或全文（建议先写摘要+四段式提纲）..." : "写下你的答案要点...") + '" style="width:100%;min-height:' + (isEssay ? 180 : 80) + 'px;padding:10px;border:1px solid var(--border-2);border-radius:6px;font-size:13px;line-height:1.7;resize:vertical;box-sizing:border-box;font-family:inherit"></textarea>';
+}
+
+function subjectiveReviewPanel(i, q) {
+  var grade = quizState.answers[i];
+  var gradeNames = { SELF_PASS: "✓ 已掌握", SELF_PARTIAL: "◐ 部分掌握", SELF_FAIL: "✗ 未掌握" };
+  var gradeColors = { SELF_PASS: "var(--success-2);color:var(--success-7)", SELF_PARTIAL: "var(--warning-1,#fef7e6);color:var(--warning-6,#b45309)", SELF_FAIL: "var(--danger-2);color:var(--danger-7)" };
+  var html = '<div style="margin-top:14px;padding:14px;border-radius:8px;border:1px solid var(--success-5,#34d399);background:var(--success-1,#f0fdf4)">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+    '<div style="font-weight:600;font-size:14px;color:var(--success-6,#059669)">参考答案要点</div>' +
+    (grade ? '<span style="font-size:12px;padding:3px 12px;border-radius:12px;font-weight:600;background:' + (gradeColors[grade] || "") + '">自评：' + (gradeNames[grade] || grade) + '</span>' : '') +
+    '</div>' +
+    '<div style="font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--text-primary)">' + escMem(q.answer || "暂无参考答案") + '</div>' +
+    (q.analysis ? '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border-2);font-size:12px;line-height:1.8;color:var(--text-2)"><strong>评分标准：</strong>' + escMem(q.analysis) + '</div>' : '') +
+    '</div>';
+  return html;
+}
+
+function revealSubjectiveAnswer(i, skipWriting) {
+  var q = quizState.questions[i];
+  if (!q || quizState.answers[i]) return;
+  // 收集作答文本
+  quizState.subjectiveAnswers = quizState.subjectiveAnswers || {};
+  var qType = q.type || "MCQ";
+  var boxes = document.querySelectorAll('textarea[id^="subq-' + i + '-"]');
+  if (qType === "ESSAY") {
+    quizState.subjectiveAnswers[i + "-0"] = boxes[0] ? boxes[0].value.trim() : "";
+  } else {
+    boxes.forEach(function(b) {
+      var k = b.id.replace("subq-" + i + "-", "");
+      quizState.subjectiveAnswers[i + "-" + k] = b.value.trim();
+    });
+  }
+  // 展示参考答案 + 三档自评按钮（尚未提交自评）
+  var el = document.getElementById("quiz-options");
+  if (!el) return;
+  var html = '<div style="margin-bottom:10px;display:flex;align-items:center;gap:8px">' +
+    '<span style="font-size:11px;padding:2px 10px;border-radius:10px;background:var(--primary-1);color:var(--primary-6);font-weight:600">' + subjectTypeName(qType) + '</span></div>';
+  // 保留我的作答展示
+  var keys = Object.keys(quizState.subjectiveAnswers).filter(function(k) { return k.indexOf(i + "-") === 0; });
+  keys.forEach(function(k) {
+    var v = quizState.subjectiveAnswers[k];
+    html += '<div style="font-size:13px;line-height:1.7;padding:10px;border-radius:6px;background:var(--bg-card);border:1px dashed var(--border-2);margin-bottom:8px;white-space:pre-wrap">' +
+      (v ? '我的作答：' + escMem(v) : '<span style="color:var(--text-3)">（本次未作答）</span>') + '</div>';
+  });
+  html += subjectiveReviewPanel(i, Object.assign({}, q, { answer: q.answer }));
+  html += '<div style="margin-top:14px;padding:12px;border-radius:8px;background:var(--bg-surface-high,#f5f5f5);border:1px solid var(--border-2)">' +
+    '<div style="font-size:13px;font-weight:600;margin-bottom:8px">对照参考答案，给自己评分：</div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+    '<button onclick="selectSelfGrade(' + i + ',\'SELF_PASS\')" style="padding:8px 20px;background:var(--success-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">✓ 完全掌握</button>' +
+    '<button onclick="selectSelfGrade(' + i + ',\'SELF_PARTIAL\')" style="padding:8px 20px;background:var(--warning-5,#f59e0b);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">◐ 部分掌握</button>' +
+    '<button onclick="selectSelfGrade(' + i + ',\'SELF_FAIL\')" style="padding:8px 20px;background:var(--danger-5);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">✗ 未掌握</button>' +
+    '</div></div>';
+  el.innerHTML = html;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function selectSelfGrade(idx, grade) {
+  if (quizState.answers[idx]) return;
+  quizState.answers[idx] = grade;
+  var q = quizState.questions[idx];
+  var correct = grade === "SELF_PASS";
+  if (correct) { quizState.combo++; if (quizState.combo > quizState.maxCombo) quizState.maxCombo = quizState.combo; }
+  else { quizState.combo = 0; quizState.hp = Math.max(0, quizState.hp - 10); }
+  q.answered = true;
+  q.lastCorrect = correct;
+
+  var fb = document.getElementById("quiz-feedback");
+  var gradeText = grade === "SELF_PASS" ? "完全掌握，继续征伐！" : grade === "SELF_PARTIAL" ? "部分掌握，建议记入错题巩固要点。" : "未掌握，重点攻克后开启 AI 批改强化。";
+  fb.style.display = "";
+  fb.style.background = correct ? "var(--success-1)" : "var(--danger-2)";
+  fb.style.color = correct ? "var(--success-6)" : "var(--danger-6)";
+  fb.innerHTML = (correct ? "自评：完全掌握！" : grade === "SELF_PARTIAL" ? "自评：部分掌握" : "自评：未掌握") + " " + gradeText;
+
+  document.getElementById("quiz-next-btn").style.display = "";
+  if (idx === quizState.questions.length - 1) {
+    document.getElementById("quiz-next-btn").style.display = "none";
+    document.getElementById("quiz-finish-btn").style.display = "";
+  }
+  updateQuizSheet();
+  updateQuizHUD();
+  showQuestion();
+
+  if (q.id) {
+    apiPost("/quiz/answer", { questionId: q.id, userAnswer: grade }).then(function(res) {
+      if (res && res.answerRecordId) {
+        quizState.answerRecordIds = quizState.answerRecordIds || {};
+        quizState.answerRecordIds[idx] = res.answerRecordId;
+      }
+    }).catch(function(e) { console.warn("self-grade submit failed", e); });
+  }
 }
 
 function selectAnswer(idx, letter) {
@@ -447,6 +969,9 @@ function selectAnswer(idx, letter) {
   var correct = letter === q.answer;
   if (correct) { quizState.combo++; if (quizState.combo > quizState.maxCombo) quizState.maxCombo = quizState.combo; }
   else { quizState.combo = 0; quizState.hp = Math.max(0, quizState.hp - 10); }
+  // 同步更新 questions 数组的答题状态，让进度统计包含当前会话
+  q.answered = true;
+  q.lastCorrect = correct;
 
   var fb = document.getElementById("quiz-feedback");
   fb.style.display = "";
@@ -499,28 +1024,100 @@ async function requestAiTutor(questionId, userAnswer) {
     }
     if (!recordId) throw new Error("无法获取答题记录");
     var tutor = await apiPost("/tutor/explain", { answerRecordId: recordId });
-    var html = '<div style="padding:14px;background:var(--bg-card);border-radius:8px;border:1px solid var(--primary-3)">';
-    if (tutor.errorTypeLabel) {
-      html += '<div style="margin-bottom:8px"><span style="font-size:12px;padding:3px 10px;border-radius:10px;background:var(--warning-1);color:var(--warning-6);font-weight:600">错因: ' + escMem(tutor.errorTypeLabel) + '</span>';
-      if (tutor.cached) html += ' <span class="text-muted">(缓存)</span>';
-      if (tutor.degraded) html += ' <span class="text-muted">(降级)</span>';
-      html += '</div>';
-    }
-    html += '<div style="font-size:14px;line-height:1.7">' + escMem(tutor.explanation || "暂无解析") + '</div>';
-    html += '</div>';
+    var html = formatTutorCard(tutor);
     if (area) area.innerHTML = html;
   } catch(e) {
     if (area) area.innerHTML = '<div style="padding:12px;background:var(--danger-1);border-radius:8px;border:1px solid var(--danger-5);color:var(--danger-6)">AI 辅导暂时不可用: ' + escMem(e.message) + '<br><button onclick="requestAiTutor(' + questionId + ',\'' + userAnswer + '\')" style="margin-top:8px;padding:6px 12px;background:var(--primary-6);color:#fff;border:none;border-radius:6px;cursor:pointer">重试</button></div>';
   }
 }
 
+function formatTutorCard(tutor) {
+  var html = '<div style="padding:16px;background:var(--bg-card);border-radius:10px;border:1px solid var(--primary-3)">';
+  // 头部：错因标签 + 置信度 + 状态
+  html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed var(--border-2)">';
+  if (tutor.errorTypeLabel) {
+    html += '<span style="font-size:12px;padding:4px 12px;border-radius:12px;background:var(--warning-1);color:var(--warning-6);font-weight:600">⚠ 错因: ' + escMem(tutor.errorTypeLabel) + '</span>';
+  }
+  if (tutor.confidence && !tutor.degraded) {
+    var pct = Math.round(tutor.confidence * 100);
+    html += '<span style="font-size:12px;padding:4px 10px;border-radius:12px;background:var(--primary-1);color:var(--primary-6);font-weight:600">置信度 ' + pct + '%</span>';
+  }
+  if (tutor.cached) html += '<span class="text-muted" style="font-size:12px">📦 缓存</span>';
+  if (tutor.degraded) html += '<span class="text-muted" style="font-size:12px">⚠ 降级模式</span>';
+  html += '</div>';
+  // 内容：分段显示
+  var explanation = tutor.explanation || "暂无解析";
+  html += '<div style="font-size:14px;line-height:1.85;color:var(--text-primary)">' + formatTutorExplanation(explanation) + '</div>';
+  html += '</div>';
+  return html;
+}
+
+function formatTutorExplanation(text) {
+  var safe = escMem(text);
+  // 按换行符分段
+  var lines = safe.split(/\n+/);
+  // 如果只有一段且较长，按关键连接词进一步分段
+  if (lines.length === 1 && lines[0].length > 80) {
+    lines = [lines[0]];
+    var segs = lines[0].split(/(?=首先|其次|然后|最后|另外|此外|因此|建议[^将]|结合你|注意)/);
+    if (segs.length > 1) lines = segs;
+  }
+  var html = '';
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line) continue;
+    // 识别序号开头的段落（1. 2. 首先 其次 最后 等）
+    if (/^(首先|其次|然后|最后|另外|此外|因此|建议|注意)/.test(line) || /^\d+[.、）)]/.test(line)) {
+      html += '<p style="margin:10px 0 6px;padding-left:10px;border-left:3px solid var(--primary-4)">' + highlightKeywords(line) + '</p>';
+    } else {
+      html += '<p style="margin:8px 0">' + highlightKeywords(line) + '</p>';
+    }
+  }
+  return html || safe;
+}
+
+function highlightKeywords(text) {
+  // 高亮"正确答案"相关关键词
+  return text
+    .replace(/(正确答案[是为：:]*\s*[A-D]+)/g, '<strong style="color:var(--success-6)">$1</strong>')
+    .replace(/(你选了\s*[A-D])/g, '<strong style="color:var(--danger-6)">$1</strong>')
+    .replace(/(建议[^。！]+。)/g, '<strong style="color:var(--primary-6)">$1</strong>');
+}
+
 function nextQuestion() {
   quizState.currentIdx++;
-  if (quizState.currentIdx >= quizState.questions.length) { finishQuiz(); return; }
+  if (quizState.currentIdx >= quizState.questions.length) {
+    if (quizState.mode === "endless") {
+      loadMoreQuestions();
+      return;
+    }
+    finishQuiz();
+    return;
+  }
   document.getElementById("quiz-feedback").style.display = "none";
   document.getElementById("quiz-next-btn").style.display = "none";
   document.getElementById("quiz-finish-btn").style.display = "none";
   showQuestion();
+}
+
+async function loadMoreQuestions() {
+  var body = { mode: "endless", count: 20 };
+  if (quizState.domainId) body.domainId = quizState.domainId;
+  try {
+    var more = await apiPost("/quiz/set", body);
+    if (more && more.length) {
+      quizState.questions = quizState.questions.concat(more);
+      renderQuizSheet();
+      document.getElementById("quiz-feedback").style.display = "none";
+      document.getElementById("quiz-next-btn").style.display = "none";
+      document.getElementById("quiz-finish-btn").style.display = "none";
+      showQuestion();
+    } else {
+      finishQuiz();
+    }
+  } catch(e) {
+    finishQuiz();
+  }
 }
 
 function updateQuizHUD() {
@@ -535,7 +1132,11 @@ function updateQuizHUD() {
 }
 
 async function finishQuiz() {
-  var correct = quizState.answers.filter(function(a, i) { return a === quizState.questions[i]?.answer; }).length;
+  var correct = quizState.questions.filter(function(q, i) {
+    if (!quizState.answers[i]) return false;
+    if (q.answered === true) return q.lastCorrect === true; // 主观题自评/已判分
+    return String(quizState.answers[i]).toUpperCase() === String(q.answer || "").toUpperCase();
+  }).length;
   var total = quizState.questions.length;
   var accuracy = total ? correct / total : 0;
   var elapsed = Math.round((Date.now() - quizState.startTime) / 1000);
@@ -583,6 +1184,7 @@ async function renderMemory(c) {
 
   var dueCount = stats.due || 0;
   var masteredCount = stats.mastered || 0;
+  var learningCount = stats.learning || 0;
   var totalCount = stats.total || memCards.length;
   var newCount = stats.new || stats.newCount || 0;
 
@@ -593,6 +1195,7 @@ async function renderMemory(c) {
         '<div style="display:flex;gap:28px;flex-wrap:wrap">' +
           '<div><span class="text-muted">总卡片</span><br><strong style="font-size:22px">' + totalCount + '</strong></div>' +
           '<div><span class="text-muted">待复习</span><br><strong style="font-size:22px;color:var(--warning-5)">' + dueCount + '</strong></div>' +
+          '<div><span class="text-muted">学习中</span><br><strong style="font-size:22px;color:var(--primary-5)">' + learningCount + '</strong></div>' +
           '<div><span class="text-muted">已掌握</span><br><strong style="font-size:22px;color:var(--success-5)">' + masteredCount + '</strong></div>' +
           '<div><span class="text-muted">新卡</span><br><strong style="font-size:22px;color:var(--text-3)">' + newCount + '</strong></div>' +
         '</div>' +
@@ -1343,6 +1946,24 @@ function renderPlanContent(plan) {
   (dayHtml ? '<div class="content-card"><div class="content-card-header"><div class="content-card-title">📅 本周任务</div></div><div class="content-card-body">' + dayHtml + '</div></div>' : '') +
   itemsHtml +
   renderMaterialSection(tasks);
+
+  // 已生成的资料已落库，进入页面自动加载展示（无需重新生成消耗 token）
+  preloadMaterials();
+}
+
+function preloadMaterials() {
+  var btns = document.querySelectorAll("[id^='material-btn-']");
+  btns.forEach(function(btn) {
+    var m = btn.id.match(/^material-btn-(\d+)$/);
+    if (!m) return;
+    var taskId = m[1];
+    apiGet("/plan/material/" + taskId).then(function(mat) {
+      if (mat && mat.content) {
+        renderMaterialContent(taskId, mat);
+        btn.textContent = "🔄 重新生成";
+      }
+    }).catch(function() { /* 无已生成资料，保持生成按钮 */ });
+  });
 }
 
 function renderMaterialSection(tasks) {

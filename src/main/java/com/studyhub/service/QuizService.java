@@ -32,27 +32,47 @@ public class QuizService {
 
         switch (req.getMode()) {
             case "continue":
+            case "sequence":
                 return continueFromLatest(pool, attempts);
             case "review":
+            case "daily":
                 return buildReviewSet(pool, req.getCount());
             case "special":
-                return pool;
             case "exam":
                 return pool;
             case "wrong":
-                return pool.stream()
+            case "intensive":
+                List<Question> wrong = pool.stream()
                     .filter(q -> latest.containsKey(q.getId()) && !latest.get(q.getId()).getIsCorrect())
                     .limit(req.getCount())
                     .collect(Collectors.toList());
+                if (wrong.size() < 5) {
+                    wrong = new ArrayList<>(pool);
+                    Collections.shuffle(wrong);
+                    wrong = wrong.stream().limit(req.getCount()).collect(Collectors.toList());
+                }
+                return wrong;
             case "favorite":
+            case "endless":
                 Set<Long> bmIds = bookmarkRepo.findAll().stream()
                     .map(Bookmark::getQuestionId).collect(Collectors.toSet());
-                return pool.stream()
+                List<Question> fav = pool.stream()
                     .filter(q -> bmIds.contains(q.getId()))
                     .limit(req.getCount())
                     .collect(Collectors.toList());
+                if (fav.size() < 5) {
+                    fav = new ArrayList<>(pool);
+                    Collections.shuffle(fav);
+                    fav = fav.stream().limit(req.getCount()).collect(Collectors.toList());
+                }
+                return fav;
             case "browse":
-                return pool.stream().limit(req.getCount()).collect(Collectors.toList());
+            case "practice":
+            case "random":
+            case "timed":
+                List<Question> shuffled = new ArrayList<>(pool);
+                Collections.shuffle(shuffled);
+                return shuffled.stream().limit(req.getCount()).collect(Collectors.toList());
             default:
                 return continueFromLatest(pool, attempts);
         }
@@ -74,6 +94,7 @@ public class QuizService {
         }
         return pool.stream()
             .filter(q -> !"OUTDATED".equals(q.getSource()) && !"MOCK".equals(q.getSource()))
+            .filter(q -> q.getFlagType() == null) // 已打问题标记的题不再抽取
             .collect(Collectors.toList());
     }
 
@@ -134,7 +155,14 @@ public class QuizService {
 
         String normalized = userAnswer.trim().toUpperCase();
         String correctAnswer = question.getAnswer() != null ? question.getAnswer().trim().toUpperCase() : "";
-        boolean correct = normalized.equals(correctAnswer);
+        String type = question.getType() != null ? question.getType() : "MCQ";
+        boolean correct;
+        if ("CASE".equals(type) || "ESSAY".equals(type)) {
+            // 主观题：自评三档 SELF_PASS/SELF_PARTIAL/SELF_FAIL（AI 批改下一批接入）
+            correct = "SELF_PASS".equals(normalized);
+        } else {
+            correct = normalized.equals(correctAnswer);
+        }
 
         AnswerRecord record = new AnswerRecord();
         record.setQuestion(question);

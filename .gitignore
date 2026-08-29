@@ -50,9 +50,12 @@ desktop.ini
 
 # ===== Temp / Tool artifacts =====
 tmp_*
+_tmp_*
 *.tmp
 .superpowers/
 .trae-html-share-packages/
+runtime-orchestration-summary.json
+validation-report.json
 
 # ===== Python =====
 __pycache__/

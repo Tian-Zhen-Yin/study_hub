@@ -53,6 +53,9 @@ public class QuestionController {
         Question q = new Question();
         q.setSource((String) body.getOrDefault("source", "MANUAL"));
         q.setSubject((String) body.getOrDefault("subject", "综合知识"));
+        String type = (String) body.getOrDefault("type", "MCQ");
+        if (!java.util.Set.of("MCQ", "CASE", "ESSAY").contains(type)) type = "MCQ";
+        q.setType(type);
         Long domainId = body.get("domainId") != null ? ((Number) body.get("domainId")).longValue() : null;
         if (domainId != null) {
             Domain domain = domainRepository.findById(domainId).orElse(null);
@@ -99,6 +102,56 @@ public class QuestionController {
         if (body.containsKey("imageUrl")) q.setImageUrl(body.get("imageUrl"));
         questionRepository.save(q);
         return ResponseEntity.ok(Map.of("code", 200, "message", "ok"));
+    }
+
+    /** 允许的标记类型：题干不全/缺图/选项不全/答案错误/解析缺失/其他 */
+    private static final java.util.Set<String> FLAG_TYPES = java.util.Set.of(
+        "INCOMPLETE_STEM", "MISSING_IMAGE", "BROKEN_OPTIONS", "WRONG_ANSWER", "MISSING_ANALYSIS", "OTHER");
+
+    /** 给题目打问题标记，打标后该题不再进入抽题范围 */
+    @PostMapping("/{id}/flag")
+    public ResponseEntity<Map<String, Object>> flagQuestion(
+            @PathVariable Long id, @RequestBody Map<String, String> body) {
+        Question q = questionRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Question not found: " + id));
+        String type = body.getOrDefault("type", "OTHER");
+        if (!FLAG_TYPES.contains(type)) type = "OTHER";
+        q.setFlagType(type);
+        q.setFlagNote(body.getOrDefault("note", ""));
+        q.setFlaggedAt(java.time.LocalDateTime.now());
+        questionRepository.save(q);
+        return ResponseEntity.ok(Map.of("code", 200, "message", "flagged"));
+    }
+
+    /** 取消标记，题目恢复进入抽题范围 */
+    @DeleteMapping("/{id}/flag")
+    public ResponseEntity<Map<String, Object>> unflagQuestion(@PathVariable Long id) {
+        Question q = questionRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Question not found: " + id));
+        q.setFlagType(null);
+        q.setFlagNote(null);
+        q.setFlaggedAt(null);
+        questionRepository.save(q);
+        return ResponseEntity.ok(Map.of("code", 200, "message", "unflagged"));
+    }
+
+    /** 已标记题目列表，供管理/恢复 */
+    @GetMapping("/flagged")
+    public ResponseEntity<Map<String, Object>> flaggedQuestions() {
+        List<Map<String, Object>> data = questionRepository.findByFlagTypeIsNotNull().stream()
+            .map(q -> {
+                Map<String, Object> m = new java.util.LinkedHashMap<>();
+                m.put("id", q.getId());
+                m.put("stem", q.getStem() != null && q.getStem().length() > 80
+                    ? q.getStem().substring(0, 80) + "…" : q.getStem());
+                m.put("domainName", q.getDomain() != null ? q.getDomain().getName() : null);
+                m.put("flagType", q.getFlagType());
+                m.put("flagNote", q.getFlagNote());
+                m.put("flaggedAt", q.getFlaggedAt() != null ? q.getFlaggedAt().toString() : null);
+                return m;
+            })
+            .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(Map.of("code", 200, "data", data, "message", "ok"));
     }
 
 }

@@ -25,7 +25,7 @@ public class AnswerRecord {
     @JoinColumn(name = "simulation_id")
     private Simulation simulation;
 
-    @Column(name = "user_answer", nullable = false, length = 10)
+    @Column(name = "user_answer", nullable = false, length = 20)
     private String userAnswer;
 
     @Column(name = "is_correct", nullable = false)

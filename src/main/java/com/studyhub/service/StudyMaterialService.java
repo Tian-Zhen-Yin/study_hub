@@ -54,7 +54,7 @@ public class StudyMaterialService {
         String system = "你是软考系统架构设计师考试的教学专家。请生成结构化的 Markdown 学习资料，包含 Mermaid 图表。";
         String user = prompts.render("material-generation", vars);
 
-        LlmRequest request = new LlmRequest(system, user, 0.5, 4000);
+        LlmRequest request = new LlmRequest(system, user, 0.5, 8000);
         LlmResponse resp = llm.chat(request);
 
         String rawContent = resp.content();

@@ -11,6 +11,7 @@ import com.studyhub.ai.PromptRegistry;
 import com.studyhub.dto.DiagnosisReport;
 import com.studyhub.dto.PlanResponse;
 import com.studyhub.dto.WeeklyPlanItem;
+import com.studyhub.entity.StudyMaterial;
 import com.studyhub.entity.WeeklyTask;
 import com.studyhub.repository.DomainRepository;
 import com.studyhub.repository.StudyMaterialRepository;
@@ -65,7 +66,7 @@ public class PlanService {
         List<WeeklyPlanItem> planItems;
         int tokensUsed;
         try {
-            LlmRequest request = new LlmRequest(system, user, 0.4, 1500).withJsonMode();
+            LlmRequest request = new LlmRequest(system, user, 0.4, 8000).withJsonMode();
             LlmResponse resp = llm.chat(request);
             planItems = parsePlanItems(resp.content(), diagnosis);
             tokensUsed = resp.tokensUsed();
@@ -88,8 +89,16 @@ public class PlanService {
         }
 
         List<WeeklyTask> oldTasks = taskRepo.findByWeekNumAndSource(weekNum, "AI");
+        // 已生成的学习资料物化保留：按 focus 暂存，重建计划后迁移到同 focus 的新任务
+        Map<String, StudyMaterial> materialsByFocus = new HashMap<>();
         for (WeeklyTask oldTask : oldTasks) {
-            materialRepo.findByWeeklyTaskId(oldTask.getId()).ifPresent(materialRepo::delete);
+            materialRepo.findByWeeklyTaskId(oldTask.getId()).ifPresent(m -> {
+                if (m.getFocus() != null && !materialsByFocus.containsKey(m.getFocus())) {
+                    materialsByFocus.put(m.getFocus(), m);
+                } else {
+                    materialRepo.delete(m);
+                }
+            });
         }
         taskRepo.deleteAiTasksByWeekNum(weekNum);
 
@@ -108,6 +117,26 @@ public class PlanService {
                     : item.getEstimatedMinutes() / item.getTasks().size();
                 task.setEstimatedMinutes(perTask);
                 savedTasks.add(taskRepo.save(task));
+            }
+        }
+
+        // 资料迁移：同 focus 挂到新任务；新计划已无此 focus 的清理，避免孤儿数据
+        Map<String, Long> newTaskIdByFocus = new HashMap<>();
+        for (WeeklyTask t : savedTasks) {
+            if (t.getFocus() != null && !newTaskIdByFocus.containsKey(t.getFocus())) {
+                newTaskIdByFocus.put(t.getFocus(), t.getId());
+            }
+        }
+        for (Map.Entry<String, StudyMaterial> e : materialsByFocus.entrySet()) {
+            Long newTaskId = newTaskIdByFocus.get(e.getKey());
+            if (newTaskId != null) {
+                StudyMaterial m = e.getValue();
+                m.setWeeklyTaskId(newTaskId);
+                materialRepo.save(m);
+                log.info("[Plan] 学习资料迁移保留 focus={} -> taskId={}", e.getKey(), newTaskId);
+            } else {
+                materialRepo.delete(e.getValue());
+                log.info("[Plan] 学习资料清理（新计划无此 focus）: {}", e.getKey());
             }
         }
 

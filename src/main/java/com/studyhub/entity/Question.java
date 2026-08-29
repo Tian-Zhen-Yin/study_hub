@@ -24,6 +24,10 @@ public class Question {
     @Column(nullable = false, length = 20)
     private String subject;
 
+    /** 题型：MCQ 单选（默认）/ CASE 案例分析 / ESSAY 论文。存量数据自动视为 MCQ */
+    @Column(name = "question_type", nullable = false, length = 10)
+    private String type;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "domain_id")
     private Domain domain;
@@ -48,4 +52,14 @@ public class Question {
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+
+    /** 问题标记类型：INCOMPLETE_STEM/MISSING_IMAGE/BROKEN_OPTIONS/WRONG_ANSWER/MISSING_ANALYSIS/OTHER，null 表示未标记 */
+    @Column(name = "flag_type", length = 20)
+    private String flagType;
+
+    @Column(name = "flag_note", columnDefinition = "TEXT")
+    private String flagNote;
+
+    @Column(name = "flagged_at")
+    private java.time.LocalDateTime flaggedAt;
 }

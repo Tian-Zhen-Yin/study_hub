@@ -11,6 +11,7 @@ public class QuestionDTO {
     private Long id;
     private String source;
     private String subject;
+    private String type;
     private Long domainId;
     private String domainName;
     private String stem;
@@ -20,4 +21,8 @@ public class QuestionDTO {
     private String examYear;
     private String sourceFile;
     private String imageUrl;
+    private Boolean answered;
+    private Boolean lastCorrect;
+    private String flagType;
+    private String flagNote;
 }
