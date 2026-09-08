@@ -876,12 +876,17 @@ function subjectiveReviewPanel(i, q) {
   var grade = quizState.answers[i];
   var gradeNames = { SELF_PASS: "✓ 已掌握", SELF_PARTIAL: "◐ 部分掌握", SELF_FAIL: "✗ 未掌握" };
   var gradeColors = { SELF_PASS: "var(--success-2);color:var(--success-7)", SELF_PARTIAL: "var(--warning-1,#fef7e6);color:var(--warning-6,#b45309)", SELF_FAIL: "var(--danger-2);color:var(--danger-7)" };
+  var answerText = q.answer || "暂无参考答案";
+  var isMarkdownAnswer = /(^|\n)#{1,3}\s|(^|\n)\|.*\||\*\*.+?\*\*/.test(answerText);
+  var answerHtml = isMarkdownAnswer
+    ? '<div class="material-body" style="font-size:13px;line-height:1.9;color:var(--text-primary)">' + simpleMarkdown(answerText) + '</div>'
+    : '<div style="font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--text-primary)">' + escMem(answerText) + '</div>';
   var html = '<div style="margin-top:14px;padding:14px;border-radius:8px;border:1px solid var(--success-5,#34d399);background:var(--success-1,#f0fdf4)">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
     '<div style="font-weight:600;font-size:14px;color:var(--success-6,#059669)">参考答案要点</div>' +
     (grade ? '<span style="font-size:12px;padding:3px 12px;border-radius:12px;font-weight:600;background:' + (gradeColors[grade] || "") + '">自评：' + (gradeNames[grade] || grade) + '</span>' : '') +
     '</div>' +
-    '<div style="font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--text-primary)">' + escMem(q.answer || "暂无参考答案") + '</div>' +
+    answerHtml +
     (q.analysis ? '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border-2);font-size:12px;line-height:1.8;color:var(--text-2)"><strong>评分标准：</strong>' + escMem(q.analysis) + '</div>' : '') +
     '</div>';
   return html;
