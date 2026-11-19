@@ -1,0 +1,1291 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "mv94rbscmks8iav89xd",
+      "type": "text",
+      "x": 400,
+      "y": 30,
+      "strokeColor": "#0A0A0A",
+      "text": "系统架构设计师选择题·知识点脑图",
+      "fontSize": 28,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:00:51.599Z",
+      "updatedAt": "2026-10-15T06:00:51.599Z",
+      "version": 1
+    },
+    {
+      "id": "mv94rthgt06ysic0t1",
+      "type": "rectangle",
+      "x": 600,
+      "y": 150,
+      "width": 280,
+      "height": 80,
+      "backgroundColor": "#654ACB",
+      "strokeColor": "#654ACB",
+      "label": {
+        "text": "系统架构设计师\n选择题知识点"
+      },
+      "fontSize": 20,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:14.508Z",
+      "updatedAt": "2026-10-15T06:09:36.110Z",
+      "version": 2
+    },
+    {
+      "id": "mv94sozskfs5bmaep6",
+      "type": "rectangle",
+      "x": 100,
+      "y": 80,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "1.操作系统\n59页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.343Z",
+      "updatedAt": "2026-10-15T06:01:55.343Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozuzo78siq44rb",
+      "type": "rectangle",
+      "x": 100,
+      "y": 160,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "2.专业英语\n35页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.343Z",
+      "updatedAt": "2026-10-15T06:01:55.343Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozul34btljfdab",
+      "type": "rectangle",
+      "x": 100,
+      "y": 240,
+      "width": 180,
+      "height": 60,
+      "backgroundColor": "#EEEFFF",
+      "strokeColor": "#654ACB",
+      "label": {
+        "text": "3.系统架构设计\n146页 ★核心"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.343Z",
+      "updatedAt": "2026-10-15T06:01:55.343Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozu7qj6tb4wx6",
+      "type": "rectangle",
+      "x": 100,
+      "y": 320,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "4.数据库系统\n35页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.343Z",
+      "updatedAt": "2026-10-15T06:01:55.343Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozuu5hlzbzbwbd",
+      "type": "rectangle",
+      "x": 100,
+      "y": 400,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "5.计算机组成原理\n16页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.343Z",
+      "updatedAt": "2026-10-15T06:01:55.343Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozucdmrxsnlhze",
+      "type": "rectangle",
+      "x": 100,
+      "y": 480,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "6.计算机网络\n31页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.343Z",
+      "updatedAt": "2026-10-15T06:01:55.343Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozu9cccsv8oe65",
+      "type": "rectangle",
+      "x": 100,
+      "y": 560,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "7.系统运行与维护\n12页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozu5hdkcwqu08h",
+      "type": "rectangle",
+      "x": 100,
+      "y": 640,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "8.企业信息化战略\n28页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozurncg90hh6li",
+      "type": "rectangle",
+      "x": 1000,
+      "y": 80,
+      "width": 180,
+      "height": 60,
+      "backgroundColor": "#EEEFFF",
+      "strokeColor": "#654ACB",
+      "label": {
+        "text": "9.软件工程\n64页 ★重点"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozuibvw1rk7z9g",
+      "type": "rectangle",
+      "x": 1000,
+      "y": 160,
+      "width": 180,
+      "height": 60,
+      "backgroundColor": "#EEEFFF",
+      "strokeColor": "#654ACB",
+      "label": {
+        "text": "10.系统分析与设计\n53页 ★重点"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozurbhv3vt4jl",
+      "type": "rectangle",
+      "x": 1000,
+      "y": 240,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "11.软件测试\n28页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozunt75z2wum2i",
+      "type": "rectangle",
+      "x": 1000,
+      "y": 320,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "12.项目管理\n24页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozuhvt0hgubesq",
+      "type": "rectangle",
+      "x": 1000,
+      "y": 400,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "13.信息安全\n23页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozukkj1i74hy6f",
+      "type": "rectangle",
+      "x": 1000,
+      "y": 480,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "14.法律法规\n25页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozuumueasxsv0n",
+      "type": "rectangle",
+      "x": 1000,
+      "y": 560,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "15.数学与经济管理\n22页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94sozuogmnf58dsks",
+      "type": "rectangle",
+      "x": 1000,
+      "y": 640,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FFFFFF",
+      "strokeColor": "#7373735C",
+      "label": {
+        "text": "16.系统可靠性\n8页"
+      },
+      "fontSize": 14,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:01:55.344Z",
+      "updatedAt": "2026-10-15T06:01:55.344Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn0wca7n3ksim",
+      "type": "arrow",
+      "x": 287.9061408232415,
+      "y": 120.13094903631914,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          304.1877183535169,
+          47.01082920008899
+        ]
+      ],
+      "start": {
+        "id": "mv94sozskfs5bmaep6"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.947Z",
+      "updatedAt": "2026-10-15T06:02:38.947Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2dsmmvl0wrzn",
+      "type": "arrow",
+      "x": 287.9996694419766,
+      "y": 185.89090608583615,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          304.0006611160468,
+          2.7636423737822042
+        ]
+      ],
+      "start": {
+        "id": "mv94sozuzo78siq44rb"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.947Z",
+      "updatedAt": "2026-10-15T06:02:38.947Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2miycfbmyzd",
+      "type": "arrow",
+      "x": 287.91669151427607,
+      "y": 255.75757214337804,
+      "strokeColor": "#654ACB",
+      "strokeWidth": 2,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          304.16661697144787,
+          -44.2424170140288
+        ]
+      ],
+      "start": {
+        "id": "mv94sozul34btljfdab"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.947Z",
+      "updatedAt": "2026-10-15T06:02:38.947Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn298plu3vyozc",
+      "type": "arrow",
+      "x": 286.40974359208286,
+      "y": 317.8299813513221,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          305.8901902351891,
+          -86.20541724809874
+        ]
+      ],
+      "start": {
+        "id": "mv94sozu7qj6tb4wx6"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.947Z",
+      "updatedAt": "2026-10-15T06:02:38.947Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2j1rka7iyfoe",
+      "type": "arrow",
+      "x": 255.8672533313545,
+      "y": 396.85671903114854,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          383.15911035856755,
+          -163.71343806229706
+        ]
+      ],
+      "start": {
+        "id": "mv94sozuu5hlzbzbwbd"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.947Z",
+      "updatedAt": "2026-10-15T06:02:38.947Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2qvx8xpwo6y",
+      "type": "arrow",
+      "x": 240.5928517938399,
+      "y": 476.02409397261897,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          422.62382022184386,
+          -242.0481879452379
+        ]
+      ],
+      "start": {
+        "id": "mv94sozucdmrxsnlhze"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.947Z",
+      "updatedAt": "2026-10-15T06:02:38.947Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn210qjqz98b8ve",
+      "type": "arrow",
+      "x": 231.30799880198825,
+      "y": 555.3333463149357,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          446.4979264466565,
+          -320.6666926298715
+        ]
+      ],
+      "start": {
+        "id": "mv94sozu9cccsv8oe65"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.947Z",
+      "updatedAt": "2026-10-15T06:02:38.947Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2qeqfx2fh12",
+      "type": "arrow",
+      "x": 225.0019524832059,
+      "y": 634.7710410372313,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          462.62767398095656,
+          -399.54208207446254
+        ]
+      ],
+      "start": {
+        "id": "mv94sozu5hdkcwqu08h"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.947Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2k5bs9sm006",
+      "type": "arrow",
+      "x": 992.2011319474251,
+      "y": 132.3540269834457,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -104.4022638948502,
+          23.86337460453717
+        ]
+      ],
+      "start": {
+        "id": "mv94sozurncg90hh6li"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.948Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn23wgb52u3yuu",
+      "type": "arrow",
+      "x": 992,
+      "y": 190,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -104,
+          0
+        ]
+      ],
+      "start": {
+        "id": "mv94sozuibvw1rk7z9g"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.948Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2dyu4lrd030h",
+      "type": "arrow",
+      "x": 992.1775806873807,
+      "y": 244.03805300443872,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -104.35516137476134,
+          -22.361820294591723
+        ]
+      ],
+      "start": {
+        "id": "mv94sozurbhv3vt4jl"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.948Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2zphyjy5mc3r",
+      "type": "arrow",
+      "x": 1026.2335919796017,
+      "y": 316.7605907338236,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -188.59621621726785,
+          -83.52118146764724
+        ]
+      ],
+      "start": {
+        "id": "mv94sozunt75z2wum2i"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.948Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2wpf4czcwcu",
+      "type": "arrow",
+      "x": 1046.1241883996797,
+      "y": 395.54052649692784,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -239.90795126744467,
+          -161.08105299385568
+        ]
+      ],
+      "start": {
+        "id": "mv94sozuhvt0hgubesq"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.948Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2k07qvotogah",
+      "type": "arrow",
+      "x": 1056.2758690522448,
+      "y": 474.6482821470204,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -265.88507143782306,
+          -239.2965642940408
+        ]
+      ],
+      "start": {
+        "id": "mv94sozukkj1i74hy6f"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.948Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2tcf351w41co",
+      "type": "arrow",
+      "x": 1062.5426058955697,
+      "y": 554.0123695107144,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -281.79407255063313,
+          -318.0247390214288
+        ]
+      ],
+      "start": {
+        "id": "mv94sozuumueasxsv0n"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.948Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94tmn2ghvmq1h4abq",
+      "type": "arrow",
+      "x": 1066.8333550640223,
+      "y": 633.5595533011731,
+      "strokeColor": "#737373",
+      "strokeWidth": 1,
+      "roundness": null,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -292.61407854909714,
+          -397.11910660234616
+        ]
+      ],
+      "start": {
+        "id": "mv94sozuogmnf58dsks"
+      },
+      "end": {
+        "id": "mv94rthgt06ysic0t1"
+      },
+      "startArrowhead": null,
+      "endArrowhead": "triangle",
+      "elbowed": false,
+      "createdAt": "2026-10-15T06:02:38.948Z",
+      "updatedAt": "2026-10-15T06:02:38.948Z",
+      "version": 1
+    },
+    {
+      "id": "mv94ukhvw78wu35wadh",
+      "type": "rectangle",
+      "x": 100,
+      "y": 740,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "PV操作\n银行家算法\n页面置换\n磁盘调度"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.826Z",
+      "updatedAt": "2026-10-15T06:11:21.075Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxweamkpm5ew8",
+      "type": "rectangle",
+      "x": 300,
+      "y": 740,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "微服务术语\n架构模式\n4+1视图\n质量属性"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.826Z",
+      "updatedAt": "2026-10-15T06:11:20.219Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhx7urss00977y",
+      "type": "rectangle",
+      "x": 500,
+      "y": 740,
+      "width": 220,
+      "height": 90,
+      "backgroundColor": "#EEEFFF",
+      "strokeColor": "#654ACB",
+      "label": {
+        "text": "架构风格\nABSD/ATAM\nSOA/微服务\n质量属性\nDSSA/4+1视图"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.826Z",
+      "updatedAt": "2026-10-15T06:03:22.826Z",
+      "version": 1
+    },
+    {
+      "id": "mv94ukhxhrzr17b45ta",
+      "type": "rectangle",
+      "x": 740,
+      "y": 740,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "范式/函数依赖\n并发控制\n分布式DB\nE-R模型"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.826Z",
+      "updatedAt": "2026-10-15T06:11:20.369Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxj5j9gplbku",
+      "type": "rectangle",
+      "x": 940,
+      "y": 740,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "流水线/加速比\n存储体系\nRISC vs CISC\n总线技术"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:11:20.714Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxd2ri28rr0l",
+      "type": "rectangle",
+      "x": 100,
+      "y": 830,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "OSI/TCP-IP\n子网划分\n802.11\n路由协议"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:12:32.801Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxzir20omhykg",
+      "type": "rectangle",
+      "x": 300,
+      "y": 830,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "维护4类\n性能指标\n遗留系统\n可行性分析"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:12:36.542Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxdklk5ducv7j",
+      "type": "rectangle",
+      "x": 500,
+      "y": 830,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "ERP/EDI\n商业智能\n供应链\n专家系统"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:12:40.267Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxmdgerd0z04",
+      "type": "rectangle",
+      "x": 700,
+      "y": 830,
+      "width": 220,
+      "height": 90,
+      "backgroundColor": "#EEEFFF",
+      "strokeColor": "#654ACB",
+      "label": {
+        "text": "开发模型\nRUP/CMMI\n构件3特性\n需求工程\n逆向工程"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:12:44.014Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxme3arg8ts9",
+      "type": "rectangle",
+      "x": 940,
+      "y": 830,
+      "width": 220,
+      "height": 90,
+      "backgroundColor": "#EEEFFF",
+      "strokeColor": "#654ACB",
+      "label": {
+        "text": "UML关系\n23种设计模式\n内聚耦合7级\n人机界面\n结构化分析"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:12:47.780Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhx2tiesq25flp",
+      "type": "rectangle",
+      "x": 100,
+      "y": 930,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "白盒/黑盒\n测试覆盖\n性能测试\n自动化测试"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:12:51.572Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxh0xr4y6ble4",
+      "type": "rectangle",
+      "x": 300,
+      "y": 930,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "关键路径\n成本基线\n配置管理\n范围管理"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:12:55.254Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhx6cu257kroh3",
+      "type": "rectangle",
+      "x": 500,
+      "y": 930,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "PKI/CA\n访问控制\n加密技术\n安全审计"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:12:58.990Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxz3v7rkqgg5q",
+      "type": "rectangle",
+      "x": 700,
+      "y": 930,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "知识产权期限\n专利/著作权\n职务发明\n商标法"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:13:20.806Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxmrrajzz1alc",
+      "type": "rectangle",
+      "x": 900,
+      "y": 930,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "线性规划\n概率统计\n动态规划\n预测决策"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:13:24.251Z",
+      "version": 2
+    },
+    {
+      "id": "mv94ukhxjswv1u5ixyj",
+      "type": "rectangle",
+      "x": 1100,
+      "y": 930,
+      "width": 180,
+      "height": 50,
+      "backgroundColor": "#FAFAFA",
+      "strokeColor": "#7373732E",
+      "label": {
+        "text": "可靠性计算\n容错/故障转移"
+      },
+      "fontSize": 12,
+      "fontFamily": 2,
+      "roundness": {
+        "type": 3
+      },
+      "createdAt": "2026-10-15T06:03:22.827Z",
+      "updatedAt": "2026-10-15T06:13:27.971Z",
+      "version": 2
+    },
+    {
+      "id": "mv94v3i882so9vecm8g",
+      "type": "text",
+      "x": 100,
+      "y": 1050,
+      "strokeColor": "#0A0A0A",
+      "text": "今日学习策略：",
+      "fontSize": 18,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:03:47.463Z",
+      "updatedAt": "2026-10-15T06:03:47.463Z",
+      "version": 1
+    },
+    {
+      "id": "mv94v3iauiz4p2s3ki",
+      "type": "text",
+      "x": 100,
+      "y": 1080,
+      "strokeColor": "#404040",
+      "text": "1. 第3章系统架构设计占30%时间（146页核心）",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:03:47.463Z",
+      "updatedAt": "2026-10-15T06:03:47.463Z",
+      "version": 1
+    },
+    {
+      "id": "mv94v3iabou2340xxwg",
+      "type": "text",
+      "x": 100,
+      "y": 1100,
+      "strokeColor": "#404040",
+      "text": "2. 第9/10/1章占30%时间（软工+系统分析+操作系统）",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:03:47.463Z",
+      "updatedAt": "2026-10-15T06:03:47.463Z",
+      "version": 1
+    },
+    {
+      "id": "mv94v3iafna2c9zaj7j",
+      "type": "text",
+      "x": 100,
+      "y": 1120,
+      "strokeColor": "#404040",
+      "text": "3. 第2/4/6/11章占20%时间（英语+数据库+网络+测试）",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:03:47.463Z",
+      "updatedAt": "2026-10-15T06:03:47.463Z",
+      "version": 1
+    },
+    {
+      "id": "mv94v3ia1ebytb6a1j7",
+      "type": "text",
+      "x": 100,
+      "y": 1140,
+      "strokeColor": "#404040",
+      "text": "4. 其余章节占15%时间（快速扫读）",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:03:47.463Z",
+      "updatedAt": "2026-10-15T06:03:47.463Z",
+      "version": 1
+    },
+    {
+      "id": "mv94v3iaubvar6cgeq8",
+      "type": "text",
+      "x": 100,
+      "y": 1160,
+      "strokeColor": "#404040",
+      "text": "5. 最后1小时：错题回顾+整体复盘",
+      "fontSize": 14,
+      "fontFamily": 2,
+      "createdAt": "2026-10-15T06:03:47.463Z",
+      "updatedAt": "2026-10-15T06:03:47.463Z",
+      "version": 1
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#F7F6F5",
+    "gridSize": null
+  }
+}

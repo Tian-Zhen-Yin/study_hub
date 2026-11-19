@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>骨架记忆 · 六段式 + 模块骨架</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1f2329;--sub:#646a73;--line:#dee0e3;--acc:#3370ff;--ok:#34a853;--bl:#b8860b}
+body.dark{--bg:#1f2329;--card:#292c33;--ink:#e8eaed;--sub:#9aa0a6;--line:#3c4043;--acc:#7ba7ff;--ok:#6dd58c;--bl:#e0b64f}
+body{background:var(--bg);color:var(--ink);font:15px/1.75 "PingFang SC","Microsoft YaHei",sans-serif;max-width:860px;margin:0 auto;padding:14px}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.cd{font-size:.82em;color:var(--sub)}
+.hbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:2px 10px;cursor:pointer;font-size:.82em;text-decoration:none}
+nav{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+nav button{flex:1;min-width:130px;padding:8px;border:1px solid var(--line);background:var(--card);color:var(--sub);border-radius:8px;cursor:pointer;font-size:.92em}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:12px}
+.card h3{font-size:1.02em;margin-bottom:6px}
+.card h3 .n{font-weight:400;font-size:.75em;color:var(--sub);margin-left:8px}
+.flow{font-family:"Consolas",monospace;font-size:.86em;color:var(--sub);background:color-mix(in srgb,var(--acc) 6%,transparent);border-radius:8px;padding:10px 12px;margin:8px 0;white-space:pre-wrap;word-break:break-all}
+table{width:100%;border-collapse:collapse;font-size:.88em;margin:6px 0}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.k{color:var(--acc);font-weight:700}
+.warn{background:color-mix(in srgb,var(--bl) 12%,transparent);border:1px solid var(--bl);border-radius:10px;padding:8px 12px;font-size:.88em;margin:10px 0}
+details{margin:4px 0}
+summary{cursor:pointer;font-size:.9em;color:var(--acc);font-weight:700}
+details .txt{display:block;border-top:1px dashed var(--line);margin-top:6px;padding-top:8px;font-size:.9em}
+.txt .seg{margin-bottom:8px;padding-left:10px;border-left:3px solid var(--line)}
+.txt .seg b{color:var(--acc)}
+.num{font-weight:700;color:var(--bl)}
+footer{text-align:center;color:var(--sub);font-size:.78em;padding:18px 0}
+</style>
+</head>
+<body>
+<header>
+  <b>🦴 骨架记忆</b><span class="cd" id="cd"></span>
+  <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="/sprint.html">← 冲刺版</a><a class="hbtn" href="/recite.html">背诵版</a><button class="hbtn" onclick="document.body.classList.toggle('dark')">◐ 夜间</button></span>
+</header>
+<nav>
+  <button class="on" onclick="sw(this,'g1')">六段式总骨架</button>
+  <button onclick="sw(this,'g2')">摘要+固定段</button>
+  <button onclick="sw(this,'g3')">RAG 范文骨架</button>
+  <button onclick="sw(this,'g4')">模块库骨架（6类）</button>
+  <button onclick="sw(this,'g5')">数字锚点 + 护城河</button>
+</nav>
+<main id="app"></main>
+<footer>骨架记忆 · 只看线索背全文 · 配套：/sprint.html /recite.html · 2026-10-12</footer>
+<script>
+var EXAM=new Date("2026-10-24T09:00:00");
+function tick(){var d=Math.ceil((EXAM-new Date())/864e5);document.getElementById("cd").textContent=d>0?"⏳ 距考试 "+d+" 天":"📅 考试日"}
+tick();setInterval(tick,6e4);
+function sw(btn,id){document.querySelectorAll("nav button").forEach(function(b){b.classList.remove("on")});btn.classList.add("on");render(id)}
+
+var V={
+g1:function(){return ''+
+'<div class="card"><h3>📐 论文六段式总骨架（所有主题通用）</h3>'+
+'<div class="flow">摘要(≤300) → 一、项目概述(~380) → 二、技术概述(~450) → 三、方案设计(2-3小节,~1000) → 四、问题与解决(~300,可并入三) → 五、效果与总结(~400)\n总字数 ≤2500，平时按 2450 练</div>'+
+'<table><tr><th>段落</th><th>字数</th><th>骨架逻辑</th><th>对应真题</th></tr>'+
+'<tr><td>摘要</td><td>≤300</td><td>时间+项目+背景 → 角色 → 首先/然后/最后(=子问题) → 效果</td><td>全题</td></tr>'+
+'<tr><td>一、概述</td><td>~380</td><td>企业规模 → 数据分散 → 三痛点带数字 → 例子 → 启动+角色</td><td>第1问</td></tr>'+
+'<tr><td>二、技术</td><td>~450</td><td>定义 → 分类/组成(每个答一问) → 协同链路 → vs 对比方案 → 局限</td><td>第2问</td></tr>'+
+'<tr><td>三、设计</td><td>~1000</td><td>权衡引入 → 小节1/2/3，每节=问题→对比→决策→落地→验证</td><td>第3问</td></tr>'+
+'<tr><td>四、问题</td><td>~300</td><td>问题一/二/三：现象 → 根因 → 解法 → 验证数据</td><td>第3问</td></tr>'+
+'<tr><td>五、总结</td><td>~400</td><td>效果(数字串) → 三点经验 → 不足+展望 → 收尾句</td><td>—</td></tr></table></div>'+
+
+'<div class="card"><h3>🔑 三问定位口诀</h3>'+
+'<div class="flow">第1问"项目+角色" → 默写固定段（一）\n第2问"理论" → 技术概述（二），每个组成用"解决什么问题"句式\n第3问"如何做+问题+效果" → 方案设计（三）+ 问题（四）+ 效果（五）</div></div>'+
+
+'<div class="card"><h3>✍ 段首呼应句模板（5类）</h3>'+
+'<table><tr><th>类型</th><th>句式</th></tr>'+
+'<tr><td>原理类</td><td>"【技术】的核心组成包括N个：【列举】。协同链路是：【一句话】。"</td></tr>'+
+'<tr><td>设计类</td><td>"本人负责【职责】，针对【题目所问】，从【方面1/2/3】三方面展开设计。"</td></tr>'+
+'<tr><td>权衡类</td><td>"对【A】与【B】权衡：前者【弊】，后者【弊】，选定【方案】，理由【扣题】。"</td></tr>'+
+'<tr><td>问题类</td><td>"问题一：【现象】。根因是【根因】，采用【解法】，之后【效果】。"</td></tr>'+
+'<tr><td>效果类</td><td>"项目于【时间】上线：【指标】从X变为Y；【指标】从X变为Y。"</td></tr></table>'+
+'<div class="warn">段首不写"随着…的发展"这类套话。段首不点题＝该论点不得分。</div></div>'},
+
+g2:function(){return ''+
+'<div class="card"><h3>📝 摘要骨架（≤300字）</h3>'+
+'<div class="flow">【时间+项目】2024年3月，我所在的某制造业集团启动了智能财务分析平台项目。\n【企业+痛点】该集团拥有<span class="num">30余家</span>子公司，年营收超过<span class="num">50亿</span>元，传统财务分析模式面临___、___、___等问题。\n【角色】本人担任系统架构师，负责整体架构设计与___架构设计。\n【结构】本文以该项目为例，论述___：首先阐述___；然后重点论述___、___、___；最后结合典型问题与解决方案，总结实施效果。\n【效果】报告生成时间从<span class="num">3天</span>缩短至<span class="num">2小时</span>，风险识别准确率从<span class="num">75%</span>提升至<span class="num">92%</span>。</div>'+
+'<div class="warn">痛点三空、结构三空 = 按考题换；效果句按主题换最强数据（性能题用120ms/99.99%）。</div></div>'+
+
+'<div class="card"><h3>📌 固定段骨架：一、项目概述（~380字）</h3>'+
+'<div class="flow">大型制造业集团 → <span class="num">30余家</span>/<span class="num">50亿</span> → 数据分散在 ERP·银行对账·Excel →\n痛点1：采集人工，<span class="num">2名</span>专职<span class="num">3天</span>\n痛点2：依赖经验，新分析师<span class="num">半年以上</span>\n痛点3：风险滞后，月度结账后才发现\n例子：2023年应收账款周转 <span class="num">45天→68天</span>，<span class="num">300万</span>坏账\n→ 2024年3月启动，目标：自动采集·智能分析·实时预警\n→ 角色：系统架构师，负责___（按题换）\n→ 团队<span class="num">28人</span>，历时<span class="num">8个月</span></div></div>'+
+
+'<div class="card"><h3>📌 固定段骨架：五、效果与总结（~400字）</h3>'+
+'<div class="flow">2024年11月上线 →\n效果：<span class="num">3天→2小时</span> · 数据质量问题减少<span class="num">85%</span> · <span class="num">75%→92%</span> · 避免坏账<span class="num">500万</span> · 年省人力<span class="num">40万</span>\n经验：一是___（按题换）；二是知识库/数据质量决定Agent上限，业务专家深度参与；三是高风险人工审核不可省略\n不足：___（按题写1条演进方向）\n收尾：微服务与AI Agent融合代表企业架构新方向，持续探索</div></div>'},
+
+g3:function(){return ''+
+'<div class="card"><h3>🤖 范文A（RAG）完整骨架</h3>'+
+'<table><tr><th>段落</th><th>骨架线索</th><th>锚点词</th></tr>'+
+'<tr><td>摘要</td><td>三痛点(采集分散·依赖经验·风险滞后) → 角色(整体架构+大模型应用) → 结构(原理/知识库-链路-运营/问题效果)</td><td>30余家 50亿 3天→2小时 75%→92%</td></tr>'+
+'<tr><td>二、技术</td><td>定义=检索+生成，开卷vs闭卷 → 五组成各答一问：<br>①向量化层=放哪里 ②检索层=怎么找(混合检索) ③重排序=未必有用 ④生成层=变答案 ⑤评估运营=越用越准</td><td>开卷作答 嵌入模型 混合检索 重排序 忠实度</td></tr>'+
+'<tr><td>二、协同</td><td>链路：问题→向量化→检索→重排→提示词→生成→评估反馈 → "用领域事实约束生成" → vs微调(无重训·即时更新·可追溯) → 局限(检索定上限·延迟)</td><td>环环相扣 领域事实约束 微调 检索质量决定生成上限</td></tr>'+
+'<tr><td>三、权衡</td><td>直接问答(泛泛) vs 微调(成本高·更新慢·法规每季变) → 选RAG → 三方面(知识库/链路/运营)</td><td>泛泛 每季 三方面</td></tr>'+
+'<tr><td>3.1 知识库</td><td>三类知识(概念/规则/行业) → 矛盾(向量语义强精度弱·关键词反) → Neo4j精确+Milvus模糊 → 对比ES(向量精度不足) → 四基础设施之一</td><td>财务专家 Neo4j Milvus Elasticsearch 四个基础设施</td></tr>'+
+'<tr><td>3.2 链路</td><td>混合检索三路(向量+图谱+规则) → 切片弃定长按章节表格 → Dify四段提示词(角色/上下文/指令/格式)+标注依据 → 护栏(三次投票·80%转人工·高风险复核)</td><td>向量召回+图谱查询+规则匹配 定长切片 Dify 三次 80%</td></tr>'+
+'<tr><td>3.3 运营</td><td>每月专家审核修订 → 每周基准更新 → 采纳/修正回流为标注 → 优化切片与检索</td><td>每月 每周 标注数据</td></tr>'+
+'<tr><td>四、问题一</td><td>现象：毛利率案例检索回无关报表 → 根因：定长切片切断口径 → 改法：结构切片+重排 → 验证：归因句</td><td>15%→1.8个百分点 0.5%→0.5个百分点 锁价</td></tr>'+
+'<tr><td>四、问题二</td><td>现象：编造科目/数据 → 解法：三次投票+置信度 → 低于80%转人工 → 标注来源 → "知识库暂无此信息"</td><td>三次 80% 转人工 暂无此信息</td></tr>'+
+'<tr><td>四、问题三</td><td>现象：外部大模型依赖 → 解法：多供应商路由+熔断降级(备选→规则引擎) → 验证：2024年12月故障2小时，核心报表全程可用</td><td>多供应商路由 熔断 降级 2小时 无感知</td></tr>'+
+'<tr><td>五、总结</td><td>效果数字串 → 经验3点(检索定上限/知识库定Agent上限/人工审核不可省) → 不足(多模态发票合同) → 暴论句</td><td>八分数据治理 两分算法 过期知识</td></tr></table></div>'+
+
+'<div class="card"><h3>💬 RAG 金句（必须原样背）</h3>'+
+'<table><tr><td>开卷 vs 闭卷</td><td>使模型"开卷作答"而非凭参数记忆"闭卷猜测"</td></tr>'+
+'<tr><td>协同目标</td><td>用检索到的领域事实约束模型生成，抑制幻觉、注入私有领域知识</td></tr>'+
+'<tr><td>经验一</td><td>检索质量决定生成上限，知识库工程投入产出比远高于模型选型</td></tr>'+
+'<tr><td>经验二</td><td>知识库质量决定Agent上限，需要业务专家深度参与建设</td></tr>'+
+'<tr><td>暴论句</td><td>同行常把RAG视作大模型落地的银弹，我的体会恰恰相反：成败八分在数据治理、两分在算法——没有持续运营的知识库，再强的检索也只会精准地召回过期知识</td></tr></table></div>'},
+
+g4:function(){return ''+
+'<div class="card"><h3>🧩 模块库骨架（6类可替换）</h3>'+
+'<table><tr><th>类别</th><th>技术概述骨架</th><th>设计子节1</th><th>设计子节2</th></tr>'+
+'<tr><td>1.分布式事务</td><td>定义 → 4方案(2PC/TCC/Saga/本地消息表) → 财务一致性要求高</td><td>Saga+Camunda：补偿逆序，指数退避5次+人工兜底，跨服务不一致工单为零</td><td>本地消息表：业务+消息同事务，定时扫表投MQ，消费判重幂等；对比RocketMQ事务消息(厂商绑定)；37条延迟无一丢失</td></tr>'+
+'<tr><td>2.可靠性</td><td>MTTF/MTTR/可用性 → 4手段(冗余/自愈/熔断限流/灾备)</td><td>容错三件套：Resilience4j熔断(错误率50%/超时3s) + 降级(转人工) + 令牌桶限流(1000/s)；对比Hystrix(停更)/Sentinel(需控制台)</td><td>三级保障：MySQL半同步RPO≈0 + RocketMQ同步刷盘 + 每日全量+每小时增量；Prometheus+SkyWalking；99.99%全年停机50分钟，主从切换30秒</td></tr>'+
+'<tr><td>3.性能优化</td><td>定义 → 4策略(缓存/异步/DB优化/并行)</td><td>三级缓存：Caffeine(秒级)→Redis(1h)→预计算表；延迟双删防脏读；读写分离+月度分表+覆盖索引；120ms提升76%</td><td>全链路异步：任务ID即返回，RocketMQ分发，企业微信推送；三消费组优先级(实时预警>报告>批量)；3天→2小时</td></tr>'+
+'<tr><td>4.数据架构</td><td>数仓定义 → 4方法(分层/维度/ETL/质量)</td><td>四层：ODS(快照)→DWD(清洗+编码统一)→DWS(主题汇总)→ADS(宽表)；维度建模选星型(凭证事实+日期/科目/组织/客商)</td><td>三道质量防线：规则引擎校验→Isolation Forest异常检测→稽核规则(借贷平衡)；数据血缘分钟级定位；质量问题减少85%</td></tr>'+
+'<tr><td>5.DDD</td><td>定义 → 战略(限界上下文/子域) + 战术(聚合/领域事件) + 事件风暴</td><td>4次事件风暴：42事件→子域(核心=分析+预警/支撑=采集+报告/通用=权限+通知)→10限界上下文→15服务；Customer-Supplier+防腐层(对接SAP)</td><td>聚合保一致性(凭证聚合内聚借贷平衡)；领域事件解耦；争议：数据清洗独立(每周迭代2次不影响采集)；服务边界由业务变化频率决定</td></tr>'+
+'<tr><td>6.大模型应用</td><td>LLM定义 → 4模式(直接问答/RAG/Agent/微调) → 3挑战(慢/不稳/泄露)</td><td>5 Agent服务化+API网关治理；三大缺陷兜底：异步化/三次投票80%/分级缓存；权限隔离+决策留痕</td><td>复用RAG知识库+链路内容；毛利率归因句；知识库运营(每月审核/每周基准)；知识库质量决定Agent上限</td></tr></table></div>'+
+
+'<div class="card"><h3>🔄 组合策略</h3>'+
+'<div class="flow">变形题应对：主干事实(项目/数字/服务拆分)不变 → 从最接近的范文抽2个小节 + 从模块库抽1个模块重组\n优先背诵：类别2(可靠性)、类别3(性能)、类别6(大模型) = 近年最高频</div></div>'},
+
+g5:function(){return ''+
+'<div class="card"><h3>🔢 数字锚点总表（错一处即硬伤）</h3>'+
+'<table><tr><th>类别</th><th>数字</th></tr>'+
+'<tr><td>规模</td><td><span class="num">30余家</span>子公司 · 年营收超<span class="num">50亿</span>元</td></tr>'+
+'<tr><td>痛点</td><td><span class="num">2名</span>专职·<span class="num">3天</span>整理 · 新分析师<span class="num">半年以上</span> · 应收<span class="num">45天→68天</span>·<span class="num">300万</span>坏账</td></tr>'+
+'<tr><td>项目</td><td><span class="num">2024年3月</span>启动 · <span class="num">11月</span>上线 · <span class="num">8个月</span> · <span class="num">28人</span></td></tr>'+
+'<tr><td>拆分</td><td><span class="num">15个</span>服务 = 业务<span class="num">6</span> + Agent <span class="num">5</span> + 基础设施<span class="num">4</span> · <span class="num">42个</span>领域事件 · <span class="num">10个</span>限界上下文</td></tr>'+
+'<tr><td>效果</td><td>报告<span class="num">3天→2小时</span> · 准确率<span class="num">75%→92%</span> · 质量问题减<span class="num">85%</span> · 坏账<span class="num">500万</span> · 人力<span class="num">40万</span> · 响应<span class="num">120ms</span> · 可用性<span class="num">99.99%</span></td></tr></table>'+
+'<div class="warn">摘要/正文/效果三处数字必须一致；120ms和99.99%只在性能/可靠性主题用，RAG范文不用。</div></div>'+
+
+'<div class="card"><h3>🏰 反模板护城河细节（每篇至少保留2处）</h3>'+
+'<table><tr><th>细节</th><th>内容</th></tr>'+
+'<tr><td>财务归因</td><td>原材料成本上涨<span class="num">15%</span>贡献<span class="num">1.8</span>个百分点，低毛利产品占比提升贡献<span class="num">0.5</span>个百分点，建议与供应商谈判锁价</td></tr>'+
+'<tr><td>故障实战</td><td>2024年12月大模型服务商接口故障<span class="num">2小时</span>，熔断/多供应商路由使核心功能全程可用，用户无感知</td></tr>'+
+'<tr><td>团队冲突</td><td>开发认为数据清洗应并入采集服务，我用试点数据说服——清洗规则平均<span class="num">每周迭代2次</span>，独立后不再影响采集链路</td></tr>'+
+'<tr><td>风险分级</td><td>高风险即时通知财务总监、中风险通知财务经理、低风险每周汇总</td></tr></table></div>'+
+
+'<div class="card"><h3>⚠ 易错清单</h3>'+
+'<table><tr><th>错误</th><th>正确</th></tr>'+
+'<tr><td>"15个微服务"</td><td>"15个服务"（含4个基础设施服务）</td></tr>'+
+'<tr><td>"风险预测Agent"</td><td>"风险预警Agent"</td></tr>'+
+'<tr><td>摘要30亿 vs 正文50亿</td><td>统一为"年营收超过50亿元"</td></tr>'+
+'<tr><td>段首"随着…的发展"</td><td>段首直接点题</td></tr>'+
+'<tr><td>问题段无编号</td><td>"问题一/二/三"显式编号</td></tr>'+
+'<tr><td>摘要超300字</td><td>平时按295字练</td></tr></table></div>'}
+};
+
+function render(id){document.getElementById("app").innerHTML=V[id]()}
+render("g1");
+</script>
+</body>
+</html>

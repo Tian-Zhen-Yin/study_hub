@@ -76,12 +76,8 @@ public abstract class AbstractAnthropicLlmClient implements LlmClient {
         long start = System.currentTimeMillis();
 
         try {
-            String responseBody = restClient.post()
-                .uri("/v1/messages")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .body(String.class);
+            // 按字节读取后自行 UTF-8 解码，兼容网关返回非标准 content-type（如 octet-stream）的场景
+            String responseBody = postForText("/v1/messages", body);
 
             long elapsed = System.currentTimeMillis() - start;
             JsonNode root = objectMapper.readTree(responseBody);
@@ -139,12 +135,7 @@ public abstract class AbstractAnthropicLlmClient implements LlmClient {
     private LlmResponse retryOnce(LlmRequest request) {
         ObjectNode body = buildRequestBody(request);
         try {
-            String responseBody = restClient.post()
-                .uri("/v1/messages")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .body(String.class);
+            String responseBody = postForText("/v1/messages", body);
             JsonNode root = objectMapper.readTree(responseBody);
 
             StringBuilder content = new StringBuilder();
@@ -167,6 +158,23 @@ public abstract class AbstractAnthropicLlmClient implements LlmClient {
             }
             throw new LlmUnavailableException("RETRY_FAILED",
                 providerName() + " 重试异常: " + e.getMessage(), e);
+        }
+    }
+
+    /** 发起 POST 并按字节读取响应后 UTF-8 解码，兼容网关返回非标准 content-type 的场景 */
+    private String postForText(String path, ObjectNode body) {
+        try {
+            byte[] raw = restClient.post()
+                .uri(path)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM)
+                .body(body)
+                .retrieve()
+                .body(byte[].class);
+            if (raw == null) return "";
+            return new String(raw, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (org.springframework.web.client.RestClientException e) {
+            throw new IllegalStateException("响应处理失败(可能为网关非JSON响应): " + e.getMessage(), e);
         }
     }
 

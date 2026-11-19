@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Slf4j
@@ -73,12 +74,9 @@ public abstract class AbstractOpenAiLlmClient implements LlmClient {
         long start = System.currentTimeMillis();
 
         try {
-            String responseBody = restClient.post()
-                .uri("/chat/completions")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .body(String.class);
+            // 按字节读取后自行 UTF-8 解码：部分网关会以 application/octet-stream 返回
+            // 响应（WAF 质询/限流页），直接按 String 提取会抛 content-type 转换异常
+            String responseBody = postForText("/chat/completions", body);
 
             long elapsed = System.currentTimeMillis() - start;
             JsonNode root = objectMapper.readTree(responseBody);
@@ -123,12 +121,7 @@ public abstract class AbstractOpenAiLlmClient implements LlmClient {
     private LlmResponse retryOnce(LlmRequest request) {
         ObjectNode body = buildRequestBody(request);
         try {
-            String responseBody = restClient.post()
-                .uri("/chat/completions")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .body(String.class);
+            String responseBody = postForText("/chat/completions", body);
             JsonNode root = objectMapper.readTree(responseBody);
             String content = root.path("choices").path(0).path("message").path("content").asText("");
             int tokens = root.path("usage").path("total_tokens").asInt(0);
@@ -140,6 +133,32 @@ public abstract class AbstractOpenAiLlmClient implements LlmClient {
             }
             throw new LlmUnavailableException("RETRY_FAILED",
                 providerName() + " 重试异常: " + e.getMessage(), e);
+        }
+    }
+
+    /** 发起 POST 并按字节读取响应后 UTF-8 解码，兼容网关返回非标准 content-type 的场景 */
+    private String postForText(String path, ObjectNode body) {
+        try {
+            byte[] raw = restClient.post()
+                .uri(path)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM)
+                .body(body)
+                .retrieve()
+                .body(byte[].class);
+            if (raw == null) return "";
+            return new String(raw, StandardCharsets.UTF_8);
+        } catch (org.springframework.web.client.HttpClientErrorException.TooManyRequests e) {
+            throw e;
+        } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
+            throw e;
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            throw e;
+        } catch (org.springframework.web.client.HttpServerErrorException e) {
+            throw e;
+        } catch (org.springframework.web.client.RestClientException e) {
+            // 透传时附带诊断信息，避免"提取失败"这种无上下文的报错
+            throw new IllegalStateException("响应处理失败(可能为网关非JSON响应): " + e.getMessage(), e);
         }
     }
 

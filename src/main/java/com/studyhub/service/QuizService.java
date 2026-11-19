@@ -22,10 +22,21 @@ public class QuizService {
     private final MemoryCardRepository memoryCardRepo;
     private final BookmarkRepository bookmarkRepo;
     private final FiveElementsService fiveElementsService;
+    private final PriorityService priorityService;
+    private final QuestionQualityRepository questionQualityRepo;
 
     private static final int[] INTERVALS = {1, 1, 3, 7, 14, 30};
 
     public List<Question> buildPracticeSet(QuizSetRequest req) {
+        // 智能推荐模式：优先按弱势考点出题（考点级掌握度），无标签/无作答数据时退回域级推荐
+        if ("smart".equals(req.getMode()) && req.getDomainId() == null) {
+            List<Question> weakKpSet = buildWeakKpSet(req.getCount());
+            if (!weakKpSet.isEmpty()) return weakKpSet;
+            Long recommended = priorityService.getRecommendedDomainId();
+            if (recommended != null) {
+                req.setDomainId(recommended);
+            }
+        }
         List<Question> pool = fetchPool(req);
         List<AnswerRecord> attempts = answerRecordRepo.findAll();
         Map<Long, AnswerRecord> latest = latestAttemptByQuestion(attempts);
@@ -40,6 +51,11 @@ public class QuizService {
             case "special":
             case "exam":
                 return pool;
+            case "case":
+                // 案例专项：只出案例大题，随机排序（题量少，一般全量返回）
+                List<Question> caseSet = new ArrayList<>(pool);
+                Collections.shuffle(caseSet);
+                return caseSet.stream().limit(req.getCount()).collect(Collectors.toList());
             case "wrong":
             case "intensive":
                 List<Question> wrong = pool.stream()
@@ -70,6 +86,7 @@ public class QuizService {
             case "practice":
             case "random":
             case "timed":
+            case "smart":
                 List<Question> shuffled = new ArrayList<>(pool);
                 Collections.shuffle(shuffled);
                 return shuffled.stream().limit(req.getCount()).collect(Collectors.toList());
@@ -78,9 +95,39 @@ public class QuizService {
         }
     }
 
+    /**
+     * 弱势考点出题：取掌握度最低的考点，优先未作答/最近答错的题。
+     */
+    private List<Question> buildWeakKpSet(int count) {
+        List<String> weakKeys = priorityService.getWeakKpKeys(8);
+        if (weakKeys.isEmpty()) return Collections.emptyList();
+        List<Question> pool = findQuestionsByIds(questionQualityRepo.findIdsByKpKeys(weakKeys));
+        if (pool.isEmpty()) return Collections.emptyList();
+
+        Map<Long, AnswerRecord> latest = latestAttemptByQuestion(answerRecordRepo.findAll());
+        List<Question> wrongOrUnanswered = new ArrayList<>();
+        List<Question> others = new ArrayList<>();
+        for (Question q : pool) {
+            AnswerRecord last = latest.get(q.getId());
+            if (last == null || !last.getIsCorrect()) {
+                wrongOrUnanswered.add(q);
+            } else {
+                others.add(q);
+            }
+        }
+        Collections.shuffle(wrongOrUnanswered);
+        Collections.shuffle(others);
+        List<Question> result = new ArrayList<>(wrongOrUnanswered);
+        result.addAll(others);
+        return result.stream().limit(count).collect(Collectors.toList());
+    }
+
     private List<Question> fetchPool(QuizSetRequest req) {
         List<Question> pool;
-        if (req.getDomainId() != null) {
+        if (req.getSource() != null && !req.getSource().isEmpty()) {
+            // 指定题源（如系分真题补充集），忽略领域/年份等其他维度
+            pool = questionRepo.findBySource(req.getSource());
+        } else if (req.getDomainId() != null) {
             pool = questionRepo.findByDomainId(req.getDomainId());
         } else if (req.getExamYear() != null && !req.getExamYear().isEmpty()) {
             pool = questionRepo.findByExamYear(req.getExamYear());
@@ -93,9 +140,56 @@ public class QuizService {
             pool = questionRepo.findAll();
         }
         return pool.stream()
-            .filter(q -> !"OUTDATED".equals(q.getSource()) && !"MOCK".equals(q.getSource()))
+            .filter(q -> !"OUTDATED".equals(q.getSource()) && !"MOCK".equals(q.getSource())
+                && !"ARCH_EXCL".equals(q.getSource()))
             .filter(q -> q.getFlagType() == null) // 已打问题标记的题不再抽取
+            .filter(q -> matchesTypeAndTopic(q, req))
             .collect(Collectors.toList());
+    }
+
+    /** 题型与案例专项方向过滤：questionType 匹配 question_type，caseTopic 匹配题干【案例题型·XX】前缀 */
+    private boolean matchesTypeAndTopic(Question q, QuizSetRequest req) {
+        if (req.getQuestionType() != null && !req.getQuestionType().isEmpty()
+                && !req.getQuestionType().equals(q.getType())) {
+            return false;
+        }
+        if (req.getCaseTopic() != null && !req.getCaseTopic().isEmpty()) {
+            String prefix = "【案例题型·" + req.getCaseTopic() + "】";
+            return q.getStem() != null && q.getStem().startsWith(prefix);
+        }
+        return true;
+    }
+
+    /**
+     * 案例专项方向汇总：解析题干【案例题型·XX】前缀，按方向统计题量（降序），供前端专项面板渲染。
+     */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> caseSummary() {
+        Map<String, Long> byTopic = new LinkedHashMap<>();
+        long untagged = 0;
+        for (Question q : questionRepo.findActiveCaseQuestions()) {
+            java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("^【案例题型·(.+?)】").matcher(q.getStem() != null ? q.getStem() : "");
+            if (m.find()) {
+                byTopic.merge(m.group(1), 1L, Long::sum);
+            } else {
+                untagged++;
+            }
+        }
+        List<Map<String, Object>> result = new ArrayList<>();
+        byTopic.entrySet().stream()
+            .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+            .forEach(e -> {
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("topic", e.getKey());
+                item.put("count", e.getValue());
+                result.add(item);
+            });
+        Map<String, Object> all = new LinkedHashMap<>();
+        all.put("topic", null);
+        all.put("count", byTopic.values().stream().mapToLong(Long::longValue).sum() + untagged);
+        result.add(0, all);
+        return result;
     }
 
     private List<Question> continueFromLatest(List<Question> questions, List<AnswerRecord> attempts) {
@@ -197,7 +291,18 @@ public class QuizService {
 
         fiveElementsService.updateOnAnswer(correct, questionId);
 
-        return AnswerResponse.builder()
+        // 答错时附带考点与同考点变式题数量，前端据此展示"举一反三"
+        AnswerResponse.AnswerMeta.AnswerMetaBuilder metaBuilder = AnswerResponse.AnswerMeta.builder();
+        boolean hasMeta = false;
+        List<QuestionQuality> tags = questionQualityRepo.findByQuestionId(questionId);
+        if (!correct && !tags.isEmpty()) {
+            String kp = tags.get(0).getKnowledgePoint();
+            int variantCount = questionQualityRepo.findVariantQuestionIds(questionId, 10).size();
+            metaBuilder.knowledgePoint(kp).variantCount((long) variantCount);
+            hasMeta = true;
+        }
+
+        AnswerResponse.AnswerResponseBuilder builder = AnswerResponse.builder()
             .correct(correct)
             .answer(question.getAnswer())
             .analysis(question.getAnalysis())
@@ -207,8 +312,26 @@ public class QuizService {
                 .state(card.getState())
                 .nextReviewAt(card.getNextReviewAt() != null ? card.getNextReviewAt().toString() : null)
                 .build())
-            .game(gameDelta)
-            .build();
+            .game(gameDelta);
+        if (hasMeta) builder.meta(metaBuilder.build());
+        return builder.build();
+    }
+
+    /**
+     * 同考点变式题（举一反三），供前端在答错后按需加载。
+     */
+    @Transactional(readOnly = true)
+    public List<Question> findVariants(Long questionId, int count) {
+        List<Long> ids = questionQualityRepo.findVariantQuestionIds(questionId, Math.min(Math.max(count, 1), 10));
+        return findQuestionsByIds(ids);
+    }
+
+    /** 按 ID 顺序装配 Question（findAllById 不保证顺序） */
+    private List<Question> findQuestionsByIds(List<Long> ids) {
+        if (ids.isEmpty()) return Collections.emptyList();
+        Map<Long, Question> byId = questionRepo.findAllById(ids).stream()
+            .collect(Collectors.toMap(Question::getId, q -> q));
+        return ids.stream().map(byId::get).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private Map<Long, AnswerRecord> latestAttemptByQuestion(List<AnswerRecord> attempts) {

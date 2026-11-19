@@ -19,6 +19,11 @@ async function renderPage() {
       case "bank":      await renderBank(c); break;
       case "data":      await renderData(c); break;
       case "llm-settings": await renderLlmSettings(c); break;
+      case "past-exams": await renderPastExams(c); break;
+      case "kp-graph": await renderKpGraph(c); break;
+      case "essay-insight": await renderEssayInsight(c); break;
+      case "mcq-insight": await renderMcqInsight(c); break;
+      case "memory-palace": await renderMemoryPalace(c); break;
       default:          await renderDashboard(c);
     }
   } catch (e) {
@@ -392,9 +397,9 @@ async function renderQuiz(c) {
   var domains = state.domains.length ? state.domains : await loadDomains();
   var territories = state.territories.length ? state.territories : await loadTerritories();
   var domainOpts = domains.map(function(d) { return '<option value="' + d.id + '">' + d.name + '</option>'; }).join("");
-  var modeNames = {practice:"自由练习",sequence:"顺序通关",random:"随机挑战",timed:"限时速答",intensive:"强化训练",endless:"无尽模式",daily:"每日挑战"};
-  var modeDescs = {practice:"自选领域，无压力",sequence:"按顺序逐个击破",random:"随机抽取，考验应变",timed:"每题限时，考验速度",intensive:"高频错题集中攻克",endless:"无限刷题，冲击高分",daily:"每日限时 20 题"};
-  var modeBtns = ["practice","sequence","random","timed","intensive","endless","daily"].map(function(m) {
+  var modeNames = {practice:"自由练习",sequence:"顺序通关",random:"随机挑战",timed:"限时速答",intensive:"强化训练",endless:"无尽模式",daily:"每日挑战",smart:"智能推荐",case:"案例专项",supp:"架构补充"};
+  var modeDescs = {practice:"自选领域，无压力",sequence:"按顺序逐个击破",random:"随机抽取，考验应变",timed:"每题限时，考验速度",intensive:"高频错题集中攻克",endless:"无限刷题，冲击高分",daily:"每日限时 20 题",smart:"按频率+薄弱度智能选题",case:"只出案例大题，按方向攻克",supp:"系统分析师真题，只刷架构师也考的考点"};
+  var modeBtns = ["practice","sequence","random","timed","intensive","endless","daily","smart","supp"].map(function(m) {
     return '<button class="quiz-mode-btn" data-mode="' + m + '" onclick="startQuiz(\'' + m + '\')" style="padding:12px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-card);cursor:pointer;text-align:left;transition:all .15s"><div style="font-weight:600">' + modeNames[m] + '</div><div class="text-muted">' + modeDescs[m] + '</div></button>';
   }).join("");
 
@@ -402,13 +407,109 @@ async function renderQuiz(c) {
     '<div class="content-card" id="quiz-territory-card" style="max-height:calc(100vh - 160px);overflow-y:auto"><div class="content-card-header" style="cursor:pointer;user-select:none" onclick="toggleTerritoryPanel()"><div class="content-card-title">领地征伐</div><span id="quiz-territory-toggle" style="font-size:12px;color:var(--text-secondary);transition:transform .2s">▼</span></div><div class="content-card-body" id="quiz-territories"></div></div>' +
     '<div class="stack">' +
       '<div class="content-card" style="background:linear-gradient(135deg,var(--hud-bg-1),var(--hud-bg-2));color:var(--hud-text);border:none"><div class="content-card-body"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><div style="font-size:var(--font-size-h4);font-weight:600" id="quiz-mode-label">选择模式</div><div style="font-size:var(--font-size-caption);color:var(--hud-text-dim)" id="quiz-progress">--</div></div><div style="display:flex;flex-direction:column;gap:6px;flex:1;max-width:300px"><div class="hud-stat-row"><span class="hud-stat-label">HP</span><div class="stat-bar"><div class="stat-bar-fill hp" id="quiz-hp-bar" style="width:100%"></div></div><span id="quiz-hp-text" style="color:var(--hud-text);font-size:12px">100</span></div><div class="hud-stat-row"><span class="hud-stat-label">⚡</span><div class="stat-bar"><div class="stat-bar-fill exp" id="quiz-combo-bar" style="width:0%"></div></div><span id="quiz-combo-text" style="color:var(--hud-text);font-size:12px">Combo x0</span></div></div></div></div></div>' +
-      '<div class="content-card" id="quiz-mode-select"><div class="content-card-header"><div class="content-card-title">选择战斗模式</div></div><div class="content-card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + modeBtns + '</div><div style="margin-top:12px;display:flex;gap:10px;align-items:center"><label style="font-size:14px;white-space:nowrap">领域：</label><select id="quiz-domain-select" style="flex:1;padding:8px;border:1px solid var(--border-2);border-radius:6px">' + domainOpts + '</select><button onclick="startBossBattle()" style="padding:8px 16px;background:linear-gradient(135deg,var(--danger-5),var(--danger-6));color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Boss 战</button></div></div></div>' +
+      '<div class="content-card" id="quiz-mode-select"><div class="content-card-header"><div class="content-card-title">选择战斗模式</div></div><div class="content-card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + modeBtns + '</div><div style="margin-top:12px;display:flex;gap:10px;align-items:center"><label style="font-size:14px;white-space:nowrap">领域：</label><select id="quiz-domain-select" style="flex:1;padding:8px;border:1px solid var(--border-2);border-radius:6px">' + domainOpts + '</select><button onclick="startBossBattle()" style="padding:8px 16px;background:linear-gradient(135deg,var(--danger-5),var(--danger-6));color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Boss 战</button></div>' +
+        '<div id="case-special-panel" style="margin-top:14px;border:1px solid var(--primary-3);border-radius:10px;overflow:hidden">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:linear-gradient(135deg,var(--primary-2),var(--primary-1));flex-wrap:wrap">' +
+            '<div><span style="font-size:14px;font-weight:700">📖 案例分析专项</span><span style="font-size:11px;color:var(--text-2);margin-left:8px">下午·应用技术 · 5道大题任选3道作答 · 每题25分 · 45分及格</span></div>' +
+            '<div style="display:flex;gap:6px;flex-wrap:wrap"><button onclick="toggleCaseTechniques()" style="padding:4px 12px;font-size:12px;border:1px solid var(--primary-5);background:var(--bg-card);color:var(--primary-6);border-radius:6px;cursor:pointer;font-weight:600">答题技巧 ▾</button><button onclick="toggleCaseKp()" style="padding:4px 12px;font-size:12px;border:1px solid var(--primary-5);background:var(--bg-card);color:var(--primary-6);border-radius:6px;cursor:pointer;font-weight:600">常考知识点 ▾</button></div>' +
+          '</div>' +
+          '<div id="case-techniques" style="display:none;border-top:1px solid var(--border-1);padding:12px 14px;background:var(--bg-card);font-size:12px;line-height:1.8">' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
+              '<div><div style="font-weight:700;margin-bottom:4px;color:var(--primary-6)">四步做题法</div>' +
+                '<div style="color:var(--text-2)"><strong>① 先读问题再读材料</strong>——材料长、时间紧，带着小问回材料定位，省一半时间；<br><strong>② 圈关键词</strong>——"高并发""跨部门""预算/工期受限"等业务特征就是考点信号，直接对应质量属性与架构决策；<br><strong>③ 分点作答</strong>——按 ①②③ 编号、一点一行（1~2行），阅卷按点给分，大段落不加分；<br><strong>④ 术语规范</strong>——用教材术语（质量属性六要素、敏感点/权衡点、限界上下文、Cache Aside…），忌口语化。</div></div>' +
+              '<div><div style="font-weight:700;margin-bottom:4px;color:var(--primary-6)">高频小问套路 & 时间取舍</div>' +
+                '<div style="color:var(--text-2)"><strong>填空补全</strong>：答案常在材料上下文的并列/对仗句里，结合特征表回忆；<br><strong>问题→对策</strong>：成对作答，一条问题配一条改进措施；<br><strong>选型比较</strong>：先给结论，再按"质量属性+业务约束"逐项对比；<br><strong>建模题</strong>：按"参与者/边界/控制/实体/关系"清单式罗列防遗漏。<br>—— 每题≤30分钟（90分钟3题），单小问卡壳5分钟先跳过；五选三先扫一遍5道题挑最熟悉的方向（近几次真题常含嵌入式/新兴技术题，没把握就避开）；平时就用键盘完整作答，练机考输入手感。</div></div>' +
+            '</div>' +
+          '</div>' +
+          '<div id="case-kp" style="display:none;border-top:1px solid var(--border-1);max-height:460px;overflow-y:auto"></div>' +
+          '<div style="padding:10px 12px;border-top:1px solid var(--border-1)">' +
+            '<div style="font-size:12px;font-weight:600;margin-bottom:8px">按方向开始练习 <span class="text-muted" style="font-weight:400">（完整案例材料，作答后对照要点自评）</span></div>' +
+            '<div id="case-topic-chips" style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px">加载中...</div>' +
+          '</div>' +
+        '</div><div id="priority-panel" style="margin-top:14px;padding:12px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-1)"><div style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between"><span>🎯 复习优先级 TOP 5</span><button onclick="loadPriorityList()" style="padding:2px 8px;font-size:11px;background:var(--primary-1);color:var(--primary-6);border:none;border-radius:4px;cursor:pointer">刷新</button></div><div id="priority-list" style="font-size:12px;color:var(--text-2)">加载中...</div></div><div id="weak-kp-panel" style="margin-top:10px;padding:12px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-1)"><div style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between"><span>🧩 薄弱考点 TOP 5</span><button onclick="loadWeakKpList()" style="padding:2px 8px;font-size:11px;background:var(--primary-1);color:var(--primary-6);border:none;border-radius:4px;cursor:pointer">刷新</button></div><div id="weak-kp-list" style="font-size:12px;color:var(--text-2)">加载中...</div></div></div></div>' +
       '<div class="content-card" id="quiz-question-card" style="display:none"><div class="content-card-header"><div class="content-card-title" id="quiz-q-num">第 1 题</div><span class="text-muted" id="quiz-q-source"></span><span id="quiz-q-history"></span><span id="quiz-flag-area" style="margin-left:auto"></span><span id="quiz-timer" style="display:none;font-size:14px;font-weight:700;padding:2px 10px;border-radius:6px;background:var(--danger-2);color:var(--danger-6)">⏱ 30s</span></div><div class="content-card-body"><div id="quiz-flag-panel" style="display:none;margin-bottom:14px;padding:12px;border:1px solid var(--danger-3,#fa9ea3);border-radius:8px;background:var(--danger-1,#fef4f4)"></div><div id="quiz-q-image" class="quiz-stem-image"></div><div style="font-size:16px;line-height:1.7;margin-bottom:20px" id="quiz-q-stem"></div><div id="quiz-options" style="display:flex;flex-direction:column;gap:10px"></div><div id="quiz-feedback" style="display:none;margin-top:16px;padding:12px;border-radius:8px"></div><div style="margin-top:16px;display:flex;gap:10px"><button id="quiz-next-btn" style="display:none;padding:10px 24px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600" onclick="nextQuestion()">下一题</button><button id="quiz-finish-btn" style="display:none;padding:10px 24px;background:var(--success-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600" onclick="finishQuiz()">完成战斗</button></div></div></div>' +
     '</div>' +
     '<div class="content-card" style="max-height:calc(100vh - 160px);overflow-y:auto"><div class="content-card-header"><div class="content-card-title">答题阵法</div><span class="text-muted" id="quiz-sheet-progress" style="font-size:12px"></span></div><div class="content-card-body"><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="quiz-sheet-grid"></div><div id="quiz-sheet-legend" style="margin-top:10px;display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-2)"><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--success-2);border:1.5px solid var(--success-5)"></span><span>已答对</span></div><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--danger-2);border:1.5px solid var(--danger-5)"></span><span>已答错</span></div><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--bg-card);border:1.5px solid var(--border-2)"></span><span>未作答</span></div></div></div></div>' +
     '</div>';
   renderQuizTerritories(territories, domains);
   restoreTerritoryPanel();
+  loadPriorityList();
+  loadWeakKpList();
+  loadCaseTopics();
+}
+
+/* ===== 案例分析专项 ===== */
+function loadCaseTopics() {
+  var el = document.getElementById("case-topic-chips");
+  if (!el) return;
+  apiGet("/quiz/case-summary").then(function(list) {
+    if (!list || !list.length) { el.innerHTML = '<span class="text-muted">题库暂无案例题</span>'; return; }
+    el.innerHTML = list.map(function(item) {
+      var primary = !item.topic;
+      var label = (item.topic ? item.topic : "全部方向") + " · " + item.count + " 题";
+      return '<button onclick="startCasePractice(' + (item.topic ? '\'' + item.topic + '\'' : "null") + ')" style="padding:6px 14px;border-radius:16px;border:1px solid ' + (primary ? "var(--primary-5)" : "var(--border-2)") + ';background:' + (primary ? "var(--primary-6)" : "var(--bg-card)") + ';color:' + (primary ? "#fff" : "var(--text-1)") + ';cursor:pointer;font-size:12px;font-weight:' + (primary ? "600" : "400") + ';transition:all .15s">' + label + '</button>';
+    }).join("");
+  }).catch(function() { el.innerHTML = '<span class="text-muted">加载失败</span>'; });
+}
+
+function toggleCaseTechniques() {
+  var el = document.getElementById("case-techniques");
+  if (!el) return;
+  el.style.display = el.style.display === "none" ? "" : "none";
+}
+
+var caseKpLoaded = false;
+function toggleCaseKp() {
+  var el = document.getElementById("case-kp");
+  if (!el) return;
+  var show = el.style.display === "none";
+  el.style.display = show ? "" : "none";
+  if (show && !caseKpLoaded) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3);font-size:12px">加载中...</div>';
+    fetch("/pages/case-kp.html?v=20260922f").then(function(r) { return r.text(); }).then(function(h) {
+      el.innerHTML = h; caseKpLoaded = true;
+    }).catch(function() {
+      el.innerHTML = '<div style="padding:12px;color:var(--danger-6);font-size:12px">加载失败，再点一次按钮重试</div>';
+    });
+  }
+}
+
+function startCasePractice(topic) {
+  startQuiz("case", { questionType: "CASE", caseTopic: topic || null, count: topic ? 99 : 5, ignoreDomain: true });
+}
+
+function loadPriorityList() {
+  var el = document.getElementById("priority-list");
+  if (!el) return;
+  apiGet("/stats/priority").then(function(list) {
+    if (!list || !list.length) { el.innerHTML = "暂无数据"; return; }
+    var html = list.slice(0, 5).map(function(item, i) {
+      var color = item.recommend === "HIGH" ? "var(--danger-6)" : item.recommend === "MEDIUM" ? "var(--warning-6)" : "var(--text-2)";
+      var badge = item.recommend === "HIGH" ? "🔥" : item.recommend === "MEDIUM" ? "⭐" : "";
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border-1)">' +
+        '<span style="color:' + color + '">' + badge + ' ' + (i+1) + '. ' + item.name + '</span>' +
+        '<span style="font-size:11px;color:var(--text-3)">频率' + item.frequency + '% 掌握' + item.mastery + '%</span>' +
+        '</div>';
+    }).join("");
+    el.innerHTML = html;
+  }).catch(function() { el.innerHTML = "加载失败"; });
+}
+
+function loadWeakKpList() {
+  var el = document.getElementById("weak-kp-list");
+  if (!el) return;
+  apiGet("/stats/kp-mastery").then(function(list) {
+    if (!list || !list.length) { el.innerHTML = "暂无考点数据"; return; }
+    el.innerHTML = list.slice(0, 5).map(function(item, i) {
+      var rateText = item.correctRate == null ? '<span style="color:var(--text-muted)">未作答</span>'
+        : '<span style="color:' + (item.correctRate < 50 ? "var(--danger-6)" : "var(--warning-6)") + '">正确率 ' + item.correctRate + '%</span>';
+      var mastered = item.mastery >= 70;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 0;border-bottom:1px solid var(--border-1)">' +
+        '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escMem(item.domainName + ' · ' + item.kp) + '">' + (i+1) + '. ' + escMem(item.kp) + '</span>' +
+        '<span style="font-size:11px;white-space:nowrap">' + (mastered ? '<span style="color:var(--success-6)">已掌握</span>' : rateText) + ' <span style="color:var(--text-3)">' + item.questionCount + '题</span></span>' +
+        '</div>';
+    }).join("");
+  }).catch(function() { el.innerHTML = "加载失败"; });
 }
 
 function toggleTerritoryPanel() {
@@ -508,24 +609,32 @@ function renderQuizTerritories(territories, domains) {
   }).join("");
 }
 
-async function startQuiz(mode) {
+async function startQuiz(mode, opts) {
+  opts = opts || {};
   quizState.mode = mode;
-  quizState.domainId = parseInt(document.getElementById("quiz-domain-select").value) || null;
+  quizState.domainId = opts.ignoreDomain ? null : (parseInt(document.getElementById("quiz-domain-select").value) || null);
   quizState.combo = 0; quizState.maxCombo = 0; quizState.hp = 100;
   quizState.currentIdx = 0; quizState.answers = []; quizState.startTime = Date.now();
 
   try {
-    var body = { mode: mode, count: (mode === "timed" || mode === "daily") ? 20 : 30 };
-    if (quizState.domainId) body.domainId = quizState.domainId;
+    var body = { mode: mode === "supp" ? "random" : mode, count: opts.count || ((mode === "timed" || mode === "daily") ? 20 : (mode === "case" ? 5 : 30)) };
+    if (mode === "supp") { body.source = "CHEKO_SUPP"; quizState.domainId = null; }
+    else if (quizState.domainId) body.domainId = quizState.domainId;
+    if (opts.questionType) body.questionType = opts.questionType;
+    if (opts.caseTopic) body.caseTopic = opts.caseTopic;
     quizState.questions = await apiPost("/quiz/set", body);
-  } catch(e) { quizState.questions = await loadQuestions(quizState.domainId, 30); }
+  } catch(e) {
+    quizState.questions = (await loadQuestions(quizState.domainId, 30)).filter(function(q) {
+      return !opts.questionType || q.type === opts.questionType;
+    });
+  }
 
   if (!quizState.questions.length) { alert("该领域暂无题目"); return; }
 
   document.getElementById("quiz-mode-select").style.display = "none";
   document.getElementById("quiz-question-card").style.display = "";
-  var names = {practice:"自由练习",sequence:"顺序通关",random:"随机挑战",timed:"限时速答",intensive:"强化训练",endless:"无尽模式",daily:"每日挑战"};
-  document.getElementById("quiz-mode-label").textContent = names[mode];
+  var names = {practice:"自由练习",sequence:"顺序通关",random:"随机挑战",timed:"限时速答",intensive:"强化训练",endless:"无尽模式",daily:"每日挑战",smart:"智能推荐",case:"案例专项",supp:"架构补充"};
+  document.getElementById("quiz-mode-label").textContent = names[mode] + (opts.caseTopic ? " · " + opts.caseTopic : "");
   renderQuizSheet();
   showQuestion();
 }
@@ -624,7 +733,7 @@ function showQuestion() {
   var q = quizState.questions[i];
   if (!q) return;
   document.getElementById("quiz-q-num").textContent = "第 " + (i+1) + "/" + quizState.questions.length + " 题";
-  document.getElementById("quiz-q-source").textContent = q.source || q.examYear || "";
+  document.getElementById("quiz-q-source").textContent = (q.source === "CHEKO_SUPP" ? "系分补充" : (q.source || q.examYear || ""));
   var histEl = document.getElementById("quiz-q-history");
   if (histEl) {
     if (q.answered === true) {
@@ -637,15 +746,14 @@ function showQuestion() {
   updateFlagArea(q);
   var imgEl = document.getElementById("quiz-q-image");
   if (imgEl) {
-    var html = (typeof renderQuestionImageHtml === "function") ? renderQuestionImageHtml(q.imageUrl) : "";
+    var html = (typeof renderQuestionImageHtml === "function" && !(q.stem && String(q.stem).indexOf("【图:") >= 0)) ? renderQuestionImageHtml(q.imageUrl) : "";
     imgEl.innerHTML = html;
     imgEl.style.display = html ? "" : "none";
   }
   var stemEl = document.getElementById("quiz-q-stem");
-  stemEl.textContent = q.stem || "";
+  stemEl.innerHTML = renderStemHtml(q.stem);
   var qType = q.type || "MCQ";
   var isSubjective = qType === "CASE" || qType === "ESSAY";
-  stemEl.style.whiteSpace = isSubjective ? "pre-wrap" : "";
   document.getElementById("quiz-progress").textContent = (i+1) + "/" + quizState.questions.length;
 
   var answered = quizState.answers[i];
@@ -833,10 +941,14 @@ function renderSubjective(i, q, qType, answered) {
     '<span style="font-size:12px;color:var(--text-secondary)">作答后对照参考答案自评（AI 批改即将接入）</span></div>';
 
   if (qType === "CASE") {
+    html += '<div style="margin-bottom:12px;padding:8px 12px;border-radius:6px;background:var(--warning-1,#fef7e6);border:1px solid var(--warning-3,#fcd34d);font-size:12px;line-height:1.7;color:var(--warning-7,#92400e)">💡 技巧：先通读下方小问再回材料定位；作答分点 ①②③、一点一行；用教材术语（质量属性六要素、敏感点/权衡点、限界上下文等），忌口语化。</div>';
+  }
+
+  if (qType === "CASE") {
     // 小问列表 + 每问作答框
     parts.forEach(function(p, k) {
       html += '<div style="margin-bottom:12px;padding:12px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-surface,#fafafa)">' +
-        '<div style="font-weight:600;font-size:14px;margin-bottom:8px">问题' + (p.no || (k + 1)) + (p.score ? '（' + p.score + '分）' : '') + '：' + escMem(p.q || p.question || "") + '</div>' +
+        '<div style="font-weight:600;font-size:14px;margin-bottom:8px">问题' + (p.no || (k + 1)) + (p.score ? '（' + p.score + '分）' : '') + '：' + escInlineMd(p.q || p.question || "") + '</div>' +
         subjectiveAnswerBox(i, k, answered) +
         '</div>';
     });
@@ -845,7 +957,7 @@ function renderSubjective(i, q, qType, answered) {
     if (parts.length) {
       html += '<div style="padding:10px 12px;border-left:3px solid var(--primary-5);background:var(--primary-1);border-radius:6px;margin-bottom:12px">' +
         '<div style="font-weight:600;font-size:13px;margin-bottom:4px">写作要求</div>' +
-        parts.map(function(p) { return '<div style="font-size:12px;color:var(--text-2);margin:3px 0">· <strong>' + escMem(p.label || '') + '</strong> ' + escMem(p.req || p.requirement || String(p)) + '</div>'; }).join("") +
+        parts.map(function(p) { return '<div style="font-size:12px;color:var(--text-2);margin:3px 0">· <strong>' + escInlineMd(p.label || '') + '</strong> ' + escInlineMd(p.req || p.requirement || String(p)) + '</div>'; }).join("") +
         '</div>';
     }
     html += subjectiveAnswerBox(i, 0, answered, true);
@@ -881,13 +993,21 @@ function subjectiveReviewPanel(i, q) {
   var answerHtml = isMarkdownAnswer
     ? '<div class="material-body" style="font-size:13px;line-height:1.9;color:var(--text-primary)">' + simpleMarkdown(answerText) + '</div>'
     : '<div style="font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--text-primary)">' + escMem(answerText) + '</div>';
+  var analysisHtml = "";
+  if (q.analysis) {
+    var analysisText = String(q.analysis).replace(/\r/g, "");
+    var isMdAnalysis = /(^|\n)#{1,3}\s|(^|\n)\|.*\||\*\*.+?\*\*/.test(analysisText);
+    analysisHtml = isMdAnalysis
+      ? '<div class="material-body" style="font-size:12px;line-height:1.8;color:var(--text-2)">' + simpleMarkdown(analysisText) + '</div>'
+      : escMem(analysisText);
+  }
   var html = '<div style="margin-top:14px;padding:14px;border-radius:8px;border:1px solid var(--success-5,#34d399);background:var(--success-1,#f0fdf4)">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
     '<div style="font-weight:600;font-size:14px;color:var(--success-6,#059669)">参考答案要点</div>' +
     (grade ? '<span style="font-size:12px;padding:3px 12px;border-radius:12px;font-weight:600;background:' + (gradeColors[grade] || "") + '">自评：' + (gradeNames[grade] || grade) + '</span>' : '') +
     '</div>' +
     answerHtml +
-    (q.analysis ? '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border-2);font-size:12px;line-height:1.8;color:var(--text-2)"><strong>评分标准：</strong>' + escMem(q.analysis) + '</div>' : '') +
+    (q.analysis ? '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border-2);font-size:12px;line-height:1.8;color:var(--text-2)"><strong>评分标准：</strong>' + analysisHtml + '</div>' : '') +
     '</div>';
   return html;
 }
@@ -982,10 +1102,12 @@ function selectAnswer(idx, letter) {
   fb.style.display = "";
   fb.style.background = correct ? "var(--success-1)" : "var(--danger-2)";
   fb.style.color = correct ? "var(--success-6)" : "var(--danger-6)";
-  fb.innerHTML = correct ? ("正确！" + (q.analysis ? "<br><small>" + q.analysis + "</small>" : "")) : ("错误！正确答案是 <strong>" + q.answer + "</strong>" + (q.analysis ? "<br><small>" + q.analysis + "</small>" : ""));
+  fb.innerHTML = correct ? ("正确！" + (q.analysis ? "<br><small style='color:var(--text-2)'>" + fmtAnalysis(q.analysis) + "</small>" : "")) : ("错误！正确答案是 <strong>" + q.answer + "</strong>" + (q.analysis ? "<br><small style='color:var(--text-2)'>" + fmtAnalysis(q.analysis) + "</small>" : ""));
 
   if (!correct) {
-    fb.innerHTML += '<div id="ai-tutor-area" style="margin-top:10px"><button id="ai-tutor-btn" onclick="requestAiTutor(' + q.id + ',\'' + letter + '\')" style="padding:8px 16px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">🤖 AI 辅导</button></div>';
+    fb.innerHTML += '<div id="ai-tutor-area" style="margin-top:10px"><button id="ai-tutor-btn" onclick="requestAiTutor(' + q.id + ',\'' + letter + '\')" style="padding:8px 16px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">🤖 AI 辅导</button>' +
+      '<button id="variants-btn" onclick="showVariants(' + q.id + ')" style="margin-left:8px;padding:8px 16px;background:#fff;color:var(--primary-6);border:1.5px solid var(--primary-5);border-radius:8px;cursor:pointer;font-weight:600">🎯 举一反三</button></div>' +
+      '<div id="variants-area" style="margin-top:10px"></div>';
   }
 
   document.getElementById("quiz-next-btn").style.display = "";
@@ -1003,6 +1125,11 @@ function selectAnswer(idx, letter) {
         quizState.answerRecordIds = quizState.answerRecordIds || {};
         quizState.answerRecordIds[idx] = res.answerRecordId;
       }
+      if (res && res.meta && res.meta.knowledgePoint) {
+        var vb = document.getElementById("variants-btn");
+        if (vb) vb.textContent = "🎯 举一反三 · " + (res.meta.knowledgePoint || "") + (res.meta.variantCount > 0 ? "（" + res.meta.variantCount + " 道变式）" : "（无变式）");
+        if (vb && !res.meta.variantCount) vb.disabled = true;
+      }
       if (res && res.memory) {
         if (res.memory.state === "mastered") {
           var mc = document.getElementById("mem-mastered-" + q.id);
@@ -1011,6 +1138,85 @@ function selectAnswer(idx, letter) {
       }
     }).catch(function(e) { console.warn("answer submit failed", e); });
   }
+}
+
+/* 解析轻量 Markdown 渲染：**加粗**、换行；先转义防注入 */
+function fmtAnalysis(t) {
+  if (!t) return "";
+  var s = escMem(t);
+  s = s.replace(/(^|\n)\s*[-*]\s+/g, "$1• ");
+  s = s.replace(/`([^`]+)`/g, "$1");
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\n/g, "<br>");
+  return s;
+}
+
+/* 题干渲染:含 markdown 结构(加粗/表格/列表/代码/换行)走 simpleMarkdown,纯文本走转义 */
+function renderStemHtml(t) {
+  if (!t) return "";
+  t = String(t).replace(/\r/g, "");
+  if (/(\*\*|`|\n|^\s*#{1,3}\s|^\s*[-*]\s|^\s*\d+\.\s|\|.*\|)/m.test(t)) return mdInlineImages(simpleMarkdown(t));
+  return mdInlineImages(escMem(t));
+}
+
+/** 行内轻量 Markdown：转义后仅渲染加粗/行内代码（案例小问、写作要求用） */
+/* 题干/小问中的【图: url】占位符就地还原为图片（导入时题图下载到 /uploads/ 并替换为占位符） */
+function mdInlineImages(html) {
+  if (!html || html.indexOf("【图") < 0) return html;
+  return html.replace(/【图[:\uff1a]\s*([^\u3011\s]+)\u3011/g, function(m, url) {
+    var safe = safeImageUrl(url);
+    if (!safe) return m;
+    return '<div style="text-align:center;margin:10px 0"><img src="' + safe + '" alt="题图" loading="lazy" style="max-width:100%;max-height:440px;border-radius:8px;border:1px solid var(--border-2);background:var(--bg-surface-low);object-fit:contain" onerror="this.parentNode.style.display=\'none\'"></div>';
+  });
+}
+
+function escInlineMd(t) {
+  return mdInlineImages(escMem(t == null ? "" : String(t).replace(/\r/g, ""))
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>"));
+}
+
+/* 举一反三：加载同考点变式题（只读学习视图，不干扰当前答题流程） */
+async function showVariants(questionId) {
+  var btn = document.getElementById("variants-btn");
+  var area = document.getElementById("variants-area");
+  if (btn) { btn.disabled = true; btn.textContent = "加载中..."; }
+  if (!area) return;
+  try {
+    var vs = await apiGet("/quiz/variants/" + questionId + "?count=3");
+    if (!vs || !vs.length) {
+      area.innerHTML = '<div style="padding:10px;background:var(--bg-card);border:1px solid var(--border-2);border-radius:8px;color:var(--text-muted);font-size:13px">该考点暂无其他变式题，先掌握好这一道吧</div>';
+      return;
+    }
+    area.innerHTML = '<div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px">同考点变式题（点击展开答案与解析）：</div>' +
+      vs.map(function(v, i) {
+        return '<div style="margin-bottom:8px;background:var(--bg-card);border:1px solid var(--border-2);border-radius:8px;overflow:hidden">' +
+          '<div onclick="toggleVariant(' + i + ')" style="padding:10px 12px;cursor:pointer;font-size:13px;color:var(--text-1);line-height:1.6"><span style="color:var(--primary-6);font-weight:700;margin-right:6px">' + (i + 1) + '.</span>' + mdInlineImages(escMem(v.stem || "")) + '</div>' +
+          '<div id="variant-detail-' + i + '" style="display:none;padding:0 12px 10px;border-top:1px dashed var(--border-2)">' +
+            '<div style="padding:8px 0;font-size:13px;color:var(--text-2)">' + renderVariantOptions(v) + '</div>' +
+            '<div style="font-size:13px"><span style="font-weight:700;color:var(--success-6)">答案：' + escMem(v.answer || "") + '</span></div>' +
+            '<div style="font-size:12px;color:var(--text-2);line-height:1.7;margin-top:4px">' + fmtAnalysis(v.analysis || "暂无解析") + '</div>' +
+          '</div></div>';
+      }).join("");
+    if (btn) { btn.textContent = "🎯 已展开变式"; }
+  } catch (e) {
+    area.innerHTML = '<div style="padding:10px;background:var(--danger-2);border-radius:8px;color:var(--danger-6);font-size:13px">变式题加载失败：' + escMem(e.message) + '</div>';
+    if (btn) { btn.disabled = false; btn.textContent = "🎯 举一反三"; }
+  }
+}
+
+function renderVariantOptions(v) {
+  try {
+    var opts = typeof v.options === "string" ? JSON.parse(v.options) : (v.options || []);
+    if (!opts.length) return "";
+    var letters = ["A", "B", "C", "D", "E", "F"];
+    return opts.map(function(o, i) { return letters[i] + ". " + escMem(String(o)); }).join("&nbsp;&nbsp;&nbsp;");
+  } catch (e) { return ""; }
+}
+
+function toggleVariant(i) {
+  var el = document.getElementById("variant-detail-" + i);
+  if (el) el.style.display = el.style.display === "none" ? "" : "none";
 }
 
 async function requestAiTutor(questionId, userAnswer) {
@@ -1052,33 +1258,46 @@ function formatTutorCard(tutor) {
   html += '</div>';
   // 内容：分段显示
   var explanation = tutor.explanation || "暂无解析";
-  html += '<div style="font-size:14px;line-height:1.85;color:var(--text-primary)">' + formatTutorExplanation(explanation) + '</div>';
+  html += '<div style="font-size:14px;line-height:1.85;color:var(--text-1)">' + formatTutorExplanation(explanation) + '</div>';
   html += '</div>';
   return html;
 }
 
 function formatTutorExplanation(text) {
   var safe = escMem(text);
-  // 按换行符分段
-  var lines = safe.split(/\n+/);
-  // 如果只有一段且较长，按关键连接词进一步分段
-  if (lines.length === 1 && lines[0].length > 80) {
-    lines = [lines[0]];
-    var segs = lines[0].split(/(?=首先|其次|然后|最后|另外|此外|因此|建议[^将]|结合你|注意)/);
-    if (segs.length > 1) lines = segs;
+  // 在结构标记前断段：错因分析(首段) | 核心知识点 | 记住口诀 | 避免再犯 | 易混淆 | 小结
+  var marked = safe.replace(/(核心知识点|记住口诀|避免再犯|易混淆|小结|知识拓展|拓展)/g, "\n$1");
+  var blocks = marked.split(/\n+/).map(function(s) { return s.trim(); }).filter(Boolean);
+  // 若断段后仍只有一段长文本,按连接词兜底分段
+  if (blocks.length === 1 && blocks[0].length > 100) {
+    blocks = blocks[0].split(/(?=首先|其次|然后|最后|另外|此外|因此|建议[^将]|结合你|注意)/).filter(Boolean);
   }
   var html = '';
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim();
-    if (!line) continue;
-    // 识别序号开头的段落（1. 2. 首先 其次 最后 等）
-    if (/^(首先|其次|然后|最后|另外|此外|因此|建议|注意)/.test(line) || /^\d+[.、）)]/.test(line)) {
-      html += '<p style="margin:10px 0 6px;padding-left:10px;border-left:3px solid var(--primary-4)">' + highlightKeywords(line) + '</p>';
-    } else {
-      html += '<p style="margin:8px 0">' + highlightKeywords(line) + '</p>';
+  blocks.forEach(function(raw, idx) {
+    var bg = "transparent", bar = "var(--border-3)", pad = "4px 12px";
+    var isLabeled = idx > 0 && /^(核心知识点|记住口诀|避免再犯|易混淆|小结|知识拓展|拓展)/.test(raw);
+    if (isLabeled) {
+      bg = "var(--primary-1)"; bar = "var(--primary-5)"; pad = "8px 12px";
+      var body = raw;
+      if (/^记住口诀/.test(raw)) { bg = "var(--warning-1)"; bar = "var(--warning-5)"; }
+      else if (/^(避免再犯|小结)/.test(raw)) { bg = "var(--success-1)"; bar = "var(--success-5)"; }
+      // 标记词加粗显示
+      raw = raw.replace(/^(\S{2,8}?)(?=[：:是]|$)/, "<strong>$1</strong>");
     }
-  }
-  return html || safe;
+    var content = highlightKeywords(enumBreaks(mdBold(raw)));
+    html += '<div style="margin:' + (isLabeled ? '10px' : '6px') + ' 0;padding:' + pad + ';background:' + bg + ';border-left:3px solid ' + bar + ';border-radius:6px;font-size:13.5px;line-height:1.95;color:var(--text-1)">' + content + '</div>';
+  });
+  return html || escMem(text);
+}
+
+/* ①②③ 编号断行成缩进列表 */
+function enumBreaks(t) {
+  return t.replace(/([①②③④⑤⑥⑦⑧⑨⑩])/g, "<br>&nbsp;&nbsp;&nbsp;$1");
+}
+
+/* **加粗** Markdown */
+function mdBold(t) {
+  return t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
 
 function highlightKeywords(text) {
@@ -1259,7 +1478,7 @@ function renderMemoryCard() {
     backHtml = '<div style="text-align:left;width:100%">' +
       '<div style="margin-bottom:16px;text-align:center"><span style="font-size:16px;padding:6px 20px;border-radius:10px;background:var(--success-5);color:#fff;font-weight:700">✅ 正确答案: ' + escMem(card.questionAnswer || "") + '</span></div>' +
       '<div style="font-size:13px;color:var(--text-3);margin-bottom:8px;font-weight:600">📝 知识点解析</div>' +
-      '<div style="font-size:14px;line-height:1.8;background:var(--bg-card);padding:12px;border-radius:8px;border:1px solid var(--border-1)">' + escMem(card.questionAnalysis || "暂无解析") + '</div>' +
+      '<div style="font-size:14px;line-height:1.8;background:var(--bg-card);padding:12px;border-radius:8px;border:1px solid var(--border-1)">' + fmtAnalysis(card.questionAnalysis || "暂无解析") + '</div>' +
     '</div>';
   } else {
     cardTypeLabel = "自定义知识点";
@@ -1380,13 +1599,14 @@ function addMemoryCard() {
 }
 
 /* ===== Simulation ===== */
-var simState = { phase:"idle", sections:[], currentSection:0, answers:{}, currentIdx:0, startTime:0, durationSec:7200, timer:null, sectionTimers:{} };
+var simState = { phase:"idle", simId:null, sections:[], currentSection:0, answers:{}, currentIdx:0, startTime:0, timer:null, sectionRemaining:{}, sectionResults:{}, submitting:false };
 
 async function renderSimulation(c) {
   var sims = [];
   try { sims = await apiGet("/simulations"); } catch(e) {}
 
   if (simState.phase === "exam") { renderSimExam(c); return; }
+  if (simState.phase === "sectionResult") { renderSimSectionResult(c); return; }
   if (simState.phase === "result") { renderSimResult(c); return; }
 
   simState.phase = "idle";
@@ -1421,12 +1641,17 @@ async function startSimulation() {
   c.innerHTML = '<div class="state-loading"><div class="spinner"></div><p>正在抽取考题...</p></div>';
   try {
     var data = await apiPost("/simulations/start", {});
+    simState.simId = data.simulationId;
     simState.sections = data.sections || [];
     simState.answers = {};
+    simState.sectionResults = {};
+    simState.sectionRemaining = {};
+    simState.submitting = false;
     simState.currentSection = 0;
     simState.currentIdx = 0;
-    simState.startTime = Date.now();
-    simState.durationSec = simState.sections.reduce(function(sum, s) { return sum + s.durationMinutes * 60; }, 0);
+    simState.sections.forEach(function(s) {
+      simState.sectionRemaining[s.key] = s.durationMinutes * 60;
+    });
     simState.phase = "exam";
     renderSimExam(c);
     startSimTimer();
@@ -1441,8 +1666,9 @@ function renderSimExam(c) {
   if (!sec) return;
   var tabsHtml = simState.sections.map(function(s, i) {
     var active = i === simState.currentSection;
-    var answered = countSectionAnswered(s);
-    return '<button onclick="switchSection(' + i + ')" style="padding:8px 16px;border:' + (active?"2px solid var(--primary-5)":"1px solid var(--border-2)") + ';background:' + (active?"var(--primary-3)":"var(--bg-card)") + ';border-radius:8px;cursor:pointer;font-weight:' + (active?"700":"500") + ';font-size:13px">' + s.name + ' (' + answered + '/' + s.totalQuestions + ')</button>';
+    var submitted = !!simState.sectionResults[s.key];
+    var label = submitted ? s.name + " ✓已交卷" : s.name + " (" + countSectionAnswered(s) + "/" + s.totalQuestions + ")";
+    return '<button onclick="switchSection(' + i + ')" style="padding:8px 16px;border:' + (active?"2px solid var(--primary-5)":"1px solid var(--border-2)") + ';background:' + (active?"var(--primary-3)":"var(--bg-card)") + ';border-radius:8px;cursor:pointer;font-weight:' + (active?"700":"500") + ';font-size:13px;' + (submitted && !active ? "opacity:.65" : "") + '">' + label + '</button>';
   }).join("");
 
   c.innerHTML = '<div style="display:grid;grid-template-columns:1fr 240px;gap:20px;min-height:calc(100vh - 160px)">' +
@@ -1451,15 +1677,15 @@ function renderSimExam(c) {
         '<div class="content-card-body" style="display:flex;justify-content:space-between;align-items:center">' +
           '<div><div style="font-size:18px;font-weight:600">' + sec.name + '</div>' +
           '<div style="font-size:12px;color:var(--hud-text-dim)">第 ' + (simState.currentIdx+1) + ' / ' + sec.totalQuestions + ' 题 · ' + sec.questionType + ' · ' + sec.scoringRule + '</div></div>' +
-          '<div style="text-align:right"><div id="sim-timer" style="font-size:28px;font-weight:700;font-family:monospace">' + formatTime(simState.durationSec) + '</div>' +
-          '<div style="font-size:12px;color:var(--hud-text-dim)">总剩余时间</div></div>' +
+          '<div style="text-align:right"><div id="sim-timer" style="font-size:28px;font-weight:700;font-family:monospace">' + formatTime(simState.sectionRemaining[sec.key] || 0) + '</div>' +
+          '<div style="font-size:12px;color:var(--hud-text-dim)">' + sec.name + '剩余时间</div></div>' +
         '</div>' +
       '</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap">' + tabsHtml + '</div>' +
       '<div class="content-card" id="sim-question-card"><div class="content-card-body" id="sim-question-body"></div></div>' +
       '<div style="display:flex;gap:10px;justify-content:space-between">' +
         '<button id="sim-prev-btn" onclick="simPrev()" style="padding:10px 24px;background:var(--bg-surface-high);border:1px solid var(--border-2);border-radius:8px;cursor:pointer;font-weight:600">上一题</button>' +
-        '<button onclick="confirmSubmitSim()" style="padding:10px 24px;background:var(--danger-5);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">交卷</button>' +
+        '<button onclick="confirmSubmitSection()" style="padding:10px 24px;background:var(--danger-5);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">交卷（' + sec.name + '）</button>' +
         '<button id="sim-next-btn" onclick="simNext()" style="padding:10px 24px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">下一题</button>' +
       '</div>' +
     '</div>' +
@@ -1486,12 +1712,18 @@ function showSimQuestion() {
 
   if (sec.key === "essay") {
     var userText = simState.answers[answerKey] || "";
-    contentHtml = '<div style="font-size:16px;line-height:1.8;margin-bottom:20px;white-space:pre-wrap">' + escMem(q.stem) + '</div>' +
+    contentHtml = '<div style="font-size:16px;line-height:1.8;margin-bottom:20px">' + renderStemHtml(q.stem) + '</div>' +
       '<textarea id="essay-textarea" oninput="updateEssayAnswer(' + q.id + ', this.value)" placeholder="请在此处撰写论文..." style="width:100%;min-height:400px;padding:16px;border:1.5px solid var(--border-2);border-radius:8px;font-size:14px;line-height:1.8;resize:vertical;font-family:inherit;background:var(--bg-card);color:var(--text-primary)">' + escMem(userText) + '</textarea>' +
       '<div style="margin-top:8px;display:flex;justify-content:space-between;font-size:12px;color:var(--text-2)"><span>字数: <span id="essay-word-count">' + userText.length + '</span></span><span>建议 2000-3000 字</span></div>' +
       '<div style="margin-top:12px;padding:12px;background:var(--bg-surface-high);border-radius:8px"><div style="font-weight:600;margin-bottom:6px;font-size:13px">自评打分</div>' +
       '<div style="display:flex;align-items:center;gap:12px"><input type="range" id="essay-self-score" min="0" max="75" value="' + (simState.answers[answerKey + "_score"] || 0) + '" oninput="updateEssayScore(' + q.id + ', this.value)" style="flex:1"><span id="essay-score-display" style="font-weight:700;font-size:18px;color:var(--primary-5)">' + (simState.answers[answerKey + "_score"] || 0) + '</span><span class="text-muted">/75</span></div>' +
       '<div style="margin-top:8px;font-size:12px;color:var(--text-2)">交卷后可查看评分标准进行对照</div></div>';
+  } else if (sec.key === "case") {
+    contentHtml = '<div style="display:flex;gap:8px;margin-bottom:12px">' +
+      '<span style="padding:2px 8px;border-radius:4px;background:var(--primary-5);color:#fff;font-size:12px">第' + (simState.currentIdx+1) + '题</span>' +
+      '</div>' +
+      '<div style="font-size:16px;line-height:1.7;margin-bottom:20px">' + renderStemHtml(q.stem) + '</div>' +
+      '<div id="sim-case-body">' + renderSimCaseBody(sec.key, q, answerKey) + '</div>';
   } else {
     var optionsHtml = "";
     if (q.optionsJson) {
@@ -1510,7 +1742,7 @@ function showSimQuestion() {
       '<span style="padding:2px 8px;border-radius:4px;background:var(--primary-5);color:#fff;font-size:12px">第' + (simState.currentIdx+1) + '题</span>' +
       (q.examYear ? '<span style="padding:2px 8px;border-radius:4px;background:var(--bg-surface-high);font-size:12px">' + q.examYear + '年</span>' : '') +
       '</div>' +
-      '<div style="font-size:16px;line-height:1.7;margin-bottom:20px;white-space:pre-wrap">' + escMem(q.stem) + '</div>' +
+      '<div style="font-size:16px;line-height:1.7;margin-bottom:20px">' + renderStemHtml(q.stem) + '</div>' +
       '<div style="display:flex;flex-direction:column;gap:10px">' + optionsHtml + '</div>';
   }
 
@@ -1530,6 +1762,109 @@ function selectSimAnswer(letter) {
   var sec = simState.sections[simState.currentSection];
   var q = sec.questions[simState.currentIdx];
   simState.answers[sec.key + "_" + q.id] = letter;
+  showSimQuestion();
+}
+
+/* ===== 模拟考·案例分析：小问作答 + 对照参考答案自评（与刷题页 renderSubjective 同一套交互） ===== */
+var SIM_CASE_GRADE_NAMES = { SELF_PASS: "✓ 完全掌握", SELF_PARTIAL: "◐ 部分掌握", SELF_FAIL: "✗ 未掌握" };
+var SIM_CASE_GRADE_COLORS = { SELF_PASS: "var(--success-2);color:var(--success-7)", SELF_PARTIAL: "var(--warning-1,#fef7e6);color:var(--warning-6,#b45309)", SELF_FAIL: "var(--danger-2);color:var(--danger-7)" };
+var SIM_CASE_GRADE_SCORES = { SELF_PASS: 15, SELF_PARTIAL: 9, SELF_FAIL: 3 };
+
+function simCaseSubQuestions(q) {
+  var parts = [];
+  try { parts = typeof q.optionsJson === "string" ? JSON.parse(q.optionsJson) : (q.optionsJson || []); } catch(e) {}
+  return Array.isArray(parts) ? parts : [];
+}
+
+function renderSimCaseBody(sectionKey, q, answerKey) {
+  var grade = simState.answers[answerKey];
+  var parts = simCaseSubQuestions(q);
+
+  // 防御：若题库存的是字母选项（字符串数组），退回选择题渲染
+  if (parts.length && typeof parts[0] === "string") {
+    return '<div style="display:flex;flex-direction:column;gap:10px">' + parts.map(function(opt, oi) {
+      var letter = String.fromCharCode(65 + oi);
+      var selected = simState.answers[answerKey] === letter ? "var(--primary-3);border-color:var(--primary-5)" : "var(--bg-card)";
+      return '<div onclick="selectSimAnswer(\'' + letter + '\')" style="padding:12px;border:1.5px solid var(--border-2);border-radius:8px;cursor:pointer;background:' + selected + ';transition:all .15s"><span style="font-weight:600;margin-right:8px">' + letter + '.</span><span>' + escMem(opt) + '</span></div>';
+    }).join("") + '</div>';
+  }
+
+  var html = '<div style="margin-bottom:12px;padding:8px 12px;border-radius:6px;background:var(--warning-1,#fef7e6);border:1px solid var(--warning-3,#fcd34d);font-size:12px;line-height:1.7;color:var(--warning-7,#92400e)">💡 案例分析为主观题：逐问作答后对照参考答案自评（完全掌握 15 分 / 部分掌握 9 分 / 未掌握 3 分），再进入下一题。</div>';
+
+  parts.forEach(function(p, k) {
+    var text = simState.answers[answerKey + "_sub_" + k] || "";
+    html += '<div style="margin-bottom:12px;padding:12px;border:1px solid var(--border-2);border-radius:8px;background:var(--bg-surface,#fafafa)">' +
+      '<div style="font-weight:600;font-size:14px;margin-bottom:8px">问题' + (p.no || (k + 1)) + (p.score ? '（' + p.score + '分）' : '') + '：' + escInlineMd(p.q || p.question || "") + '</div>' +
+      '<textarea id="sim-case-sub-' + k + '" oninput="simCaseInput(\'' + answerKey + '\',' + k + ', this.value)" placeholder="写下你的答案要点..." style="width:100%;min-height:90px;padding:10px;border:1px solid var(--border-2);border-radius:6px;font-size:13px;line-height:1.7;resize:vertical;box-sizing:border-box;font-family:inherit;background:var(--bg-card);color:var(--text-primary)">' + escMem(text) + '</textarea>' +
+      '</div>';
+  });
+
+  if (grade) {
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:' + (SIM_CASE_GRADE_COLORS[grade] || "var(--bg-surface-high)") + ';font-weight:600;font-size:13px">' +
+      '自评：' + (SIM_CASE_GRADE_NAMES[grade] || grade) + '（本题 ' + (SIM_CASE_GRADE_SCORES[grade] || 0) + ' / 15 分）' +
+      '<button onclick="simCaseRegrade(\'' + answerKey + '\')" style="margin-left:auto;padding:4px 12px;background:var(--bg-card);border:1px solid var(--border-2);border-radius:6px;cursor:pointer;font-size:12px">重新自评</button></div>';
+  } else {
+    html += '<button onclick="simCaseReveal(\'' + answerKey + '\',' + q.id + ')" style="padding:10px 24px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">完成本题，对照参考答案自评</button>';
+  }
+  return html;
+}
+
+function simCaseInput(answerKey, k, val) {
+  simState.answers[answerKey + "_sub_" + k] = val;
+}
+
+function simCaseReferenceHtml(q) {
+  var answerText = q.answer || "暂无参考答案";
+  var isMd = /(^|\n)#{1,3}\s|(^|\n)\|.*\||\*\*.+?\*\*/.test(answerText);
+  return isMd
+    ? '<div class="material-body" style="font-size:13px;line-height:1.9;color:var(--text-primary)">' + simpleMarkdown(answerText) + '</div>'
+    : '<div style="font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--text-primary)">' + escMem(answerText) + '</div>';
+}
+
+/** 评分标准/解析：含表格等 markdown 结构走 simpleMarkdown，纯文本走转义 */
+function simCaseAnalysisHtml(analysis) {
+  if (!analysis) return "";
+  var t = String(analysis).replace(/\r/g, "");
+  var isMd = /(^|\n)#{1,3}\s|(^|\n)\|.*\||\*\*.+?\*\*/.test(t);
+  return isMd
+    ? '<div class="material-body" style="margin-top:8px;font-size:12px;line-height:1.8;color:var(--text-2)"><strong>评分标准：</strong>' + simpleMarkdown(t) + '</div>'
+    : '<div style="margin-top:8px;font-size:12px;line-height:1.8;color:var(--text-2)"><strong>评分标准：</strong>' + fmtAnalysis(t) + '</div>';
+}
+
+function simCaseReveal(answerKey, qId) {
+  var sec = simState.sections[simState.currentSection];
+  var q = sec && sec.questions[simState.currentIdx];
+  if (!q || q.id !== qId) return;
+  var parts = simCaseSubQuestions(q);
+  for (var k = 0; k < parts.length; k++) {
+    var ta = document.getElementById("sim-case-sub-" + k);
+    if (ta) simState.answers[answerKey + "_sub_" + k] = ta.value;
+  }
+  var area = document.getElementById("sim-case-body");
+  if (!area) return;
+  var html = '<div style="margin-top:4px;padding:14px;border-radius:8px;border:1px solid var(--success-5,#34d399);background:var(--success-1,#f0fdf4)">' +
+    '<div style="font-weight:600;font-size:14px;color:var(--success-6,#059669);margin-bottom:8px">参考答案要点</div>' +
+    simCaseReferenceHtml(q) +
+    simCaseAnalysisHtml(q.analysis) +
+    '</div>' +
+    '<div style="margin-top:12px;padding:12px;border-radius:8px;background:var(--bg-surface-high,#f5f5f5);border:1px solid var(--border-2)">' +
+    '<div style="font-size:13px;font-weight:600;margin-bottom:8px">对照参考答案，本题自评（满分 15 分）：</div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+    '<button onclick="simCaseGrade(\'' + answerKey + '\',\'SELF_PASS\')" style="padding:8px 20px;background:var(--success-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">✓ 完全掌握（15分）</button>' +
+    '<button onclick="simCaseGrade(\'' + answerKey + '\',\'SELF_PARTIAL\')" style="padding:8px 20px;background:var(--warning-5,#f59e0b);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">◐ 部分掌握（9分）</button>' +
+    '<button onclick="simCaseGrade(\'' + answerKey + '\',\'SELF_FAIL\')" style="padding:8px 20px;background:var(--danger-5);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">✗ 未掌握（3分）</button>' +
+    '</div></div>';
+  area.innerHTML = html;
+  area.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function simCaseGrade(answerKey, grade) {
+  simState.answers[answerKey] = grade;
+  showSimQuestion();
+}
+
+function simCaseRegrade(answerKey) {
+  delete simState.answers[answerKey];
   showSimQuestion();
 }
 
@@ -1569,9 +1904,15 @@ function simNext() {
 }
 
 function switchSection(idx) {
+  var sec = simState.sections[idx];
+  if (!sec) return;
   simState.currentSection = idx;
   simState.currentIdx = 0;
-  renderSimExam(content());
+  if (simState.sectionResults[sec.key]) {
+    renderSimSectionResult(content());
+  } else {
+    renderSimExam(content());
+  }
 }
 
 function simJump(idx) {
@@ -1614,69 +1955,200 @@ function formatTime(sec) {
 function startSimTimer() {
   if (simState.timer) clearInterval(simState.timer);
   simState.timer = setInterval(function() {
-    var elapsed = Math.floor((Date.now() - simState.startTime) / 1000);
-    var remaining = simState.durationSec - elapsed;
-    if (remaining <= 0) {
-      clearInterval(simState.timer);
-      simState.timer = null;
-      alert("时间到，自动交卷！");
-      submitSim();
-      return;
-    }
+    var sec = simState.sections[simState.currentSection];
+    if (!sec || simState.sectionResults[sec.key]) return; // 已交卷科目不走时
+    var rem = (simState.sectionRemaining[sec.key] || 0) - 1;
+    simState.sectionRemaining[sec.key] = rem;
     var el = document.getElementById("sim-timer");
     if (el) {
-      el.textContent = formatTime(remaining);
-      if (remaining < 300) el.style.color = "#ef4444";
+      el.textContent = formatTime(Math.max(0, rem));
+      if (rem < 300) el.style.color = "#ef4444";
+    }
+    if (rem <= 0) {
+      clearInterval(simState.timer);
+      simState.timer = null;
+      alert(sec.name + " 时间到，本科自动交卷！");
+      submitSectionNow(true);
     }
   }, 1000);
 }
 
-function confirmSubmitSim() {
-  var totalAnswered = 0;
-  var totalQs = 0;
-  simState.sections.forEach(function(sec) {
-    totalQs += sec.totalQuestions;
-    sec.questions.forEach(function(q) {
-      if (simState.answers[sec.key + "_" + q.id]) totalAnswered++;
-    });
-  });
-  var msg = "已答 " + totalAnswered + "/" + totalQs + " 题";
-  if (totalQs - totalAnswered > 0) msg += "，还有 " + (totalQs - totalAnswered) + " 题未作答";
-  msg += "\n\n确定交卷吗？";
-  if (confirm(msg)) submitSim();
+function confirmSubmitSection() {
+  var sec = simState.sections[simState.currentSection];
+  if (!sec || simState.sectionResults[sec.key]) return;
+  var answered = countSectionAnswered(sec);
+  var unanswered = sec.totalQuestions - answered;
+  var msg = "确定交卷【" + sec.name + "】吗？\n已答 " + answered + "/" + sec.totalQuestions;
+  if (unanswered > 0) msg += "，还有 " + unanswered + " 题未作答";
+  msg += "\n\n交卷后立即出分并展示错题分析，本科答案不能再修改。";
+  if (confirm(msg)) submitSectionNow(false);
 }
 
-async function submitSim() {
-  if (simState.timer) { clearInterval(simState.timer); simState.timer = null; }
-  simState.phase = "submitting";
+async function submitSectionNow(auto) {
+  var sec = simState.sections[simState.currentSection];
+  if (!sec || simState.sectionResults[sec.key] || simState.submitting) return;
+  simState.submitting = true;
   var c = content();
-  c.innerHTML = '<div class="state-loading"><div class="spinner"></div><p>正在阅卷评分...</p></div>';
+  if (!auto) c.innerHTML = '<div class="state-loading"><div class="spinner"></div><p>正在批改' + sec.name + '...</p></div>';
 
   try {
-    var body = {};
-    if (!simState.sections || !simState.sections.length) {
-      throw new Error("没有考试数据，请重新开始");
-    }
-    simState.sections.forEach(function(sec) {
-      var answers = (sec.questions || []).map(function(q) {
-        var ans = { questionId: q.id, userAnswer: simState.answers[sec.key + "_" + q.id] || "" };
-        if (sec.key === "essay") {
-          ans.selfScore = simState.answers[sec.key + "_" + q.id + "_score"] || 0;
+    var answers = (sec.questions || []).map(function(q) {
+      var answerKey = sec.key + "_" + q.id;
+      var ans = { questionId: q.id, userAnswer: simState.answers[answerKey] || "" };
+      if (sec.key === "essay") {
+        ans.selfScore = simState.answers[answerKey + "_score"] || 0;
+      }
+      if (sec.key === "case") {
+        // 案例主观题：userAnswer 汇总各小问作答文本，selfGrade 为三档自评
+        var parts = simCaseSubQuestions(q);
+        var texts = [];
+        for (var k = 0; k < parts.length; k++) {
+          texts.push("问题" + (parts[k].no || (k + 1)) + "：" + (simState.answers[answerKey + "_sub_" + k] || "（未作答）"));
         }
-        return ans;
-      });
-      body[sec.key] = answers;
+        ans.userAnswer = texts.join("\n\n");
+        ans.selfGrade = simState.answers[answerKey] || "";
+      }
+      return ans;
     });
-
-    var result = await apiPost("/simulations/submit", body);
-    simState.result = result;
-    simState.phase = "result";
-    renderSimResult(c);
+    var resp = await apiPost("/simulations/" + simState.simId + "/submit-section", { section: sec.key, answers: answers });
+    simState.sectionResults[sec.key] = resp;
+    simState.submitting = false;
+    simState.phase = "sectionResult";
+    renderSimSectionResult(c);
   } catch(e) {
-    console.error("submitSim error:", e);
-    simState.phase = "idle";
+    simState.submitting = false;
+    console.error("submitSection error:", e);
     c.innerHTML = '<div class="state-error"><p>交卷失败: ' + (e.message || e) + '</p><button onclick="navigate(\'simulation\')" style="margin-top:12px;padding:8px 20px;background:var(--primary-6);color:#fff;border:none;border-radius:6px;cursor:pointer">返回</button></div>';
   }
+}
+
+/* 单科交卷结果：得分 + 错题分析 */
+function renderSimSectionResult(c) {
+  var sec = simState.sections[simState.currentSection];
+  var r = sec && simState.sectionResults[sec.key];
+  if (!sec || !r) { renderSimExam(c); return; }
+  var d = r.scoreDetail || {};
+  var feedback = r.feedback || [];
+  var color = d.passed ? "var(--success-5)" : "var(--danger-5)";
+
+  var html = '<div class="page-title">' + sec.name + ' · 交卷结果</div>' +
+    '<div class="stack" style="margin-top:16px">';
+
+  html += '<div class="content-card"><div class="content-card-body" style="display:flex;justify-content:space-around;text-align:center;flex-wrap:wrap;gap:12px">' +
+    '<div><div style="font-size:40px;font-weight:700;color:' + color + '">' + (d.score || 0) + '</div><div style="font-size:12px;color:var(--text-muted)">满分 ' + (d.fullScore || 75) + '</div></div>' +
+    '<div style="align-self:center"><div style="font-size:16px;font-weight:700;color:' + color + '">' + (d.passed ? "✓ 通过" : "✗ 未过") + '</div><div style="font-size:12px;color:var(--text-muted)">及格线 ' + (d.passThreshold || 45) + '</div></div>' +
+    (sec.key === "essay"
+      ? '<div style="align-self:center"><div style="font-size:14px;font-weight:600">自评科目</div><div style="font-size:12px;color:var(--text-muted)">对照评分标准打分</div></div>'
+      : '<div style="align-self:center"><div style="font-size:20px;font-weight:700">' + (d.answeredCount || 0) + '/' + (d.totalQuestions || sec.totalQuestions) + '</div><div style="font-size:12px;color:var(--text-muted)">已作答题数</div></div>') +
+    '</div></div>';
+
+  if (sec.key === "essay") {
+    html += '<div class="content-card"><div class="content-card-header"><div class="content-card-title">论文详情</div></div><div class="content-card-body">' +
+      feedback.map(function(fb) {
+        return '<div style="padding:16px;margin-bottom:12px;background:var(--bg-surface-high);border-radius:8px;border-left:3px solid var(--primary-5)">' +
+          '<div style="margin-bottom:12px;line-height:1.6;font-size:14px;white-space:pre-wrap">' + mdInlineImages(escMem(fb.stem)) + '</div>' +
+          '<div style="margin-bottom:12px"><div style="font-size:13px;font-weight:600;margin-bottom:4px">你的答卷:</div><div style="padding:12px;background:var(--bg-card);border-radius:6px;font-size:13px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">' + escMem(fb.userEssay || "未作答") + '</div></div>' +
+          '<div style="margin-bottom:12px">自评得分: <strong style="color:var(--primary-5)">' + (fb.selfScore || 0) + '</strong>/75</div>' +
+          '<div style="font-size:13px;font-weight:600;margin-bottom:4px">评分标准:</div><div style="padding:12px;background:var(--bg-card);border-radius:6px;font-size:13px;line-height:1.7;white-space:pre-wrap">' + escMem(fb.scoringCriteria || "") + '</div>' +
+        '</div>';
+      }).join("") + '</div></div>';
+  } else if (sec.key === "case") {
+    // 案例主观题：逐题展示作答 / 参考答案 / 自评档位与得分
+    html += '<div class="content-card"><div class="content-card-header"><div class="content-card-title">案例分析详情</div></div><div class="content-card-body">' +
+      feedback.map(function(fb) {
+        var grade = fb.selfGrade || "";
+        var refText = fb.referenceAnswer || "暂无参考答案";
+        var isMd = /(^|\n)#{1,3}\s|(^|\n)\|.*\||\*\*.+?\*\*/.test(refText);
+        var refHtml = isMd
+          ? '<div class="material-body" style="font-size:13px;line-height:1.9;color:var(--text-primary)">' + simpleMarkdown(refText) + '</div>'
+          : '<div style="font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--text-primary)">' + escMem(refText) + '</div>';
+        var subHtml = "";
+        try {
+          var subs = typeof fb.subQuestions === "string" ? JSON.parse(fb.subQuestions) : (fb.subQuestions || []);
+          if (Array.isArray(subs) && subs.length && typeof subs[0] !== "string") {
+            subHtml = '<div style="margin:8px 0;font-size:12.5px;line-height:1.8;color:var(--text-2)">' +
+              subs.map(function(p, k) { return '<div>问题' + (p.no || (k + 1)) + (p.score ? '（' + p.score + '分）' : '') + '：' + escInlineMd(p.q || p.question || "") + '</div>'; }).join("") + '</div>';
+          }
+        } catch(e) {}
+        return '<div style="padding:16px;margin-bottom:12px;background:var(--bg-surface-high);border-radius:8px;border-left:3px solid ' + (grade === "SELF_PASS" ? "var(--success-5)" : grade === "SELF_FAIL" ? "var(--danger-5)" : "var(--warning-5,#f59e0b)") + '">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px"><div style="font-size:13px;line-height:1.6;font-weight:600">' + escMem(String(fb.stem || "").split("\n")[0]).slice(0, 60) + '…</div>' +
+          '<span style="white-space:nowrap;font-size:12px;padding:3px 12px;border-radius:12px;font-weight:600;background:' + (SIM_CASE_GRADE_COLORS[grade] || "var(--bg-surface-high)") + '">' + (SIM_CASE_GRADE_NAMES[grade] || "未自评") + ' · ' + (fb.score || 0) + '/15</span></div>' +
+          subHtml +
+          '<div style="margin-bottom:10px"><div style="font-size:13px;font-weight:600;margin-bottom:4px">我的作答:</div><div style="padding:12px;background:var(--bg-card);border-radius:6px;font-size:13px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">' + escMem(fb.userAnswer || "未作答") + '</div></div>' +
+          '<div><div style="font-size:13px;font-weight:600;margin-bottom:4px">参考答案要点:</div><div style="padding:12px;background:var(--bg-card);border-radius:6px;max-height:400px;overflow-y:auto">' + refHtml + '</div></div>' +
+          simCaseAnalysisHtml(fb.analysis) +
+        '</div>';
+      }).join("") + '</div></div>';
+  } else {
+    var wrong = feedback.filter(function(f) { return !f.correct; });
+    html += '<div class="content-card"><div class="content-card-header"><div class="content-card-title">错题分析（' + wrong.length + ' 题）</div>' +
+      '<span class="text-muted" style="font-size:12px">答对 ' + (feedback.length - wrong.length) + ' / ' + feedback.length + '</span></div><div class="content-card-body">';
+    if (!wrong.length) {
+      html += '<div class="state-empty"><p>本科全部答对，没有错题 🎉</p></div>';
+    } else {
+      html += wrong.map(function(f) {
+        var idx = feedback.indexOf(f) + 1;
+        var optsHtml = "";
+        try {
+          var opts = typeof f.optionsJson === "string" ? JSON.parse(f.optionsJson) : (f.optionsJson || []);
+          if (Array.isArray(opts)) {
+            optsHtml = '<div style="margin:8px 0;font-size:12px;color:var(--text-2);line-height:1.8">' +
+              opts.map(function(o, i) { return String.fromCharCode(65 + i) + ". " + escMem(String(o)); }).join("&nbsp;&nbsp;") + '</div>';
+          }
+        } catch(e) {}
+        return '<div style="margin-bottom:16px;padding:14px;background:var(--bg-surface-high);border-radius:8px;border-left:3px solid var(--danger-5)">' +
+          '<div style="font-size:14px;line-height:1.7;margin-bottom:6px"><strong>第 ' + idx + ' 题</strong>' +
+          (f.examYear ? ' <span style="font-size:11px;color:var(--text-muted)">' + escMem(f.examYear) + '年</span>' : '') +
+          '<span style="float:right;font-size:12px">你的答案: <strong style="color:var(--danger-5)">' + (f.userAnswer || "未作答") + '</strong>　正确答案: <strong style="color:var(--success-6)">' + escMem(f.correctAnswer) + '</strong></span></div>' +
+          '<div style="font-size:13px;line-height:1.7;margin-bottom:4px;white-space:pre-wrap">' + mdInlineImages(escMem(f.stem)) + '</div>' +
+          optsHtml +
+          (f.analysis ? '<div style="margin-top:8px;padding:10px;background:var(--bg-card);border-radius:6px;font-size:12.5px;line-height:1.8;color:var(--text-2)"><strong style="color:var(--primary-6)">解析：</strong>' + fmtAnalysis(f.analysis) + '</div>' : '') +
+        '</div>';
+      }).join("");
+    }
+    html += '</div></div>';
+  }
+
+  var nextUn = -1;
+  simState.sections.forEach(function(s, i) { if (nextUn < 0 && !simState.sectionResults[s.key]) nextUn = i; });
+  html += '<div style="display:flex;gap:12px;justify-content:center;margin-bottom:20px">';
+  if (r.completed) {
+    html += '<button onclick="finishSimulation()" style="padding:12px 32px;background:linear-gradient(135deg,var(--success-5),var(--success-6));color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">查看总成绩</button>';
+  } else if (nextUn >= 0) {
+    var nextSec = simState.sections[nextUn];
+    html += '<button onclick="jumpToSection(' + nextUn + ')" style="padding:12px 32px;background:var(--primary-6);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">进入下一科：' + nextSec.name + '</button>';
+  }
+  html += '<button onclick="navigate(\'simulation\')" style="padding:12px 32px;background:var(--bg-surface-high);border:1px solid var(--border-2);border-radius:8px;cursor:pointer;font-weight:600">退出考试</button>';
+  html += '</div></div>';
+  c.innerHTML = html;
+}
+
+function jumpToSection(idx) {
+  simState.currentSection = idx;
+  simState.currentIdx = 0;
+  simState.phase = "exam";
+  renderSimExam(content());
+}
+
+/* 三科交齐后汇总总成绩 */
+function finishSimulation() {
+  var last = null;
+  simState.sections.forEach(function(s) {
+    var r = simState.sectionResults[s.key];
+    if (r && r.completed) last = r;
+  });
+  if (!last) { navigate("simulation"); return; }
+  var essay = simState.sectionResults.essay;
+  simState.result = {
+    simDate: last.simDate,
+    scores: last.scores,
+    totalScore: last.totalScore,
+    passed: last.passed,
+    insights: last.insights,
+    essayFeedback: essay ? (essay.feedback || []) : []
+  };
+  simState.phase = "result";
+  renderSimResult(content());
 }
 
 function renderSimResult(c) {
@@ -1703,7 +2175,7 @@ function renderSimResult(c) {
   var essayHtml = essayFeedback.length ? essayFeedback.map(function(fb) {
     return '<div style="padding:16px;margin-bottom:12px;background:var(--bg-surface-high);border-radius:8px;border-left:3px solid var(--primary-5)">' +
       '<div style="font-weight:600;margin-bottom:8px">论文题</div>' +
-      '<div style="margin-bottom:12px;line-height:1.6;font-size:14px;white-space:pre-wrap">' + escMem(fb.stem) + '</div>' +
+      '<div style="margin-bottom:12px;line-height:1.6;font-size:14px;white-space:pre-wrap">' + mdInlineImages(escMem(fb.stem)) + '</div>' +
       '<div style="margin-bottom:12px"><div style="font-size:13px;font-weight:600;margin-bottom:4px">你的答卷:</div><div style="padding:12px;background:var(--bg-surface-low);border-radius:6px;font-size:13px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">' + escMem(fb.userEssay||"未作答") + '</div></div>' +
       '<div style="display:flex;gap:12px;margin-bottom:12px"><span>自评得分: <strong style="color:var(--primary-5)">' + (fb.selfScore||0) + '</strong>/75</span></div>' +
       '<div style="font-size:13px;font-weight:600;margin-bottom:4px">评分标准:</div><div style="padding:12px;background:var(--bg-surface-low);border-radius:6px;font-size:13px;line-height:1.7;white-space:pre-wrap">' + escMem(fb.scoringCriteria||"") + '</div>' +
@@ -2059,11 +2531,13 @@ function renderMaterialContent(taskId, material) {
 
 function simpleMarkdown(md) {
   if (!md) return '';
+  md = String(md).replace(/\r/g, ""); // 题库存量数据含 CRLF，\r 会破坏表格分隔行与行首判定
   var lines = md.split('\n');
   var html = [];
   var i = 0;
   var inList = false;
   var inOl = false;
+  var inNestedUl = false;
   var inTable = false;
   var tableRows = [];
 
@@ -2076,6 +2550,7 @@ function simpleMarkdown(md) {
     s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     s = s.replace(/\*(.+?)\*/g, '<em>$1</em>');
     s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    s = s.replace(/\*\*/g, ''); // 清理未配对的孤立 **（数据噪声）
     return s;
   }
 
@@ -2100,6 +2575,7 @@ function simpleMarkdown(md) {
 
     if (line.startsWith('```mermaid')) {
       if (inList) { html.push('</ul>'); inList = false; }
+      if (inNestedUl) { html.push('</ul>'); inNestedUl = false; }
       if (inOl) { html.push('</ol>'); inOl = false; }
       flushTable();
       var code = [];
@@ -2115,6 +2591,7 @@ function simpleMarkdown(md) {
 
     if (line.startsWith('```')) {
       if (inList) { html.push('</ul>'); inList = false; }
+      if (inNestedUl) { html.push('</ul>'); inNestedUl = false; }
       if (inOl) { html.push('</ol>'); inOl = false; }
       flushTable();
       var code2 = [];
@@ -2130,6 +2607,7 @@ function simpleMarkdown(md) {
 
     if (/^#{1,3}\s/.test(line)) {
       if (inList) { html.push('</ul>'); inList = false; }
+      if (inNestedUl) { html.push('</ul>'); inNestedUl = false; }
       if (inOl) { html.push('</ol>'); inOl = false; }
       flushTable();
       var level = line.match(/^(#+)/)[1].length;
@@ -2139,26 +2617,34 @@ function simpleMarkdown(md) {
       continue;
     }
 
-    if (/^[-*]\s/.test(line)) {
-      if (inOl) { html.push('</ol>'); inOl = false; }
-      flushTable();
-      if (!inList) { html.push('<ul>'); inList = true; }
-      html.push('<li>' + inline(line.replace(/^[-*]\s/, '')) + '</li>');
+    if (/^\s*[-*]\s/.test(line)) {
+      var dashText = inline(line.replace(/^\s*[-*]\s/, ''));
+      if (inOl) {
+        // 有序列表下的缩进子条目：嵌套 ul，不打断 ol 编号
+        if (!inNestedUl) { html.push('<ul class="md-sub">'); inNestedUl = true; }
+        html.push('<li>' + dashText + '</li>');
+      } else {
+        flushTable();
+        if (!inList) { html.push('<ul>'); inList = true; }
+        html.push('<li>' + dashText + '</li>');
+      }
       i++;
       continue;
     }
 
-    if (/^\d+\.\s/.test(line)) {
+    if (/^\s*\d+\.\s/.test(line)) {
+      if (inNestedUl) { html.push('</ul>'); inNestedUl = false; }
       if (inList) { html.push('</ul>'); inList = false; }
       flushTable();
       if (!inOl) { html.push('<ol>'); inOl = true; }
-      html.push('<li>' + inline(line.replace(/^\d+\.\s/, '')) + '</li>');
+      html.push('<li>' + inline(line.replace(/^\s*\d+\.\s/, '')) + '</li>');
       i++;
       continue;
     }
 
     if (/^\|.*\|/.test(line)) {
       if (inList) { html.push('</ul>'); inList = false; }
+      if (inNestedUl) { html.push('</ul>'); inNestedUl = false; }
       if (inOl) { html.push('</ol>'); inOl = false; }
       if (i + 1 < lines.length && /^\|[-:\s|]+\|$/.test(lines[i + 1])) {
         tableRows.push(line.split('|').slice(1, -1));
@@ -2174,6 +2660,7 @@ function simpleMarkdown(md) {
 
     if (line.startsWith('<details') || line.startsWith('</details') || line.startsWith('<summary') || line.startsWith('</summary')) {
       if (inList) { html.push('</ul>'); inList = false; }
+      if (inNestedUl) { html.push('</ul>'); inNestedUl = false; }
       if (inOl) { html.push('</ol>'); inOl = false; }
       flushTable();
       html.push(line);
@@ -2183,6 +2670,7 @@ function simpleMarkdown(md) {
 
     if (line.trim() === '') {
       if (inList) { html.push('</ul>'); inList = false; }
+      if (inNestedUl) { html.push('</ul>'); inNestedUl = false; }
       if (inOl) { html.push('</ol>'); inOl = false; }
       flushTable();
       i++;
@@ -2197,6 +2685,7 @@ function simpleMarkdown(md) {
   }
 
   if (inList) html.push('</ul>');
+  if (inNestedUl) html.push('</ul>');
   if (inOl) html.push('</ol>');
   flushTable();
   return html.join('\n');
@@ -2653,3 +3142,1633 @@ function esc(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+/* ============================================================
+   历年真题（参考芝士架构 past_exam：按试卷浏览 → 题目展开）
+   ============================================================ */
+var pastExamState = { subject: "全部", openPaperId: null, detailCache: {}, paperTab: {}, qCache: {} };
+
+var PE_TYPE_META = {
+  "MCQ":  { label: "综合知识", color: "var(--primary-2,#e8f0fe)", text: "var(--primary-6)" },
+  "":     { label: "综合知识", color: "var(--primary-2,#e8f0fe)", text: "var(--primary-6)" },
+  "CASE": { label: "案例分析", color: "var(--warning-2,#fef3e2)", text: "#b45309" },
+  "ESSAY":{ label: "论文",     color: "var(--success-1,#ecfdf5)", text: "var(--success-6)" }
+};
+
+function peTypeBadge(t) {
+  var m = PE_TYPE_META[t] || PE_TYPE_META[""];
+  return '<span style="padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;background:' + m.color + ';color:' + m.text + '">' + m.label + '</span>';
+}
+
+function peFreqBadge(f) {
+  if (!f || f === "未标注") return "";
+  var color = f === "高频" ? "var(--danger-6)" : (f === "中频" ? "#b45309" : "var(--primary-6)");
+  return '<span style="padding:1px 8px;border-radius:12px;font-size:11px;font-weight:700;border:1px solid currentColor;color:' + color + '">' + f + '</span>';
+}
+
+async function renderPastExams(c) {
+  c.innerHTML = '<div class="page-title">历年真题</div><div class="page-subtitle">按试卷浏览 · 真题小问与解析 · 点击试卷展开</div><div id="pe-body"><div class="state-loading"><div class="spinner"></div><p>加载真题库...</p></div></div>';
+  var data;
+  try { data = await apiGet("/past-exam/papers"); } catch (e) {
+    document.getElementById("pe-body").innerHTML = '<div class="state-error"><p>加载失败: ' + esc(e.message) + '</p></div>';
+    return;
+  }
+  var papers = data.papers || [];
+  if (!papers.length) {
+    document.getElementById("pe-body").innerHTML = '<div class="state-empty" style="padding:40px"><p>暂无真题数据，请先运行 scripts/past-exam/import-past-exam.js</p></div>';
+    return;
+  }
+  var subjSet = {};
+  papers.forEach(function(p) { if (subjSet[p.subject] != null) subjSet[p.subject]++; else subjSet[p.subject] = 1; });
+  var tabs = ["全部"].concat(Object.keys(subjSet));
+  var totalCount = papers.reduce(function(s, p) { return s + p.mcqCount + p.caseCount + p.essayCount; }, 0);
+
+  var html = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 6px">';
+  tabs.forEach(function(t) {
+    var active = pastExamState.subject === t;
+    html += '<button onclick="peSetSubject(\'' + t + '\')" style="padding:6px 16px;border-radius:8px;border:1px solid ' + (active ? 'var(--primary-6)' : 'var(--border-2)') + ';background:' + (active ? 'var(--primary-6)' : 'var(--bg-surface-high)') + ';color:' + (active ? '#fff' : 'var(--text-1)') + ';cursor:pointer;font-weight:600;font-size:13px">' + esc(t) + '</button>';
+  });
+  html += '<span class="text-muted" style="font-size:13px;margin-left:auto">' + papers.length + ' 份试卷 · ' + totalCount + ' 题</span></div>';
+
+  // 按年份分组倒序
+  var byYear = {};
+  papers.forEach(function(p) {
+    var y = (p.examDate || "").split("-")[0] || "未知";
+    (byYear[y] = byYear[y] || []).push(p);
+  });
+  var years = Object.keys(byYear).sort().reverse();
+  years.forEach(function(y) {
+    html += '<div style="margin:14px 0 8px;font-weight:700;font-size:15px;color:var(--primary-6)">' + y + ' 年</div>';
+    byYear[y].forEach(function(p) {
+      if (pastExamState.subject !== "全部" && p.subject !== pastExamState.subject) return;
+      var open = pastExamState.openPaperId === p.id;
+      html += '<div class="content-card" style="margin-bottom:10px">' +
+        '<div class="content-card-body" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 16px" onclick="peTogglePaper(' + p.id + ')">' +
+          '<div style="font-weight:700;font-size:14.5px;flex:1">' + esc(p.name) + '</div>' +
+          '<span style="font-size:12px;color:var(--text-2)">单选 ' + p.mcqCount + ' · 案例 ' + p.caseCount + ' · 论文 ' + p.essayCount + '</span>' +
+          '<span style="color:var(--primary-6);font-weight:700">' + (open ? "▾" : "▸") + '</span>' +
+        '</div>' +
+        (open ? '<div id="pe-paper-' + p.id + '" style="padding:0 16px 16px"></div>' : '') +
+      '</div>';
+    });
+  });
+  document.getElementById("pe-body").innerHTML = html;
+  if (pastExamState.openPaperId != null) peLoadPaper(pastExamState.openPaperId);
+}
+
+function peSetSubject(s) { pastExamState.subject = s; renderPage(); }
+function peTogglePaper(id) {
+  pastExamState.openPaperId = pastExamState.openPaperId === id ? null : id;
+  renderPage();
+}
+
+async function peLoadPaper(id) {
+  var box = document.getElementById("pe-paper-" + id);
+  if (!box) return;
+  box.innerHTML = '<div class="state-loading"><div class="spinner"></div><p>加载试卷...</p></div>';
+  var data = pastExamState.qCache[id];
+  if (!data) {
+    try {
+      data = await apiGet("/past-exam/papers/" + id + "/questions");
+      pastExamState.qCache[id] = data;
+    } catch (e) {
+      box.innerHTML = '<div class="state-error"><p>加载失败: ' + esc(e.message) + '</p></div>';
+      return;
+    }
+  }
+  var qs = data.questions || [];
+  var groups = { mcq: [], case: [], essay: [] };
+  qs.forEach(function(q) {
+    if (q.type === "CASE") groups.case.push(q);
+    else if (q.type === "ESSAY") groups.essay.push(q);
+    else groups.mcq.push(q);
+  });
+  ["mcq", "case", "essay"].forEach(function(k) {
+    groups[k].sort(function(a, b) { return (a.examSort || 0) - (b.examSort || 0); });
+  });
+
+  var active = pastExamState.paperTab[id];
+  if (!active || !groups[active].length) active = groups.mcq.length ? "mcq" : (groups.case.length ? "case" : "essay");
+  pastExamState.paperTab[id] = active;
+
+  var TABS = [["mcq", "综合知识"], ["case", "案例分析"], ["essay", "论文"]];
+  var html = '<div style="border-top:1px solid var(--border-2);margin-top:6px;padding-top:12px">';
+  if (!qs.length) {
+    html += '<p class="text-muted" style="font-size:13px">该试卷暂无题目</p>';
+  } else {
+    html += '<div style="display:flex;gap:8px;margin-bottom:12px">';
+    TABS.forEach(function(t) {
+      var n = groups[t[0]].length;
+      if (!n) return;
+      var on = active === t[0];
+      html += '<button onclick="peSetPaperTab(' + id + ',\'' + t[0] + '\')" style="padding:5px 14px;border-radius:8px;border:1px solid ' + (on ? 'var(--primary-6)' : 'var(--border-2)') + ';background:' + (on ? 'var(--primary-6)' : 'var(--bg-surface-high)') + ';color:' + (on ? '#fff' : 'var(--text-1)') + ';cursor:pointer;font-weight:600;font-size:12.5px">' + t[1] + ' ' + n + '</button>';
+    });
+    html += '</div>';
+    html += peRenderQList(groups[active], active);
+  }
+  box.innerHTML = html + '</div>';
+}
+
+function peSetPaperTab(pid, t) {
+  pastExamState.paperTab[pid] = t;
+  peLoadPaper(pid);
+}
+
+function peRenderQList(qs, typeKey) {
+  var html = '';
+  qs.forEach(function(q, i) {
+    var stemBrief = String(q.stem || "").split("\n")[0].slice(0, typeKey === "mcq" ? 70 : 90);
+    html += '<div style="margin-bottom:10px;border:1px solid var(--border-2);border-radius:10px;background:var(--bg-surface-high)">' +
+      '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer" onclick="peToggleDetail(' + q.id + ',this)">' +
+        '<span style="font-weight:700;color:var(--primary-6);font-size:13px;white-space:nowrap">第 ' + (q.examSort || (i + 1)) + ' 题</span>' +
+        (q.kpName ? '<span style="padding:1px 8px;border-radius:12px;font-size:11px;background:var(--bg-surface-highest);color:var(--text-2)">' + esc(q.kpName) + '</span>' : '') +
+        '<span style="font-size:12.5px;color:var(--text-2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(stemBrief) + '</span>' +
+        '<span style="color:var(--primary-6);font-size:12px" class="pe-arrow">展开 ▾</span>' +
+      '</div>' +
+      '<div class="pe-detail" id="pe-q-' + q.id + '" style="display:none;padding:0 14px 14px"></div>' +
+    '</div>';
+  });
+  return html;
+}
+
+function peToggleDetail(qid, head) {
+  var box = document.getElementById("pe-q-" + qid);
+  if (!box) return;
+  var showing = box.style.display !== "none";
+  box.style.display = showing ? "none" : "";
+  head.querySelector(".pe-arrow").textContent = showing ? "展开 ▾" : "收起 ▴";
+  if (!showing && !box.dataset.loaded) {
+    box.dataset.loaded = "1";
+    peRenderDetail(qid, box);
+  }
+}
+
+async function peRenderDetail(qid, box) {
+  box.innerHTML = '<p class="text-muted" style="font-size:13px">加载详情...</p>';
+  var q;
+  try {
+    q = pastExamState.detailCache[qid] || await apiGet("/past-exam/questions/" + qid);
+    pastExamState.detailCache[qid] = q;
+  } catch (e) { box.innerHTML = '<p style="color:var(--danger-6);font-size:13px">加载失败: ' + esc(e.message) + '</p>'; return; }
+  var html = (q.stem && String(q.stem).indexOf("【图:") >= 0) ? "" : renderQuestionImageHtml(q.imageUrl);
+  html += '<div style="font-size:14.5px;line-height:1.8;margin-bottom:12px">' + renderStemHtml(q.stem) + '</div>';
+  var t = q.type || "MCQ";
+  if (t === "CASE") {
+    var subs = [];
+    try { subs = typeof q.optionsJson === "string" ? JSON.parse(q.optionsJson) : (q.optionsJson || []); } catch (e) {}
+    subs.forEach(function(s, k) {
+      html += '<div style="margin:10px 0;padding:10px 12px;background:var(--bg-surface-highest);border-radius:8px">' +
+        '<div style="font-weight:600;font-size:13.5px;margin-bottom:6px">问题' + (s.no || (k + 1)) + (s.score ? '（' + s.score + '分）' : '') + '</div>' +
+        '<div style="font-size:13.5px;line-height:1.8">' + escInlineMd(s.q || s.question || "") + '</div>' +
+        (s.image ? '<div style="text-align:center;margin:8px 0"><img src="' + safeImageUrl(s.image) + '" style="max-width:100%;border-radius:6px;border:1px solid var(--border-2)" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '') +
+        '<details style="margin-top:6px"><summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--primary-6)">参考答案 / 解析</summary>' +
+        '<div style="font-size:13px;line-height:1.8;margin-top:8px;white-space:pre-wrap">' + escInlineMd(s.answer || "（暂无）") + '</div>' +
+        (s.analysis ? '<div style="font-size:12.5px;line-height:1.8;margin-top:8px;color:var(--text-2);white-space:pre-wrap">💡 ' + escInlineMd(s.analysis) + '</div>' : '') +
+        '</details></div>';
+    });
+  } else if (t === "ESSAY") {
+    html += '<details><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--primary-6)">写作策略 / 范文</summary>' +
+      '<div style="font-size:13px;line-height:1.9;margin-top:8px;white-space:pre-wrap">' + escInlineMd(q.answer || "（暂无）") + '</div></details>';
+  } else {
+    var opts = [];
+    try { opts = typeof q.optionsJson === "string" ? JSON.parse(q.optionsJson) : (q.optionsJson || []); } catch (e) {}
+    var letters = ["A","B","C","D","E","F","G","H"];
+    opts.forEach(function(o, i) {
+      var correct = letters[i] === q.answer;
+      html += '<div style="display:flex;gap:8px;padding:7px 10px;margin:4px 0;border-radius:8px;font-size:13.5px;background:' + (correct ? 'var(--success-1,#ecfdf5)' : 'var(--bg-surface-highest)') + '">' +
+        '<strong style="color:' + (correct ? 'var(--success-6)' : 'var(--text-2)') + '">' + letters[i] + '.</strong>' +
+        '<span style="flex:1">' + escInlineMd(o) + '</span>' +
+        (correct ? '<strong style="color:var(--success-6);font-size:12px">✓ 正确</strong>' : '') + '</div>';
+    });
+    html += '<details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--primary-6)">答案与解析</summary>' +
+      '<div style="font-size:13px;line-height:1.8;margin-top:8px">正确答案：<strong style="color:var(--success-6)">' + esc(q.answer) + '</strong></div>' +
+      (q.analysis ? '<div style="font-size:13px;line-height:1.8;margin-top:6px;color:var(--text-2)">' + renderStemHtml(q.analysis) + '</div>' : '') +
+      '</details>';
+  }
+  html += '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">' +
+    (q.paperName ? '<span class="text-muted" style="font-size:12px">📅 ' + esc(q.paperName) + '</span>' : '') +
+    (q.kp && q.kp.id ? '<button onclick="kpgOpenInTree(' + q.kp.id + ')" style="display:inline-flex;align-items:center;gap:4px;padding:3px 12px;border-radius:14px;border:1px solid var(--primary-6,#1664ff);background:var(--bg-surface-high);color:var(--primary-6,#1664ff);cursor:pointer;font-size:12px;font-weight:600">📍 ' + esc(q.kp.name) + ' · 知识图谱</button>' : '') +
+  '</div>';
+  box.innerHTML = html;
+}
+
+/* ============================================================
+   知识图谱 v3（双视图：知识树浏览 + 力导向关系图）
+   知识树: 左侧分类→考点导航, 右侧考点详情(精讲/年份/子考点/关联考点/真题)
+   关系图: 聚焦/着色/语义-共现边开关/搜索
+   ============================================================ */
+var kpGraphState = {
+  chart: null, nodes: [], edges: [], byId: {}, childrenOf: {}, branchColor: {},
+  subject: "全部", colorBy: "freq", showSem: true, showCo: false, labels: "auto",
+  focusId: null, selected: null,
+  view: "tree",
+  tree: { expanded: {}, selectedId: null, filter: "" },
+  detailCache: {}, qCache: {}
+};
+
+var KP_FREQ_COLOR = { "高频": "#ef4444", "中频": "#f59e0b", "低频": "#3b82f6", "未标注": "#94a3b8" };
+var KPG_VIRTUAL_ROOT = { id: 990000001, name: "专项考点" };
+
+function kpgSubjPass(n) {
+  var s = kpGraphState.subject;
+  if (s === "全部") return true;
+  return s === "架构设计师" ? (n.archCount > 0) : (n.analystCount > 0);
+}
+function kpgSubjCount(n) {
+  var s = kpGraphState.subject;
+  if (s === "全部") return n.questionCount || 0;
+  return s === "架构设计师" ? (n.archCount || 0) : (n.analystCount || 0);
+}
+function kpgSetSubject(s2) { kpGraphState.subject = s2; renderPage(); }
+
+async function renderKpGraph(c) {
+  c.innerHTML = '<div class="state-loading"><div class="spinner"></div><p>加载知识图谱...</p></div>';
+  if (!kpGraphState.nodes.length || !kpGraphState.edges.length) {
+    var tree, edgeData;
+    try {
+      [tree, edgeData] = await Promise.all([apiGet("/kp/tree"), apiGet("/kp/edges")]);
+    } catch (e) {
+      c.innerHTML = '<div class="state-error"><p>加载失败: ' + esc(e.message) + '</p></div>';
+      return;
+    }
+    kpGraphState.nodes = tree.nodes || [];
+    kpGraphState.edges = edgeData.edges || [];
+    var byId = {}, childrenOf = {};
+    kpGraphState.nodes.forEach(function(n) {
+      byId[n.id] = n;
+      if (n.parentId) (childrenOf[n.parentId] = childrenOf[n.parentId] || []).push(n.id);
+    });
+    kpGraphState.byId = byId;
+    kpGraphState.childrenOf = childrenOf;
+    var roots = kpGraphState.nodes.filter(function(n) { return n.isParent; });
+    roots.forEach(function(r, i) { kpGraphState.branchColor[r.id] = "hsl(" + Math.round(i * 360 / roots.length) + ",58%,48%)"; });
+    kpGraphState.branchColor[KPG_VIRTUAL_ROOT.id] = "#64748b";
+  }
+
+  var visLeaves = kpGraphState.nodes.filter(function(n) { return !n.isParent && kpgSubjPass(n); });
+  var leafCount = visLeaves.length;
+  var qCount = visLeaves.reduce(function(s, n) { return s + kpgSubjCount(n); }, 0);
+
+  var html = '<div class="page-title">知识图谱</div>' +
+    '<div class="page-subtitle">考点体系 · 精讲 · 关联真题 —— 从任意真题的「📍 知识图谱」按钮可直达考点</div>' +
+    '<div style="display:flex;gap:10px;margin:14px 0 10px;flex-wrap:wrap;align-items:center">' +
+      '<span style="display:inline-flex;border:1px solid var(--border-2);border-radius:8px;overflow:hidden">' +
+        '<button id="kpg-vt-tree" onclick="kpgSetView(\'tree\')" style="padding:6px 16px;border:none;cursor:pointer;font-size:13px;font-weight:600">📖 知识树</button>' +
+        '<button id="kpg-vt-graph" onclick="kpgSetView(\'graph\')" style="padding:6px 16px;border:none;cursor:pointer;font-size:13px;font-weight:600">🕸️ 关系图谱</button>' +
+      '</span>' +
+      '<span style="display:inline-flex;border:1px solid var(--border-2);border-radius:8px;overflow:hidden">' +
+        '<button id="kpg-sj-0" onclick="kpgSetSubject(\'全部\')" style="padding:6px 14px;border:none;cursor:pointer;font-size:13px;font-weight:600">全部</button>' +
+        '<button id="kpg-sj-1" onclick="kpgSetSubject(\'架构设计师\')" style="padding:6px 14px;border:none;cursor:pointer;font-size:13px;font-weight:600">架构师</button>' +
+        '<button id="kpg-sj-2" onclick="kpgSetSubject(\'系统分析师\')" style="padding:6px 14px;border:none;cursor:pointer;font-size:13px;font-weight:600">分析师</button>' +
+      '</span>' +
+      '<span class="text-muted" style="font-size:13px">' + leafCount + ' 个考点 · ' + qCount + ' 题挂接 · 关联边 ' + kpGraphState.edges.length + '</span>' +
+      '<span id="kpg-toolbar" style="margin-left:auto;display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap"></span>' +
+    '</div>' +
+    '<div id="kpg-body"></div>';
+  c.innerHTML = html;
+  kpgStyleTabs();
+  if (kpGraphState.view === "graph") kpgRenderGraphView(); else kpgRenderTreeView();
+}
+
+function kpgSetView(v) {
+  kpGraphState.view = v;
+  kpgStyleTabs();
+  if (v === "graph") kpgRenderGraphView(); else kpgRenderTreeView();
+}
+
+function kpgStyleTabs() {
+  var on = "background:var(--primary-6);color:#fff", off = "background:var(--bg-surface-high);color:var(--text-1)";
+  var t = document.getElementById("kpg-vt-tree"), g = document.getElementById("kpg-vt-graph");
+  if (t) t.style.cssText += ";" + (kpGraphState.view === "tree" ? on : off);
+  if (g) g.style.cssText += ";" + (kpGraphState.view === "graph" ? on : off);
+  [["kpg-sj-0","全部"],["kpg-sj-1","架构设计师"],["kpg-sj-2","系统分析师"]].forEach(function(p) {
+    var el = document.getElementById(p[0]);
+    if (el) el.style.cssText += ";" + (kpGraphState.subject === p[1] ? on : off);
+  });
+}
+
+/** 任意页面跳入知识树并选中某考点（真题详情「知识图谱」按钮） */
+function kpgOpenInTree(id) {
+  kpGraphState.view = "tree";
+  kpGraphState.tree.selectedId = id;
+  var n = kpGraphState.byId[id];
+  if (n && n.parentId) kpGraphState.tree.expanded[n.parentId] = true;
+  if (state.page !== "kp-graph") navigate("kp-graph");
+  else renderPage();
+}
+
+/* ============================================================
+   知识树视图
+   ============================================================ */
+function kpgRenderTreeView() {
+  var toolbar = document.getElementById("kpg-toolbar");
+  if (toolbar) toolbar.innerHTML =
+    '<input id="kpg-tree-filter" placeholder="过滤考点..." oninput="kpgTreeFilter(this.value)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border-2);background:var(--bg-surface-high);color:var(--text-1);min-width:180px;outline:none;font-size:13px">';
+  var body = document.getElementById("kpg-body");
+  body.innerHTML =
+    '<div style="display:flex;gap:14px;align-items:stretch">' +
+      '<div class="content-card" style="width:296px;min-width:280px;flex:none;max-height:700px;display:flex;flex-direction:column">' +
+        '<div class="content-card-header" style="padding:10px 14px"><div class="content-card-title" style="font-size:14px">考点导航 <span class="text-muted" style="font-weight:400;font-size:12px">点击展开/收起</span></div></div>' +
+        '<div id="kpg-tree-nav" style="flex:1;overflow-y:auto;padding:4px 8px 12px"></div>' +
+      '</div>' +
+      '<div style="flex:1;min-width:0"><div id="kpg-tree-main"></div></div>' +
+    '</div>';
+  kpgRenderTreeNav();
+  var sel = kpGraphState.tree.selectedId;
+  if (sel && kpGraphState.byId[sel]) kpgRenderTreeMain(sel);
+  else {
+    document.getElementById("kpg-tree-main").innerHTML =
+      '<div class="content-card"><div class="content-card-body state-empty" style="padding:60px 30px;text-align:center">' +
+      '<p style="font-size:15px">从左侧选择一个考点开始 📖</p>' +
+      '<p class="text-muted" style="font-size:13px;margin-top:6px">或在做真题时点击题目里的「📍 知识图谱」按钮直达考点</p></div></div>';
+  }
+}
+
+function kpgRenderTreeNav() {
+  var nav = document.getElementById("kpg-tree-nav");
+  if (!nav) return;
+  var st = kpGraphState.tree;
+  var roots = kpGraphState.nodes.filter(function(n) { return n.isParent; });
+  roots.sort(function(a, b) {
+    var qa = (kpGraphState.childrenOf[a.id] || []).reduce(function(s, id) { return s + (kpGraphState.byId[id].questionCount || 0); }, 0);
+    var qb = (kpGraphState.childrenOf[b.id] || []).reduce(function(s, id) { return s + (kpGraphState.byId[id].questionCount || 0); }, 0);
+    return qb - qa;
+  });
+  var filter = (st.filter || "").trim().toLowerCase();
+
+  var html = "";
+  roots.forEach(function(r) {
+    var kids = (kpGraphState.childrenOf[r.id] || []).map(function(id) { return kpGraphState.byId[id]; });
+    if (kpGraphState.subject !== "全部") kids = kids.filter(function(k) { return kpgSubjPass(k); });
+    if (filter) kids = kids.filter(function(k) { return k.name.toLowerCase().indexOf(filter) >= 0; });
+    if (!kids.length && (filter || kpGraphState.subject !== "全部")) return;
+    kids.sort(function(a, b) { return kpgSubjCount(b) - kpgSubjCount(a); });
+    var expanded = filter ? true : (st.expanded[r.id] !== false);
+    var total = (kpGraphState.childrenOf[r.id] || []).reduce(function(s, id) { return s + kpgSubjCount(kpGraphState.byId[id]); }, 0);
+    html += '<div style="margin:2px 0">' +
+      '<div onclick="kpgTreeToggle(' + r.id + ')" style="display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--text-1)' + (st.selectedId === r.id ? ';background:var(--primary-1,#e8f0fe);color:var(--primary-6)' : '') + '">' +
+        '<span style="color:var(--primary-6);font-size:11px">' + (expanded ? "▾" : "▸") + '</span>' +
+        '<span style="flex:1">' + esc(r.name) + '</span>' +
+        '<span class="text-muted" style="font-size:11px;font-weight:400">' + total + '</span></div>';
+    if (expanded) {
+      kids.forEach(function(k) {
+        var sel = st.selectedId === k.id;
+        html += '<div onclick="kpgTreeSelect(' + k.id + ')" style="display:flex;align-items:center;gap:6px;padding:5px 10px 5px 26px;border-radius:8px;cursor:pointer;font-size:12.5px;transition:background .15s' + (sel ? ';background:var(--primary-1,#e8f0fe)' : '') + '" onmouseover="this.style.background=\'var(--bg-surface-high)\'" onmouseout="this.style.background=\'' + (sel ? 'var(--primary-1,#e8f0fe)' : 'transparent') + '\'">' +
+          '<i style="width:7px;height:7px;border-radius:50%;background:' + (KP_FREQ_COLOR[k.freq] || KP_FREQ_COLOR["未标注"]) + ';display:inline-block;flex:none"></i>' +
+          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' + (sel ? 'color:var(--primary-6);font-weight:700' : 'color:var(--text-2)') + '">' + esc(k.name) + '</span>' +
+          (k.hasEssence ? '<span style="font-size:10px;flex:none">📌</span>' : '') +
+          '<span class="text-muted" style="font-size:10.5px;flex:none">' + kpgSubjCount(k) + '</span></div>';
+      });
+      if (!kids.length && !filter) html += '<div class="text-muted" style="padding:4px 10px 4px 26px;font-size:12px">（无子考点）</div>';
+    }
+    html += '</div>';
+  });
+  nav.innerHTML = html;
+  var selEl = nav.querySelector('[style*="primary-1"]') || nav.querySelector('div[onclick*="kpgTreeSelect"]');
+  if (selEl && selEl.scrollIntoView) { try { selEl.scrollIntoView({ block: "nearest" }); } catch (e) {} }
+}
+
+function kpgTreeToggle(rootId) {
+  var st = kpGraphState.tree;
+  st.expanded[rootId] = st.expanded[rootId] === false ? true : false;
+  kpgRenderTreeNav();
+}
+
+function kpgTreeFilter(v) {
+  kpGraphState.tree.filter = v;
+  kpgRenderTreeNav();
+}
+
+function kpgTreeSelect(id) {
+  kpGraphState.tree.selectedId = id;
+  kpgRenderTreeNav();
+  kpgRenderTreeMain(id);
+}
+
+var KPG_MARK_STYLE = {
+  "高频": "background:var(--danger-2,#fee2e2);color:var(--danger-6,#dc2626)",
+  "易错": "background:var(--warning-2,#fef3c7);color:#b45309",
+  "易混淆": "background:var(--warning-2,#fef3c7);color:#b45309",
+  "记忆": "background:var(--primary-2,#e0eaff);color:var(--primary-6,#1664ff)",
+  "对比": "background:var(--primary-2,#e0eaff);color:var(--primary-6,#1664ff)",
+  "结论": "background:var(--success-1,#ecfdf5);color:var(--success-6,#059669)"
+};
+function kpgEssenceHtml(md) {
+  var h = renderStemHtml(md);
+  Object.keys(KPG_MARK_STYLE).forEach(function(mk) {
+    h = h.split("【" + mk + "】").join('<span style="display:inline-block;padding:0 7px;margin:0 3px 0 1px;border-radius:9px;font-size:11px;font-weight:700;vertical-align:1px;' + KPG_MARK_STYLE[mk] + '">' + mk + '</span>');
+  });
+  return h;
+}
+
+/* 知识图谱关联真题: 选择题作答式渲染(先选择后揭示答案) */
+function kpgToggleDetail(qid, head) {
+  var box = document.getElementById("kpg-q-" + qid);
+  if (!box) return;
+  var showing = box.style.display !== "none";
+  box.style.display = showing ? "none" : "";
+  if (head) {
+    var arrow = head.querySelector(".kpg-arrow");
+    if (arrow) arrow.textContent = showing ? "展开 ▾" : "收起 ▴";
+  }
+  if (!showing && !box.dataset.loaded) {
+    box.dataset.loaded = "1";
+    kpgLoadDetail(qid, box);
+  }
+}
+
+async function kpgLoadDetail(qid, box) {
+  box.innerHTML = '<p class="text-muted" style="font-size:13px">加载详情...</p>';
+  var q;
+  try {
+    q = pastExamState.detailCache[qid] || await apiGet("/past-exam/questions/" + qid);
+    pastExamState.detailCache[qid] = q;
+  } catch (e) {
+    box.innerHTML = '<p style="color:var(--danger-6);font-size:13px">加载失败: ' + esc(e.message) + '</p>';
+    return;
+  }
+  if (q.type === "CASE" || q.type === "ESSAY") {
+    peRenderDetail(qid, box); // 主观题: 参考答案在折叠区, 点开才显示
+  } else {
+    kpgRenderMcqQuiz(q, box);
+  }
+}
+
+function kpgRenderMcqQuiz(q, box) {
+  var html = (q.stem && String(q.stem).indexOf("\u3010\u56fe:") >= 0) ? "" : renderQuestionImageHtml(q.imageUrl);
+  html += '<div style="font-size:14.5px;line-height:1.8;margin-bottom:12px">' + renderStemHtml(q.stem) + '</div>';
+  var opts = [];
+  try { opts = typeof q.optionsJson === "string" ? JSON.parse(q.optionsJson) : (q.optionsJson || []); } catch (e) {}
+  var letters = ["A","B","C","D","E","F","G","H"];
+  html += '<div id="kpg-quiz-opts-' + q.id + '">';
+  opts.forEach(function(o, i) {
+    html += '<div onclick="kpgPick(' + q.id + ',\'' + letters[i] + '\')" style="cursor:pointer;padding:8px 12px;margin:5px 0;border-radius:8px;border:1px solid var(--border-2);background:var(--bg-surface-high);font-size:13.5px;display:flex;gap:8px;align-items:flex-start;transition:border-color .15s" onmouseover="if(!this.parentNode.dataset.done)this.style.borderColor=\'var(--primary-5,#5a8dff)\'" onmouseout="if(!this.parentNode.dataset.done)this.style.borderColor=\'var(--border-2)\'">' +
+      '<strong style="color:var(--text-2)">' + letters[i] + '.</strong><span style="flex:1">' + escInlineMd(o) + '</span></div>';
+  });
+  html += '</div>';
+  html += '<div id="kpg-quiz-res-' + q.id + '"></div>';
+  html += '<div id="kpg-quiz-skip-' + q.id + '" style="text-align:right;margin-top:4px"><span onclick="kpgReveal(' + q.id + ')" style="color:var(--text-2);font-size:12px;cursor:pointer;text-decoration:underline">直接看答案</span></div>';
+  box.innerHTML = html;
+}
+
+function kpgQuizFinish(qid, chosen) {
+  var q = pastExamState.detailCache[qid];
+  var optsBox = document.getElementById("kpg-quiz-opts-" + qid);
+  var res = document.getElementById("kpg-quiz-res-" + qid);
+  var skip = document.getElementById("kpg-quiz-skip-" + qid);
+  if (!q || !optsBox || optsBox.dataset.done) return;
+  optsBox.dataset.done = "1";
+  var answer = q.answer || "";
+  var letters = ["A","B","C","D","E","F","G","H"];
+  var rows = optsBox.children;
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].onclick = null;
+    rows[i].onmouseover = null;
+    rows[i].onmouseout = null;
+    var L = letters[i];
+    if (L === answer) {
+      rows[i].style.borderColor = "var(--success-6,#059669)";
+      rows[i].style.background = "var(--success-1,#ecfdf5)";
+      rows[i].insertAdjacentHTML("beforeend", '<strong style="color:var(--success-6,#059669);font-size:12px;white-space:nowrap">✓ 正确答案</strong>');
+    } else if (L === chosen) {
+      rows[i].style.borderColor = "var(--danger-6,#dc2626)";
+      rows[i].style.background = "var(--danger-1,#fef4f4)";
+      rows[i].insertAdjacentHTML("beforeend", '<strong style="color:var(--danger-6,#dc2626);font-size:12px;white-space:nowrap">✗ 你的选择</strong>');
+    } else {
+      rows[i].style.opacity = "0.6";
+    }
+  }
+  var correct = chosen != null && chosen === answer;
+  var html = '<div style="margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:600;background:' +
+    (correct ? "var(--success-1,#ecfdf5);color:var(--success-6,#059669)" : "var(--danger-1,#fef4f4);color:var(--danger-6,#dc2626)") + '">' +
+    (chosen == null ? "正确答案：" + esc(answer) : (correct ? "✓ 回答正确" : "✗ 回答错误，正确答案 " + esc(answer))) + '</div>';
+  if (q.analysis) html += '<div style="font-size:13px;line-height:1.8;margin-top:8px;color:var(--text-2)">' + renderStemHtml(q.analysis) + '</div>';
+  if (q.paperName) html += '<div class="text-muted" style="font-size:12px;margin-top:8px">📅 ' + esc(q.paperName) + '</div>';
+  res.innerHTML = html;
+  if (skip) skip.style.display = "none";
+}
+function kpgPick(qid, letter) { kpgQuizFinish(qid, letter); }
+function kpgReveal(qid) { kpgQuizFinish(qid, null); }
+
+async function kpgRenderTreeMain(id) {
+  var main = document.getElementById("kpg-tree-main");
+  if (!main) return;
+  var d = kpGraphState.detailCache[id];
+  if (!d) {
+    main.innerHTML = '<div class="state-loading"><div class="spinner"></div><p>加载考点...</p></div>';
+    try { d = await apiGet("/kp/" + id); kpGraphState.detailCache[id] = d; }
+    catch (e) { main.innerHTML = '<div class="state-error"><p>加载失败: ' + esc(e.message) + '</p></div>'; return; }
+  }
+  var n = kpGraphState.byId[id];
+  var rootName = n && n.parentId && kpGraphState.byId[n.parentId] ? kpGraphState.byId[n.parentId].name : "";
+
+  var html = '<div class="content-card">' +
+    '<div class="content-card-body" style="padding:18px 22px">' +
+      '<div class="text-muted" style="font-size:12px;margin-bottom:6px">' + esc(rootName) + ' ›</div>' +
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">' +
+        '<strong style="font-size:20px">' + esc(d.name) + '</strong>' +
+        peFreqBadge(d.freq) +
+        '<span class="text-muted" style="font-size:13px">' + d.questionCount + ' 题</span>' +
+        (kpGraphState.byId[id] && (kpGraphState.byId[id].archCount || kpGraphState.byId[id].analystCount) ? '<span class="text-muted" style="font-size:12px">（架构师 ' + (kpGraphState.byId[id].archCount || 0) + ' · 分析师 ' + (kpGraphState.byId[id].analystCount || 0) + '）</span>' : '') +
+        '<button onclick="kpgOpenInGraphView(' + id + ')" style="margin-left:auto;padding:5px 14px;border-radius:8px;border:1px solid var(--border-2);background:var(--bg-surface-high);color:var(--text-1);cursor:pointer;font-size:12px;font-weight:600">🕸️ 在关系图谱中查看</button>' +
+      '</div>';
+
+  if (d.years && d.years.length) {
+    html += '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;margin-bottom:5px">📅 出题记录（' + d.years.length + ' 场）</div><div style="display:flex;gap:4px;flex-wrap:wrap">' +
+      d.years.map(function(y) { return '<span style="padding:2px 9px;border-radius:10px;font-size:11px;background:var(--bg-surface-high);color:var(--text-2)">' + esc(y) + '</span>'; }).join("") +
+      '</div></div>';
+  }
+
+  if (d.essence) {
+    html += '<div style="padding:14px 16px;background:var(--bg-surface-high);border-radius:10px;margin-bottom:14px;border-left:3px solid var(--primary-6)">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--primary-6);margin-bottom:8px">📌 考点精讲</div>' +
+      '<div class="material-body" style="font-size:13.5px;line-height:1.9;color:var(--text-2)">' + kpgEssenceHtml(d.essence) + '</div></div>';
+  }
+
+  if (d.children && d.children.length) {
+    html += '<div style="margin-bottom:14px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">📚 子考点 ' + d.children.length + '</div><div style="display:flex;gap:6px;flex-wrap:wrap">' +
+      d.children.map(function(ch) {
+        return '<button onclick="kpgTreeSelect(' + ch.id + ')" style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:14px;border:1px solid var(--border-2);background:var(--bg-surface-high);cursor:pointer;font-size:12.5px;color:var(--text-1)">' +
+          '<i style="width:6px;height:6px;border-radius:50%;background:' + (KP_FREQ_COLOR[ch.freq] || KP_FREQ_COLOR["未标注"]) + '"></i>' + esc(ch.name) +
+          '<span class="text-muted" style="font-size:11px">' + ch.questionCount + '</span></button>';
+      }).join("") + '</div></div>';
+  }
+
+  if (d.related && d.related.length) {
+    html += '<div style="margin-bottom:14px"><div style="font-size:13px;font-weight:700;margin-bottom:6px">🔗 关联考点（易混淆 / 常对比）</div><div style="display:flex;gap:6px;flex-wrap:wrap">' +
+      d.related.slice(0, 10).map(function(r) {
+        return '<button onclick="kpgTreeSelect(' + r.id + ')" title="' + esc(r.note || "") + '" style="padding:4px 12px;border-radius:14px;border:1px dashed var(--primary-4,#7fa8ff);background:transparent;cursor:pointer;font-size:12.5px;color:var(--primary-6)">' + esc(r.name) + '</button>';
+      }).join("") + '</div></div>';
+  }
+
+  var qs = d.questions || [];
+  if (kpGraphState.subject !== "全部") qs = qs.filter(function(q) { return q.paperName && q.paperName.indexOf(kpGraphState.subject) >= 0; });
+  html += '<div style="font-size:13px;font-weight:700;margin:16px 0 8px">📝 关联真题 ' + qs.length + '（点击展开）</div>';
+  qs.slice(0, 60).forEach(function(q, i) {
+    var brief = String(q.stem || "").split("\n")[0].slice(0, 80);
+    html += '<div style="margin-bottom:10px;border:1px solid var(--border-2);border-radius:10px;background:var(--bg-surface-high)">' +
+      '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer" onclick="kpgToggleDetail(' + q.id + ',this)">' +
+        peTypeBadge(q.type) + peFreqBadge(kpGraphState.byId[id] ? kpGraphState.byId[id].freq : "") +
+        (q.paperName ? '<span style="font-size:11.5px;color:var(--primary-6);white-space:nowrap">' + esc(q.paperName) + '</span>' : '') +
+        '<span style="font-size:12.5px;color:var(--text-2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(brief) + '</span>' +
+        '<span style="color:var(--primary-6);font-size:12px" class="kpg-arrow">展开 ▾</span>' +
+      '</div>' +
+      '<div class="kpg-detail" id="kpg-q-' + q.id + '" style="display:none;padding:0 14px 14px"></div>' +
+    '</div>';
+  });
+  if (qs.length > 60) html += '<p class="text-muted" style="font-size:12px">…其余 ' + (qs.length - 60) + ' 题在历年真题页查看</p>';
+
+  html += '</div></div>';
+  main.innerHTML = html;
+}
+
+function kpgOpenInGraphView(id) {
+  kpGraphState.view = "graph";
+  kpgSetView("graph");
+  if (id) kpgShowDetail(id);
+}
+
+/* ============================================================
+   关系图谱视图（力导向）
+   ============================================================ */
+function kpgRenderGraphView() {
+  var toolbar = document.getElementById("kpg-toolbar");
+  if (toolbar) toolbar.innerHTML =
+    '<input id="kpg-search" list="kpg-dl" placeholder="搜索考点名，回车定位..." onkeydown="if(event.key===\'Enter\')kpgFocusNode(this.value)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border-2);background:var(--bg-surface-high);color:var(--text-1);min-width:190px;outline:none;font-size:13px">' +
+    '<datalist id="kpg-dl">' + kpGraphState.nodes.map(function(n) { return '<option value="' + esc(n.name) + '">'; }).join("") + '</datalist>' +
+    '<span style="display:inline-flex;border:1px solid var(--border-2);border-radius:8px;overflow:hidden">' +
+      '<button id="kpg-cb-freq" onclick="kpgSetColor(\'freq\')" style="padding:5px 12px;border:none;cursor:pointer;font-size:12.5px;font-weight:600">按频率</button>' +
+      '<button id="kpg-cb-branch" onclick="kpgSetColor(\'branch\')" style="padding:5px 12px;border:none;cursor:pointer;font-size:12.5px;font-weight:600">按分类</button>' +
+    '</span>' +
+    '<label style="font-size:12.5px;color:var(--text-2);display:inline-flex;align-items:center;gap:4px"><input type="checkbox" id="kpg-tg-sem" checked onchange="kpgToggleEdge(\'sem\',this.checked)"> 语义</label>' +
+    '<label style="font-size:12.5px;color:var(--text-2);display:inline-flex;align-items:center;gap:4px"><input type="checkbox" id="kpg-tg-co" onchange="kpgToggleEdge(\'co\',this.checked)"> 共现</label>';
+  var body = document.getElementById("kpg-body");
+  body.innerHTML =
+    '<div id="kpg-crumb" style="display:none;margin:0 0 8px;font-size:13px"></div>' +
+    '<div style="display:flex;gap:14px;align-items:stretch">' +
+      '<div class="content-card" style="flex:1;overflow:hidden"><div class="content-card-body" style="padding:0"><div id="kpg-chart" style="width:100%;height:620px"></div></div></div>' +
+      '<div class="content-card" id="kpg-panel" style="width:360px;min-width:320px;max-height:660px;overflow-y:auto"><div class="content-card-header"><div class="content-card-title">考点详情</div></div><div class="content-card-body" id="kpg-panel-body"><p class="text-muted" style="font-size:13px">点击图中任意考点节点查看详情</p></div></div>' +
+    '</div>';
+  if (kpGraphState.chart) kpGraphState.chart.dispose();
+  kpGraphState.chart = echarts.init(document.getElementById("kpg-chart"));
+  kpGraphState.chart.on("click", function(p) {
+    if (p.dataType === "node") kpgShowDetail(Number(p.data.id));
+  });
+  kpGraphState.chart.on("dblclick", function(p) {
+    if (p.dataType === "node" && kpGraphState.byId[Number(p.data.id)] && kpGraphState.byId[Number(p.data.id)].isParent) {
+      kpgSetFocus(Number(p.data.id));
+    }
+  });
+  kpgStyleColorButtons();
+  kpgApplyGraph();
+  kpgRenderCrumb();
+  if (kpGraphState.selected) kpgShowDetail(kpGraphState.selected);
+}
+
+function kpgStyleColorButtons() {
+  var on = "background:var(--primary-6);color:#fff", off = "background:var(--bg-surface-high);color:var(--text-1)";
+  var f = document.getElementById("kpg-cb-freq"), b = document.getElementById("kpg-cb-branch");
+  if (f) f.style.cssText += ";" + (kpGraphState.colorBy === "freq" ? on : off);
+  if (b) b.style.cssText += ";" + (kpGraphState.colorBy === "branch" ? on : off);
+}
+
+function kpgBranchRoot(id) {
+  var n = kpGraphState.byId[id];
+  while (n && n.parentId && kpGraphState.byId[n.parentId]) n = kpGraphState.byId[n.parentId];
+  return n ? n.id : KPG_VIRTUAL_ROOT.id;
+}
+
+function kpgDescendants(rootId) {
+  var out = [Number(rootId)], queue = [Number(rootId)];
+  while (queue.length) {
+    var cur = queue.shift();
+    (kpGraphState.childrenOf[cur] || []).forEach(function(cid) { out.push(cid); queue.push(cid); });
+  }
+  return out;
+}
+
+function kpgApplyGraph() {
+  var st = kpGraphState;
+  if (!st.chart) return;
+  var nodeIds = (st.focusId != null && st.byId[st.focusId]) ? kpgDescendants(st.focusId) : st.nodes.map(function(n) { return n.id; });
+  if (st.subject !== "全部") {
+    nodeIds = nodeIds.filter(function(id) {
+      var n = st.byId[id];
+      if (!n) return false;
+      if (!n.isParent) return kpgSubjPass(n);
+      return (st.childrenOf[id] || []).some(function(cid) { var c = st.byId[cid]; return c && !c.isParent && kpgSubjPass(c); });
+    });
+  }
+  var inSet = {};
+  nodeIds.forEach(function(id) { inSet[id] = true; });
+  var focused = st.focusId != null && !!st.byId[st.focusId];
+
+  var eNodes = nodeIds.map(function(id) {
+    var n = st.byId[id];
+    if (!n) return null;
+    var size = n.isParent ? (focused ? 26 : 14) : (focused ? 12 + Math.sqrt(kpgSubjCount(n)) * 5 : 8 + Math.sqrt(kpgSubjCount(n)) * 4);
+    var color = st.colorBy === "branch" ? st.branchColor[kpgBranchRoot(n.id)] : (KP_FREQ_COLOR[n.freq] || KP_FREQ_COLOR["未标注"]);
+    return {
+      id: String(n.id), name: n.name, symbolSize: size,
+      itemStyle: { color: color, borderColor: n.isParent ? "#1e293b" : "transparent", borderWidth: n.isParent ? 2 : 0 },
+      label: { show: focused || st.labels === "all" || n.isParent || size > 14, fontSize: n.isParent ? 13 : 11, fontWeight: n.isParent ? 700 : 400 }
+    };
+  }).filter(Boolean);
+
+  function lineStyle(kind, weight) {
+    if (kind === "semantic") return { color: "#3b82f6", width: 0.7 + (weight || 1) * 0.4, type: [5, 4], opacity: 0.55 };
+    if (kind === "co") return { color: "#f59e0b", width: 0.5 + Math.min(weight || 1, 6) * 0.35, type: [2, 4], opacity: 0.35, curveness: 0.12 };
+    return { color: "#475569", width: 1, opacity: 0.5 };
+  }
+
+  var eLinks = [];
+  nodeIds.forEach(function(id) {
+    var n = st.byId[id];
+    if (n && n.parentId && inSet[n.parentId]) eLinks.push({ source: String(n.parentId), target: String(id), kind: "h", lineStyle: lineStyle("h") });
+  });
+  st.edges.forEach(function(e) {
+    if (e.kind === "semantic" && !st.showSem) return;
+    if (e.kind === "co" && !st.showCo) return;
+    if (inSet[e.src] && inSet[e.dst]) eLinks.push({ source: String(e.src), target: String(e.dst), kind: e.kind, weight: e.weight, note: e.note, lineStyle: lineStyle(e.kind, e.weight) });
+  });
+
+  st.chart.setOption({
+    tooltip: { formatter: function(p) {
+      if (p.dataType === "edge") {
+        if (p.data.kind === "h") return "";
+        var a = st.byId[Number(p.data.source)], b = st.byId[Number(p.data.target)];
+        var label = p.data.kind === "semantic" ? "语义关联" : "同卷共现 ×" + p.data.weight;
+        return esc((a ? a.name : "") + " ↔ " + (b ? b.name : "")) + "<br><span style='color:#94a3b8'>" + label + (p.data.note ? " · " + esc(p.data.note) : "") + "</span>";
+      }
+      if (p.dataType !== "node") return "";
+      var n = st.byId[Number(p.data.id)];
+      if (!n) return esc(p.data.name);
+      return esc(n.name) + (n.isParent ? "（分类，双击聚焦）" : "<br>关联真题: " + n.questionCount + " 题" + (n.freq !== "未标注" ? " · " + n.freq : ""));
+    } },
+    series: [{
+      type: "graph", layout: "force", roam: true, draggable: true,
+      data: eNodes, links: eLinks,
+      force: { repulsion: focused ? 260 : (eLinks.length > 900 ? 90 : 110), edgeLength: focused ? [90, 200] : [45, 130], gravity: focused ? 0.08 : 0.14, friction: 0.25 },
+      label: { position: "right", color: "#94a3b8" },
+      emphasis: { focus: "adjacency", itemStyle: { shadowBlur: 12, shadowColor: "rgba(59,130,246,.6)" } },
+      scaleLimit: { min: 0.4, max: 4 }
+    }]
+  }, { notMerge: true });
+  st.chart.dispatchAction({ type: "downplay" });
+}
+
+function kpgSetColor(mode) { kpGraphState.colorBy = mode; kpgStyleColorButtons(); kpgApplyGraph(); }
+function kpgToggleEdge(kind, on) { if (kind === "sem") kpGraphState.showSem = on; else kpGraphState.showCo = on; kpgApplyGraph(); }
+
+function kpgSetFocus(id) {
+  kpGraphState.focusId = (kpGraphState.focusId === id) ? null : id;
+  kpgApplyGraph();
+  kpgRenderCrumb();
+}
+
+function kpgRenderCrumb() {
+  var el = document.getElementById("kpg-crumb");
+  if (!el) return;
+  if (kpGraphState.focusId == null || !kpGraphState.byId[kpGraphState.focusId]) { el.style.display = "none"; return; }
+  var n = kpGraphState.byId[kpGraphState.focusId];
+  el.style.display = "";
+  el.innerHTML = '📍 已聚焦分类：<strong style="color:var(--primary-6)">' + esc(n.name) + '</strong>' +
+    ' <span class="text-muted">（' + kpgDescendants(n.id).length + ' 个节点）</span>' +
+    ' <button onclick="kpgSetFocus(' + n.id + ')" style="padding:2px 10px;margin-left:6px;border-radius:6px;border:1px solid var(--border-2);background:var(--bg-surface-high);color:var(--text-1);cursor:pointer;font-size:12px">退出聚焦</button>';
+}
+
+function kpgFocusNode(name) {
+  if (!name) return;
+  var hit = null;
+  for (var i = 0; i < kpGraphState.nodes.length; i++) {
+    if (kpGraphState.nodes[i].name === name || kpGraphState.nodes[i].name.indexOf(name) >= 0) { hit = kpGraphState.nodes[i]; break; }
+  }
+  if (!hit) { alert("未找到考点: " + name); return; }
+  if (kpGraphState.chart) kpGraphState.chart.dispatchAction({ type: "highlight", seriesIndex: 0, name: hit.name });
+  kpgShowDetail(hit.id);
+}
+
+async function kpgShowDetail(id) {
+  kpGraphState.selected = id;
+  var body = document.getElementById("kpg-panel-body");
+  if (!body) return;
+  body.innerHTML = '<p class="text-muted" style="font-size:13px">加载考点详情...</p>';
+  var d;
+  try { d = kpGraphState.detailCache[id] || await apiGet("/kp/" + id); kpGraphState.detailCache[id] = d; }
+  catch (e) { body.innerHTML = '<p style="color:var(--danger-6)">加载失败</p>'; return; }
+  var html = '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">' +
+    '<strong style="font-size:16px">' + esc(d.name) + '</strong>' + peFreqBadge(d.freq) +
+    '<span class="text-muted" style="font-size:12px">' + d.questionCount + ' 题</span></div>';
+  if (d.years && d.years.length) {
+    html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">' +
+      d.years.slice(0, 12).map(function(y) { return '<span style="padding:1px 8px;border-radius:10px;font-size:11px;background:var(--bg-surface-high);color:var(--text-2)">' + esc(y) + '</span>'; }).join("") + '</div>';
+  }
+  if (d.essence) html += '<p style="font-size:12.5px;line-height:1.8;color:var(--text-2);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">' + esc(d.essence.slice(0, 220)) + '…</p>';
+  html += '<button onclick="kpgOpenInTree(' + id + ')" style="width:100%;margin:8px 0;padding:7px;border-radius:8px;border:1px solid var(--primary-6,#1664ff);background:var(--bg-surface-high);color:var(--primary-6,#1664ff);cursor:pointer;font-size:12.5px;font-weight:600">📖 在知识树中查看完整内容</button>';
+  if (d.children && d.children.length) {
+    html += '<div style="font-size:12px;font-weight:700;margin:10px 0 6px">子考点 ' + d.children.length + '</div>';
+    d.children.slice(0, 8).forEach(function(ch) {
+      html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 10px;margin:3px 0;border:1px solid var(--border-2);border-radius:8px;cursor:pointer" onclick="kpgShowDetail(' + ch.id + ')">' +
+        peFreqBadge(ch.freq) + '<span style="font-size:12.5px;flex:1">' + esc(ch.name) + '</span>' +
+        '<span class="text-muted" style="font-size:11px">' + ch.questionCount + ' 题</span></div>';
+    });
+  }
+  var qs = d.questions || [];
+  if (kpGraphState.subject !== "全部") qs = qs.filter(function(q) { return q.paperName && q.paperName.indexOf(kpGraphState.subject) >= 0; });
+  html += '<div style="font-size:12px;font-weight:700;margin:10px 0 6px">关联真题 ' + qs.length + '</div>';
+  qs.slice(0, 15).forEach(function(q) {
+    var brief = String(q.stem || "").split("\n")[0].slice(0, 42);
+    html += '<div style="padding:7px 10px;margin:4px 0;border:1px solid var(--border-2);border-radius:8px;cursor:pointer" onclick="kpgOpenQuestion(' + q.id + ')">' +
+      '<div style="display:flex;gap:6px;align-items:center">' + peTypeBadge(q.type) +
+      (q.paperName ? '<span style="font-size:11px;color:var(--primary-6)">' + esc(q.paperName) + '</span>' : '') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(brief) + '</div></div>';
+  });
+  if (qs.length > 15) html += '<p class="text-muted" style="font-size:12px">…其余 ' + (qs.length - 15) + ' 题在知识树视图查看</p>';
+  body.innerHTML = html;
+}
+
+var kpgQCache = {};
+async function kpgOpenQuestion(qid) {
+  var body = document.getElementById("kpg-panel-body");
+  if (!body) return;
+  var q = kpgQCache[qid];
+  if (!q) {
+    body.innerHTML = '<p class="text-muted" style="font-size:13px">加载真题...</p>';
+    try { q = await apiGet("/past-exam/questions/" + qid); kpgQCache[qid] = q; } catch (e) { body.innerHTML = '<p style="color:var(--danger-6)">加载失败</p>'; return; }
+  }
+  var backId = q.kp ? q.kp.id : kpGraphState.selected;
+  var html = '<button onclick="kpgShowDetail(' + backId + ')" style="padding:4px 12px;border-radius:6px;border:1px solid var(--border-2);background:var(--bg-surface-high);color:var(--text-1);cursor:pointer;font-size:12px;margin-bottom:10px">← 返回考点</button>';
+  html += '<div style="font-size:14px;line-height:1.8;margin-bottom:10px">' + renderStemHtml(q.stem) + '</div>';
+  html += '<div id="kpg-q-body"></div>';
+  body.innerHTML = html;
+  var holder = document.createElement("div");
+  var renderP;
+  if (q.type === "CASE" || q.type === "ESSAY") renderP = peRenderDetail(qid, holder);
+  else { kpgRenderMcqQuiz(q, holder); renderP = Promise.resolve(); }
+  renderP.then(function() {
+    var el = document.getElementById("kpg-q-body");
+    if (el) el.innerHTML = holder.innerHTML;
+  });
+}
+
+/* ============================================================
+   论文备考洞察 (#essay-insight) —— 考频全景 / 理论重复 / 回归窗口
+   数据来源：2013.11-2026.05 架构设计师 16 次真题 64 题，人工标注主题域
+   ============================================================ */
+const EI = {
+  exams: ["2013-11","2014-11","2015-11","2016-11","2017-11","2018-11","2019-11","2020-11","2021-11","2022-11","2023-11","2024-05","2024-11","2025-05","2025-11","2026-05"],
+  themes: [
+    { k:"svc",  name:"服务化架构", c:"#3b82f6" },
+    { k:"data", name:"数据架构",   c:"#8b5cf6" },
+    { k:"dm",   name:"设计方法",   c:"#10b981" },
+    { k:"test", name:"测试与质量", c:"#f59e0b" },
+    { k:"style",name:"架构风格",   c:"#06b6d4" },
+    { k:"eai",  name:"企业集成",   c:"#f97316" },
+    { k:"perf", name:"性能高并发", c:"#ef4444" },
+    { k:"ops",  name:"维护与运维", c:"#64748b" },
+    { k:"rel",  name:"可靠性",     c:"#14b8a6" },
+    { k:"sec",  name:"安全架构",   c:"#e11d48" },
+    { k:"eval", name:"架构评估",   c:"#a855f7" },
+    { k:"req",  name:"需求工程",   c:"#84cc16" },
+    { k:"mw",   name:"中间件",     c:"#94a3b8" }
+  ],
+  /* [考试序号, 题号, 主题域, 题目名] */
+  qs: [
+    [0,1,"dm","论软件架构建模技术与应用（4+1视图）"],
+    [0,2,"style","论企业应用系统的分层架构风格"],
+    [0,3,"rel","论软件可靠性设计技术的应用"],
+    [0,4,"data","论分布式存储系统架构设计"],
+    [1,1,"req","论软件需求管理"],
+    [1,2,"req","论非功能性需求对企业应用架构设计的影响"],
+    [1,3,"rel","论软件的可靠性设计"],
+    [1,4,"sec","论网络安全体系设计（5大类安全服务）"],
+    [2,1,"mw","论应用服务器基础软件"],
+    [2,2,"style","论软件系统架构风格"],
+    [2,3,"svc","论面向服务的架构及其应用（SOA参考架构）"],
+    [2,4,"eai","论企业集成平台的技术与应用"],
+    [3,1,"eval","论软件系统架构评估（质量属性）"],
+    [3,2,"dm","论软件设计模式及其应用"],
+    [3,3,"style","论数据访问层设计技术及其应用"],
+    [3,4,"svc","论微服务架构及其应用（对比单块）"],
+    [4,1,"dm","论软件系统建模方法及其应用"],
+    [4,2,"style","论软件架构风格"],
+    [4,3,"svc","论无服务器架构及其应用"],
+    [4,4,"test","论软件质量保证及其应用（SQA）"],
+    [5,1,"dm","论软件开发过程RUP及其应用"],
+    [5,2,"ops","论软件体系结构的演化"],
+    [5,3,"svc","论面向服务架构设计及其应用（技术标准）"],
+    [5,4,"data","论NoSQL数据库技术及其应用"],
+    [6,1,"dm","论软件设计方法及其应用"],
+    [6,2,"eval","论软件系统架构评估及其应用（SAAM/ATAM/CBAM）"],
+    [6,3,"data","论数据湖技术及其应用（vs数仓5维度）"],
+    [6,4,"perf","论负载均衡技术在Web系统中的应用（三种算法）"],
+    [7,1,"data","论数据分片技术及其应用"],
+    [7,2,"svc","论云原生架构及其应用（四类设计原则）"],
+    [7,3,"test","论软件测试中缺陷管理及其应用"],
+    [7,4,"eai","论企业集成架构设计及应用（三类集成技术）"],
+    [8,1,"dm","论面向方面的编程技术及其应用（AOP）"],
+    [8,2,"sec","论系统安全架构设计及其应用（鉴别+访问控制）"],
+    [8,3,"eai","论企业集成平台的理解与应用（基本功能）"],
+    [8,4,"svc","论微服务架构及其应用（优点）"],
+    [9,1,"dm","论基于构件的软件开发方法及其应用"],
+    [9,2,"ops","论软件维护方法及其应用（影响因素）"],
+    [9,3,"data","论区块链技术及应用（3种核心技术）"],
+    [9,4,"data","论湖仓一体架构及其应用（四类关键特征）"],
+    [10,1,"dm","论面向对象分析的应用与实现"],
+    [10,2,"eai","论多数据源集成的应用与实现"],
+    [10,3,"rel","论软件可靠性评价的设计与实现"],
+    [10,4,"svc","论边云协同的设计与实现"],
+    [11,1,"data","论大数据Lambda架构（三层特性）"],
+    [11,2,"test","论单元测试及其应用（静态/动态）"],
+    [11,3,"dm","论模型驱动架构设计方法及其应用（MDA）"],
+    [11,4,"ops","论云上自动化运维及其应用（CloudOps指标）"],
+    [12,1,"ops","论软件维护及其应用（工作内容+可维护性）"],
+    [12,2,"svc","论面向服务的架构设计（SOA特征与重用）"],
+    [12,3,"eai","论多源异构数据集成方法"],
+    [12,4,"svc","论分布式事务及其解决方案（四种方案）"],
+    [13,1,"style","论事件驱动架构（EDA概念与全过程）"],
+    [13,2,"perf","论负载均衡设计技术（静/动/场景化）"],
+    [13,3,"test","论AI测试用例生成（支持TDD）"],
+    [13,4,"data","论多模型数据管理技术及其应用"],
+    [14,1,"data","论云原生数据库技术及其应用"],
+    [14,2,"test","论性能测试技术及其应用（类型/指标/流程）"],
+    [14,3,"svc","论Serverless架构及其应用（核心组成）"],
+    [14,4,"perf","论秒杀场景及其实践（扩容/缓存/限流/降级）"],
+    [15,1,"test","论多模态大模型在移动智能测试框架中的应用"],
+    [15,2,"style","论六边形架构的设计和应用"],
+    [15,3,"perf","论系统高并发性能优化的设计与实践"],
+    [15,4,"data","论向量数据库的设计与应用"]
+  ],
+  /* 理论重复组：name / 主题色 / 考次日期 / 备注 */
+  groups: [
+    { name:"架构风格清单", k:"style", dots:["2015-11","2017-11"], note:"几乎逐字重复，隔2年" },
+    { name:"可靠性设计技术", k:"rel", dots:["2013-11","2014-11"], note:"连续两年同题" },
+    { name:"高并发技术集(缓存/限流/降级)", k:"perf", dots:["2025-11","2026-05"], note:"技术集合高度重叠，连续两年" },
+    { name:"数据集成(多源异构)", k:"eai", dots:["2023-11","2024-11"], note:"连续两次，内容+技术路线" },
+    { name:"微服务特点/优点", k:"svc", dots:["2016-11","2021-11"], note:"同题级重复，隔5年" },
+    { name:"企业集成平台基本功能", k:"eai", dots:["2015-11","2021-11"], note:"同一采分点(≥4种功能)" },
+    { name:"SOA理论", k:"svc", dots:["2015-11","2018-11","2024-11"], note:"三考：参考架构→技术标准→特征与重用" },
+    { name:"Serverless", k:"svc", dots:["2017-11","2025-11"], note:"同域深化：特点→核心组成+协同" },
+    { name:"负载均衡", k:"perf", dots:["2019-11","2025-05"], note:"升级：三种算法→静/动/场景化" },
+    { name:"架构评估", k:"eval", dots:["2016-11","2019-11"], note:"递进：质量属性→评估方法对比" },
+    { name:"软件维护", k:"ops", dots:["2022-11","2024-11"], note:"影响因素→工作内容+可维护性" },
+    { name:"云原生", k:"svc", dots:["2020-11","2024-05","2025-11"], note:"三侧面：四原则/CloudOps/云原生数据库" },
+    { name:"建模方法", k:"dm", dots:["2013-11","2017-11","2024-05"], note:"三框架：4+1视图/方法分类/MDA" },
+    { name:"安全框架", k:"sec", dots:["2014-11","2021-11"], note:"5类安全服务→鉴别+访问控制" }
+  ],
+  /* 回归窗口候选：理论点 / 上次考核 / 距2026.10.24年数(估算) / 标签 */
+  regression: [
+    { name:"可靠性设计技术（纯设计，非评价）", last:"2014.11", gap:11.8 },
+    { name:"设计模式三大类（创建5/结构7/行为11）", last:"2016.11", gap:9.8 },
+    { name:"架构风格清单+各自含义", last:"2017.11", gap:8.8 },
+    { name:"架构评估方法对比（SAAM/ATAM/CBAM）", last:"2019.11", gap:6.8, tag:"09范文已备" },
+    { name:"云原生四类设计原则", last:"2020.11", gap:5.8 },
+    { name:"微服务特点/优点（vs单块≥4条）", last:"2021.11", gap:4.8, tag:"v3已备" },
+    { name:"企业集成平台基本功能（≥4种）", last:"2021.11", gap:4.8 },
+    { name:"安全鉴别+访问控制框架", last:"2021.11", gap:4.8 },
+    { name:"软件维护工作内容+可维护性", last:"2024.11", gap:1.8 },
+    { name:"SOA特征与软件重用", last:"2024.11", gap:1.8 },
+    { name:"分布式事务四种方案", last:"2024.11", gap:1.8, tag:"刚考概率低" },
+    { name:"数据集成内容+技术路线", last:"2024.11", gap:1.8, tag:"刚考概率低" },
+    { name:"性能测试类型/指标/流程", last:"2025.11", gap:0.8, tag:"刚考概率低" },
+    { name:"向量数据库/高并发技术集", last:"2026.05", gap:0.3, tag:"刚考概率低" }
+  ],
+  cards: [
+    { t:"设计模式三大类", y:"2016.11", gap:9.8, body:'<b>创建型</b>（工厂方法、抽象工厂、单例、建造者、原型）——封装对象创建逻辑；<b>结构型</b>（适配器、桥接、组合、装饰、外观、享元、代理）——简化类与对象的组合结构；<b>行为型</b>（策略、观察者、命令、模板方法、迭代器、状态、职责链、中介者、备忘录、访问者、解释器）——对象职责分配与交互算法。<br><span style="color:var(--text-2)">项目素材：报表导出用策略模式、指标计算用模板方法、预警通知用观察者。</span>' },
+    { t:"架构风格清单", y:"2017.11", gap:8.8, body:'管道-过滤器、客户机/服务器、分层、事件驱动（隐式调用）、微内核（插件）、仓库（数据库/黑板）、解释器、面向对象、环状、C2；云时代延伸：微服务、Serverless、六边形（端口适配器）。<br><span style="color:var(--text-2)">项目素材：采集链路=管道过滤、平台主体=分层+事件驱动、Agent=微服务。</span>' },
+    { t:"架构评估方法对比", y:"2019.11", gap:6.8, body:'<b>SAAM</b>：验证"架构是否支持场景"，可修改性为主，场景开发/分类/评估五步，轻量；<b>ATAM</b>：揭示"属性之间如何权衡"，识别敏感点/权衡点/风险，效用树+九步，多属性；<b>CBAM</b>：回答"改进是否经济"，效用-响应曲线+投资回报排序。<br><span style="color:var(--text-2)">完整实践已写入 09 范文（ATAM：36场景/11风险/12月故障验证）。</span>' },
+    { t:"云原生四类设计原则", y:"2020.11", gap:5.8, body:'<b>服务化</b>（微服务/Serverless拆分）、<b>弹性</b>（伸缩弹性+资源弹性+故障弹性）、<b>可观测性</b>（指标/日志/链路追踪）、<b>自动化</b>（CI/CD、声明式API）。<br><span style="color:var(--text-2)">协同型模板：服务化是基础，弹性是目标，可观测性提供反馈，自动化保障落地，四者协同实现敏捷交付与高可用。</span>' },
+    { t:"微服务特点/优点", y:"2021.11", gap:4.8, body:'服务自治（独立开发部署伸缩）、围绕业务能力组织、去中心化数据治理（每服务独立库）、轻量级通信（REST/MQ）、故障隔离、技术异构、基础设施自动化。与单块对比：优点=独立演进/弹性/容错，代价=分布式复杂性/事务/运维成本。<br><span style="color:var(--text-2)">项目素材：v3 范文 15 服务拆分全套。</span>' },
+    { t:"企业集成平台基本功能（≥4种）", y:"2021.11", gap:4.8, body:'通信服务（消息路由/协议转换）、信息服务（元数据/主数据管理）、应用集成（API/事件适配）、流程集成（BPM编排）、数据集成（ETL/复制）、管理与监控。<br><span style="color:var(--text-2)">项目素材恰好一一对应：RocketMQ=通信、主数据=信息、API网关=应用、Camunda=流程、DataX=数据。</span>' },
+    { t:"安全鉴别+访问控制框架", y:"2021.11", gap:4.8, body:'<b>鉴别</b>=认证主体身份：口令、生物特征、OTP、证书PKI、双因素；<b>访问控制</b>=授权策略：DAC自主、MAC强制、RBAC基于角色、ABAC基于属性。主要威胁：口令破解/社会工程/越权访问/重放攻击/提权，危害=数据泄露篡改、身份冒用、不可抵赖性丧失。<br><span style="color:var(--text-2)">项目素材：RBAC权限服务+财务数据分级+Agent权限隔离+审计留痕。</span>' },
+    { t:"可靠性设计技术", y:"2014.11", gap:11.8, body:'<b>避错</b>（正规化方法/严格测试验证）、<b>检错</b>（断言/防御性编程/心跳探测/校验码）、<b>容错</b>（N版本程序设计、恢复块+接受测试、冗余：结构/信息/时间）。协同：预防→发现→自愈，压缩MTTR拉长MTTF。组装提纲见 data/papers/14。<br><span style="color:var(--text-2)">项目素材：熔断降级+主从复制+幂等设计+异地备份。注意与"可靠性评价"（2023.11考过：模型选择/数据收集/评估预测）区分。</span>' },
+    { t:"可观测性架构", y:"2020.11(四原则之一)", gap:5.8, body:'<b>三支柱：</b><b>指标Metrics</b>（Prometheus，聚合时序数值——QPS/延迟/错误率，回答"发生了什么"）、<b>日志Logging</b>（结构化日志聚合，回答"为什么"）、<b>链路追踪Tracing</b>（SkyWalking/OpenTelemetry，TraceID贯穿全链路，回答"哪里慢/谁调用谁"）。<b>协同叙事：</b>指标发现异常→追踪定位到服务→日志定位根因，三者以统一时间轴与TraceID关联，形成"发现-定位-诊断"闭环，并为弹性伸缩提供决策依据、为SLO提供度量数据。<br><span style="color:var(--text-2)">项目素材：Prometheus+SkyWalking全链路监控、告警分级推送（高/中/低）、99.99%可用性度量。</span>' }
+  ]
+};
+
+let eiCharts = [];
+const THEME_COLOR = {};
+EI.themes.forEach(function(t){ THEME_COLOR[t.k] = t.c; });
+function T_COLOR(k) { return THEME_COLOR[k] || "#94a3b8"; }
+function eiDispose() { eiCharts.forEach(function(ch){ try { ch.dispose(); } catch(e){} }); eiCharts = []; }
+
+async function renderEssayInsight(c) {
+  eiDispose();
+  var cnt = {}, cntMech = {};
+  EI.qs.forEach(function(q){ var k=q[2]; cnt[k]=(cnt[k]||0)+1; if(q[0]>=11) cntMech[k]=(cntMech[k]||0)+1; });
+
+  var chips = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px">' +
+    '<span style="padding:6px 14px;border-radius:20px;background:var(--bg-surface-high);font-size:13px;font-weight:600">16 次考试 · 64 题（4选1）</span>' +
+    '<span style="padding:6px 14px;border-radius:20px;background:var(--bg-surface-high);font-size:13px">13 个主题域</span>' +
+    '<span style="padding:6px 14px;border-radius:20px;background:#fef3c7;color:#92400e;font-size:13px;font-weight:600">机考后 5 次 20 题：测试+数据+性能占 55%</span>' +
+    '<span style="padding:6px 14px;border-radius:20px;background:#fee2e2;color:#991b1b;font-size:13px;font-weight:600">第2问理论 40% 有"前科"</span>' +
+    '<span style="padding:6px 14px;border-radius:20px;background:var(--bg-surface-high);font-size:13px">目标：2026.10.24/25</span>' +
+  '</div>';
+
+  var rankHtml = '';
+  EI.themes.forEach(function(t) {
+    var n = cnt[t.k]||0, m = cntMech[t.k]||0;
+    rankHtml += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px">' +
+      '<span style="width:10px;height:10px;border-radius:3px;background:' + t.c + ';flex:none"></span>' +
+      '<span style="flex:1">' + t.name + '</span>' +
+      '<span style="font-weight:700">' + n + '</span>' +
+      (m ? '<span style="font-size:11px;color:#b45309;background:#fef3c7;padding:1px 6px;border-radius:8px">机考' + m + '</span>' : '') +
+    '</div>';
+  });
+
+  var html = '<div class="page-title">论文备考洞察</div>' +
+    '<div class="page-subtitle">基于 2013.11–2026.05 架构设计师 16 次论文真题的考频、理论重复与回归窗口分析（悬停图表可看明细）</div>' +
+    chips +
+    '<div class="stack" style="margin-top:14px">' +
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">考频全景：每次考试考了什么</div><span class="text-muted" style="font-size:12px">右侧排行含机考后（2024.05起）出现次数</span></div>' +
+      '<div class="content-card-body" style="display:flex;gap:18px;flex-wrap:wrap">' +
+        '<div id="ei-heatmap" style="flex:1;min-width:560px;height:420px"></div>' +
+        '<div style="flex:0 0 230px;max-width:100%"><div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--text-1)">主题域考频排行</div>' + rankHtml + '</div>' +
+      '</div></div>' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">重考规律：同一理论点的回归轨迹</div><span class="text-muted" style="font-size:12px">每个圆点=该理论被考一次，红色区域即回归窗口</span></div>' +
+      '<div class="content-card-body"><div id="ei-beads" style="width:100%;height:520px"></div>' +
+      '<div style="margin-top:8px;padding:10px 14px;border-radius:8px;background:var(--bg-surface-high);font-size:13px;color:var(--text-2)">规律：<b style="color:var(--text-1)">同一知识点 5–8 年换个外壳重考是常态</b>——知识点不变，场景包装跟着时代走（秒杀/高并发 = 老性能专题的电商外壳，向量数据库 = NoSQL 的 AI 版本）。背理论模板的性价比远高于押新题。</div></div></div>' +
+
+    '<div class="grid-2">' +
+      '<div class="content-card"><div class="content-card-header"><div class="content-card-title">2026.10.24 回归窗口倒计时</div><span class="text-muted" style="font-size:12px">距上次考核年数（按 2026.10.24 时点估算）</span></div>' +
+        '<div class="content-card-body"><div id="ei-regression" style="width:100%;height:460px"></div></div></div>' +
+      '<div class="content-card"><div class="content-card-header"><div class="content-card-title">机考后命题风向（20 题）</div></div>' +
+        '<div class="content-card-body"><div id="ei-mech" style="width:100%;height:220px"></div>' +
+        '<div style="margin-top:10px;font-size:13px;line-height:1.9;color:var(--text-1)"><b>第2问问法已换风格：</b><br>' +
+        '<span style="display:inline-block;padding:2px 8px;border-radius:6px;background:var(--bg-surface-high);font-size:12px;margin:2px 4px 2px 0">2013-2019 列举型</span>"有哪些X？阐述每类的含义/特点"<br>' +
+        '<span style="display:inline-block;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#991b1b;font-size:12px;margin:2px 4px 2px 0">2024.05起 组成+协同型</span>"核心组成部分及作用，如何协同实现XX目标"（2025.11 三道全是）<br>' +
+        '<span style="color:#b45309">⚠ 漏答"协同链路/目标回应"是当前最大隐性失分点</span></div></div></div>' +
+    '</div>' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">高概率回归理论背诵卡（第2问直接默写素材）</div><span class="text-muted">点击展开 · 每卡含要点+项目素材映射</span></div>' +
+      '<div class="content-card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px">';
+  EI.cards.forEach(function(card, i) {
+    html += '<details style="border:1px solid var(--border-2);border-radius:10px;padding:10px 14px;background:var(--bg-card)">' +
+      '<summary style="cursor:pointer;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<span style="color:var(--primary-6)">' + (i+1) + '. ' + card.t + '</span>' +
+        '<span style="font-size:11px;color:#991b1b;background:#fee2e2;padding:1px 8px;border-radius:8px">上次 ' + card.y + '</span>' +
+        '<span style="font-size:11px;color:#92400e;background:#fef3c7;padding:1px 8px;border-radius:8px">已隔≈' + card.gap + '年</span>' +
+      '</summary>' +
+      '<div style="font-size:13px;line-height:1.9;margin-top:8px;color:var(--text-1)">' + card.body + '</div></details>';
+  });
+  html += '</div></div>';
+
+  html += '<div class="content-card"><div class="content-card-header"><div class="content-card-title">备考资产索引（data/papers/）</div></div><div class="content-card-body" style="font-size:13px;line-height:2">' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:var(--bg-surface-high);margin:2px 4px 2px 0">04-backbone.md 项目事实卡·唯一数字口径</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#dbeafe;color:#1e40af;margin:2px 4px 2px 0">02-v3 微服务+Agent（考场版）</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#ede9fe;color:#5b21b6;margin:2px 4px 2px 0">05 数据集成(2024.11真题)</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#ede9fe;color:#5b21b6;margin:2px 4px 2px 0">06 湖仓一体(2022.11真题)</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;margin:2px 4px 2px 0">07 负载均衡(2025.5真题)</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;margin:2px 4px 2px 0">08 性能测试(2025.11真题)</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#dcfce7;color:#166534;margin:2px 4px 2px 0">09 架构评估(回归预测)</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fef3c7;color:#92400e;margin:2px 4px 2px 0">10 理论重复分析+背诵卡</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;margin:2px 4px 2px 0">13 AI-RAG范文(2026.10押题·一档头名)</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fef3c7;color:#92400e;margin:2px 4px 2px 0">14 可靠性组装提纲(二档押题)</span>' +
+    '<a href="/sprint.html" style="text-decoration:none;display:inline-block;padding:3px 10px;border-radius:8px;background:#1e40af;color:#ffffff;margin:2px 4px 2px 0">15 冲刺版总集(📱手机页 /sprint.html)</a>' +
+    '<br><span class="text-muted">考场组合策略：主干事实不变 → 从最接近的范文抽 2 个小节 + 从 03-modules 抽 1 个模块重组；交卷前 5–8 分钟专查数字口径与专有名词一致性。</span>' +
+  '</div></div></div>';
+
+  c.innerHTML = html;
+  if (!window.echarts) return;
+
+  /* 图1：考频热力全景 */
+  var cellQ = {};
+  EI.qs.forEach(function(q){ var key = q[0] + ":" + q[2]; (cellQ[key] = cellQ[key] || []).push("第" + q[1] + "题 " + q[3]); });
+  var heatData = [];
+  EI.qs.forEach(function(q) {
+    var ti = EI.themes.findIndex(function(t){ return t.k === q[2]; });
+    var same = EI.qs.filter(function(o){ return o[0]===q[0] && o[2]===q[2]; }).length;
+    heatData.push({ value:[q[0], ti, same], itemStyle:{ color:T_COLOR(q[2]), borderRadius:4 } });
+  });
+  var hm = echarts.init(document.getElementById("ei-heatmap"));
+  hm.setOption({
+    tooltip: { formatter: function(p) {
+      var list = cellQ[p.value[0] + ":" + EI.themes[p.value[1]].k] || [];
+      return "<b>" + EI.themes[p.value[1]].name + "</b> · " + EI.exams[p.value[0]] + "<br>" + list.join("<br>");
+    } },
+    grid: { left: 90, right: 16, top: 30, bottom: 46 },
+    xAxis: { type:"category", data: EI.exams, splitArea:{show:false}, axisLabel:{ fontSize:10, rotate:45, color:"#94a3b8" }, axisTick:{show:false}, axisLine:{lineStyle:{color:"#e2e8f0"}} },
+    yAxis: { type:"category", data: EI.themes.map(function(t){ return t.name; }), inverse:true, axisLabel:{ fontSize:11.5, color:"#475569" }, axisTick:{show:false}, axisLine:{lineStyle:{color:"#e2e8f0"}} },
+    series: [{ type:"heatmap", data: heatData,
+      markArea: { silent:true, itemStyle:{ color:"rgba(59,130,246,0.05)" }, label:{ show:true, position:"insideTop", color:"#3b82f6", fontSize:11, formatter:"机考时期" },
+        data:[[{ xAxis: 10.5 }, { xAxis: 15.5 }]] },
+      markLine: { silent:true, symbol:"none", lineStyle:{ color:"#ef4444", type:"dashed", width:1.5 },
+        label:{ show:true, formatter:"2024.05 机考", fontSize:10, color:"#ef4444", distance:4 },
+        data:[{ xAxis: 10.5 }] }
+    }]
+  });
+  eiCharts.push(hm);
+
+  /* 图2：理论重复回归轨迹 */
+  var beadData = [];
+  EI.groups.forEach(function(g, gi) {
+    g.dots.forEach(function(d, di) {
+      var dt = d.replace("-", "/") + "/01";
+      beadData.push({ value:[dt, gi], group:g.name, date:d, note:g.note,
+        prev: di>0 ? g.dots[di-1] : null,
+        itemStyle:{ color:THEME_COLOR[g.k], borderColor:"#fff", borderWidth:1.5, shadowBlur:4, shadowColor:"rgba(0,0,0,0.2)" } });
+    });
+  });
+  var bd = echarts.init(document.getElementById("ei-beads"));
+  bd.setOption({
+    tooltip: { formatter: function(p) {
+      var gapTxt = p.data.prev ? "（与上次间隔 " + (parseInt(p.data.date.slice(0,4),10)-parseInt(p.data.prev.slice(0,4),10)) + " 年）" : "";
+      return "<b>" + p.data.group + "</b><br>" + p.data.date + " 考核" + gapTxt + "<br><span style='color:#94a3b8'>" + p.data.note + "</span>";
+    } },
+    grid: { left: 150, right: 60, top: 34, bottom: 40 },
+    xAxis: { type:"time", min:"2013/06/01", max:"2026/12/01", axisLabel:{ fontSize:10, color:"#94a3b8", formatter:function(v){ var d=new Date(v); return String(d.getFullYear()); } } },
+    yAxis: { type:"category", data: EI.groups.map(function(g){ return g.name; }), inverse:true, axisLabel:{ fontSize:11, color:"#475569" }, axisTick:{show:false}, axisLine:{lineStyle:{color:"#e2e8f0"}} },
+    series: [{ type:"scatter", symbolSize:15, data: beadData,
+      markArea: { silent:true, itemStyle:{ color:"rgba(239,68,68,0.07)" }, label:{ show:true, position:"insideTop", color:"#dc2626", fontSize:11, formatter:"回归窗口" },
+        data:[[{ xAxis:"2026/09/29" }, { xAxis:"2026/10/25" }]] },
+      markLine: { silent:true, symbol:"none",
+        data: [
+          { xAxis:"2026/09/29", lineStyle:{ color:"#64748b", type:"dashed" }, label:{ formatter:"现在", fontSize:10, color:"#64748b" } },
+          { xAxis:"2026/10/24", lineStyle:{ color:"#dc2626", width:2 }, label:{ formatter:"10.24 考试", fontSize:10.5, color:"#dc2626", fontWeight:700 } }
+        ] }
+    }]
+  });
+  eiCharts.push(bd);
+
+  /* 图3：回归窗口倒计时 */
+  function gapColor(v) { return v>=8?"#dc2626":(v>=4.5?"#f97316":(v>=3?"#f59e0b":(v>=1.5?"#64748b":"#cbd5e1"))); }
+  var reg = EI.regression.slice().sort(function(a,b){ return b.gap-a.gap; });
+  var rg = echarts.init(document.getElementById("ei-regression"));
+  rg.setOption({
+    tooltip: { formatter: function(p){ return "<b>" + p.name + "</b><br>上次考核：" + p.data.last + "<br>已隔 ≈" + p.value + " 年" + (p.data.tag?"<br><span style='color:#92400e'>"+p.data.tag+"</span>":""); } },
+    grid: { left: 8, right: 90, top: 8, bottom: 20, containLabel:true },
+    xAxis: { type:"value", axisLabel:{ fontSize:10, color:"#94a3b8", formatter:"{value}年" }, splitLine:{ lineStyle:{ color:"#f1f5f9" } } },
+    yAxis: { type:"category", data: reg.map(function(r){ return r.name; }), axisLabel:{ fontSize:11, color:"#475569" }, axisTick:{show:false}, axisLine:{show:false} },
+    series: [{ type:"bar", barWidth:14,
+      data: reg.map(function(r){ return { value:r.gap, last:r.last, tag:r.tag, itemStyle:{ color:gapColor(r.gap), borderRadius:[0,7,7,0] } }; }),
+      label: { show:true, position:"right", fontSize:10.5, color:"#64748b", formatter:function(p){ return "上次" + p.data.last; } }
+    }]
+  });
+  eiCharts.push(rg);
+
+  /* 图4：机考后分布玫瑰图 */
+  var mechData = EI.themes.filter(function(t){ return (cntMech[t.k]||0)>0; }).map(function(t){ return { name:t.name+" ("+cntMech[t.k]+")", value:cntMech[t.k], itemStyle:{ color:t.c } }; });
+  var mc = echarts.init(document.getElementById("ei-mech"));
+  mc.setOption({
+    tooltip: { trigger:"item", formatter:"{b}：{c} 题（{d}%）" },
+    series: [{ type:"pie", radius:["38%","68%"], center:["50%","52%"], data:mechData,
+      label:{ fontSize:11, color:"#475569", formatter:"{b}" }, labelLine:{ length:8, length2:8 },
+      itemStyle:{ borderColor:"#fff", borderWidth:2 } }]
+  });
+  eiCharts.push(mc);
+
+  window.addEventListener("resize", function(){ eiCharts.forEach(function(ch){ try{ch.resize();}catch(e){} }); });
+}
+/* ============================================================
+   记忆宫殿 (#memory-palace) —— 论文知识点的空间记忆法 v2
+   S 形蛇形动线：房间按巡游顺序排布，路线零交叉；
+   编号路标 + 已走段实线高亮 + 回归年份徽章 + 图例区
+   ============================================================ */
+const MP = {
+  tour: ["foyer","living","dining","kitchen","bath","study","bedroom","balcony","garage","garden"],
+  rooms: {
+    foyer:  { name:"玄关", tag:"考场策略", c:"#64748b", box:[30,400,160,110],
+      items:[
+        { obj:"鞋柜上的四步选题卡", theory:"选题四步法", detail:"①先看第3问，挑亲手踩过坑的题 ②校验第2问能否列3-5条理论 ③警惕没做过的时髦题（向量库/多模态） ④两个都熟选偏工程的" },
+        { obj:"墙上的挂钟", theory:"时间分配", detail:"选题≤10分钟 → 摘要公式化 → 正文80分钟 → 最后8分钟只查两件事：数字口径一致、专有名词统一" },
+        { obj:"门垫刻字", theory:"摘要最后写", detail:"约320字：背景1句+痛点1句+角色1句+本文结构2句+效果数据1句" }
+      ],
+      mnemonic:"进门先看第三问，八分留给对口径" },
+    living: { name:"客厅", tag:"万能项目", c:"#f59e0b", box:[200,400,230,110],
+      items:[
+        { obj:"三人沙发", theory:"项目背景", detail:"制造业集团 · 30余家子公司 · 年营收超50亿 · 痛点：人工采集3天/新人半年上手/风险滞后（45→68天，300万坏账）" },
+        { obj:"电视大屏", theory:"效果数据", detail:"报告3天→2小时 · 准确率75%→92% · 数据问题-85% · 年省40万 · 免坏账500万 · 接口120ms · 可用性99.99%" },
+        { obj:"茶几上的立项书", theory:"项目骨架", detail:"2024年3月启动→11月上线，历时8个月，团队28人，本人任系统架构师" },
+        { obj:"沙发旁的AI音箱", theory:"架构事实", detail:"15个服务=业务6+Agent5+基础设施4（别说15个微服务） · 42个领域事件 · 10个限界上下文" }
+      ],
+      mnemonic:"沙发坐着集团，电视放着效果，音箱报着架构" },
+    dining: { name:"餐厅", tag:"企业集成平台 · 已隔≈5年", c:"#f97316", box:[440,400,150,110],
+      items:[
+        { obj:"餐桌转盘", theory:"通信服务", detail:"消息路由/协议转换 → 项目里就是 RocketMQ" },
+        { obj:"菜单", theory:"信息服务", detail:"元数据/主数据管理 → 集团科目主数据" },
+        { obj:"公筷", theory:"应用集成", detail:"API/事件适配 → API网关" },
+        { obj:"上菜顺序卡", theory:"流程集成", detail:"BPM编排 → Camunda 流程引擎" },
+        { obj:"中央汤锅", theory:"数据集成", detail:"ETL/复制汇聚 → DataX+Flink CDC" },
+        { obj:"值班经理", theory:"管理与监控", detail:"集成平台运行监控告警" }
+      ],
+      mnemonic:"转盘·菜单·公筷·顺序·汤锅·经理——六道菜上齐" },
+    kitchen:{ name:"厨房", tag:"可靠性设计技术 · 已隔≈12年", c:"#14b8a6", box:[600,400,150,110],
+      items:[
+        { obj:"橱柜密封罐", theory:"避错", detail:"正规化方法、严格的测试验证——把错误封死在罐子里不发生" },
+        { obj:"双开门冰箱", theory:"冗余", detail:"结构/信息/时间冗余；主从半同步复制、异地备份——冰箱坏了另一门还冷" },
+        { obj:"烟雾报警器", theory:"检错", detail:"心跳探测、断言、防御性编程、校验码——冒烟就响" },
+        { obj:"灭火器", theory:"容错", detail:"N版本程序设计、恢复块+接受测试——烧了也能扑" },
+        { obj:"灶台便签", theory:"项目映射", detail:"熔断降级+主从复制+幂等设计+异地备份；注意与可靠性评价区分（2023.11考过评价：模型选择/数据收集/评估预测）" }
+      ],
+      mnemonic:"罐避·警检·灭容——冰箱永远有备门" },
+    bath:   { name:"浴室", tag:"安全框架 · 已隔≈5年", c:"#e11d48", box:[590,210,160,160],
+      items:[
+        { obj:"智能门锁", theory:"鉴别（认证身份）", detail:"口令、生物特征、OTP、证书PKI、双因素——先证明你是你" },
+        { obj:"浴室镜子", theory:"访问控制（授权）", detail:"DAC自主/MAC强制/RBAC基于角色/ABAC基于属性——镜子里看清你能碰什么" },
+        { obj:"莲蓬头分流", theory:"数据分级", detail:"财务数据按密级分流推送" },
+        { obj:"地漏", theory:"主要威胁", detail:"口令破解/社会工程/越权访问/重放攻击/提权——危害：泄露篡改、身份冒用、抵赖——都从地漏排走" },
+        { obj:"毛巾架便签", theory:"项目映射", detail:"RBAC权限服务+财务数据分级+Agent权限隔离+审计留痕" }
+      ],
+      mnemonic:"锁辨人、镜授权、漏排险" },
+    study:  { name:"书房", tag:"设计模式 5/7/11 · 已隔≈10年", c:"#10b981", box:[400,210,180,160],
+      items:[
+        { obj:"书架顶层帽子盒×5", theory:"创建型", detail:"工厂方法、抽象工厂、单例、建造者、原型——工厂生产帽子（对象如何出生）" },
+        { obj:"中层西装×7", theory:"结构型", detail:"适配器、桥接、组合、装饰、外观、享元、代理——穿衣搭配（对象如何组装）" },
+        { obj:"抽屉档案×11", theory:"行为型", detail:"策略、观察者、命令、模板方法、迭代器、状态、职责链、中介者、备忘录、访问者、解释器——为人处世（对象如何交互）" },
+        { obj:"桌上项目笔记", theory:"项目映射", detail:"报表导出=策略模式 · 指标计算=模板方法 · 预警通知=观察者" }
+      ],
+      mnemonic:"帽造·衣构·档行为——5、7、11" },
+    bedroom:{ name:"卧室", tag:"架构风格清单 · 已隔≈9年", c:"#06b6d4", box:[210,210,180,160],
+      items:[
+        { obj:"床垫三层", theory:"分层风格", detail:"表现层/业务逻辑层/数据访问层——层间松耦合、不跨层调用" },
+        { obj:"床头门铃", theory:"事件驱动", detail:"隐式调用、发布订阅——按门铃才响应" },
+        { obj:"进水管", theory:"管道-过滤器", detail:"数据流经一系列处理单元——采集链路就是它" },
+        { obj:"床架+插座", theory:"微内核", detail:"核心+插件——插座上随插随用" },
+        { obj:"衣柜", theory:"仓库风格", detail:"数据库/黑板——中央存储各取所需" },
+        { obj:"墙上全家福", theory:"客户机/服务器", detail:"一请求一响应" },
+        { obj:"床头新海报", theory:"云时代成员", detail:"微服务、Serverless、六边形（端口适配器）——风格家族在不断添丁" }
+      ],
+      mnemonic:"垫分·铃事·管水·架微·柜仓·福主从" },
+    balcony:{ name:"阳台", tag:"云原生四原则 · 已隔≈6年", c:"#2563eb", box:[30,210,170,160],
+      items:[
+        { obj:"主干植物", theory:"服务化", detail:"微服务/Serverless 拆分——一切从主干长出" },
+        { obj:"伸缩花架", theory:"弹性", detail:"资源弹性+故障弹性+伸缩——架子能伸能缩" },
+        { obj:"叶面传感器", theory:"可观测性", detail:"指标/日志/链路追踪（Prometheus+SkyWalking）——叶子感知阳光" },
+        { obj:"自动浇花器", theory:"自动化", detail:"CI/CD、声明式API——不用人浇水" },
+        { obj:"花架说明牌", theory:"协同型模板", detail:"服务化是基础、弹性是目标、可观测性给反馈、自动化保落地——四者协同实现敏捷与高可用" }
+      ],
+      mnemonic:"干·架·叶·浇——服务化、弹性、可观测、自动化" },
+    garage: { name:"车库", tag:"微服务特点 · 已隔≈5年", c:"#3b82f6", box:[30,30,180,150],
+      items:[
+        { obj:"一队各自开的小车", theory:"服务自治", detail:"独立开发、独立部署、独立伸缩" },
+        { obj:"车型各不相同", theory:"技术异构", detail:"每辆车用各自合适的技术栈" },
+        { obj:"车对讲机", theory:"轻量级通信", detail:"REST/MQ——只装对讲机不装拖车绳" },
+        { obj:"一辆抛锚不堵路", theory:"故障隔离", detail:"单服务故障不拖垮全局" },
+        { obj:"各自独立油箱", theory:"去中心化数据治理", detail:"每服务独立数据库，不共用油箱" },
+        { obj:"车库铭牌", theory:"项目映射", detail:"15个服务=业务6+Agent5+基础设施4；与单块对比：优点=独立演进/弹性/容错，代价=分布式复杂性/事务/运维成本" }
+      ],
+      mnemonic:"自治异构轻通信，隔离油箱各自存" },
+    garden: { name:"花园", tag:"架构评估 · 已隔≈7年", c:"#a855f7", box:[220,30,180,150],
+      items:[
+        { obj:"巡逻园丁", theory:"SAAM 场景分析法", detail:"最早、轻量、五步：场景开发→架构描述→场景分类→交互→总体评估；以可修改性为主" },
+        { obj:"放大镜园丁", theory:"ATAM 架构权衡分析法", detail:"九步、效用树排序；识别敏感点/权衡点/风险；揭示性能/可用性/安全/可修改性的相互制约" },
+        { obj:"算账园丁", theory:"CBAM 成本效益分析法", detail:"在ATAM之上做经济分析：效用-响应曲线、投资回报、给架构策略排序" },
+        { obj:"花园项目展板", theory:"ATAM实践素材", detail:"36个场景按重要性/难度进效用树；敏感点=连接池/超时阈值/缓存时长；权衡点=熔断阈值/缓存一致性/置信度80%；11项风险→多供应商路由改造，12月故障10秒切换验证" }
+      ],
+      mnemonic:"巡场景（SAAM）、镜权衡（ATAM）、账排序（CBAM）" }
+  }
+};
+
+let mpTourTimer = null, mpTourIdx = -1;
+function mpStopTour() { if (mpTourTimer) { clearInterval(mpTourTimer); mpTourTimer = null; } }
+
+function mpCenter(id) {
+  var b = MP.rooms[id].box;
+  return [b[0] + b[2] / 2, b[1] + b[3] / 2];
+}
+function mpGapColor(v) { return v >= 8 ? "#dc2626" : "#f97316"; }
+
+async function renderMemoryPalace(c) {
+  mpStopTour();
+  var roomSvg = "";
+  Object.keys(MP.rooms).forEach(function(id) {
+    var r = MP.rooms[id], b = r.box, cx = b[0] + b[2] / 2, cy = b[1] + b[3] / 2;
+    var gap = (r.tag.match(/已隔≈([\d.]+)年/) || [])[1];
+    var badge = "";
+    if (gap) {
+      badge = '<rect x="' + (b[0] + b[2] - 58) + '" y="' + (b[1] + 7) + '" width="50" height="17" rx="8" fill="' + mpGapColor(parseFloat(gap)) + '"/>' +
+        '<text x="' + (b[0] + b[2] - 33) + '" y="' + (b[1] + 19) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">≈' + gap + '年</text>';
+    }
+    roomSvg += '<g id="mp-room-' + id + '" class="mp-room" onclick="mpSelect(\'' + id + '\')">' +
+      '<rect class="room" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] + '" rx="12" fill="' + r.c + '" fill-opacity="0.13" stroke="' + r.c + '" stroke-width="1.5"/>' +
+      '<text x="' + cx + '" y="' + (cy - 20) + '" text-anchor="middle" font-size="16" font-weight="700" fill="' + r.c + '">' + r.name + '</text>' +
+      '<text x="' + cx + '" y="' + (cy + 24) + '" text-anchor="middle" font-size="10" fill="#94a3b8">' + r.tag.split(" · ")[0] + '</text>' +
+      badge +
+    '</g>';
+  });
+
+  /* S 形动线：9 段路径 + 编号路标 */
+  var route = '<defs>' +
+    '<marker id="mp-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#cbd5e1"/></marker>' +
+    '<marker id="mp-arrow-walk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#64748b"/></marker>' +
+    '</defs>';
+  var waypoints = "";
+  for (var i = 0; i < MP.tour.length; i++) {
+    var rid = MP.tour[i], rr = MP.rooms[rid], pc = mpCenter(rid);
+    if (i < MP.tour.length - 1) {
+      var nc = mpCenter(MP.tour[i + 1]);
+      var dx = nc[0] - pc[0], dy = nc[1] - pc[1], len = Math.sqrt(dx * dx + dy * dy);
+      var ux = dx / len, uy = dy / len, pad = 17;
+      route += '<line id="mp-seg-' + i + '" x1="' + (pc[0] + ux * pad) + '" y1="' + (pc[1] + uy * pad) + '" x2="' + (nc[0] - ux * pad) + '" y2="' + (nc[1] - uy * pad) + '" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="7 5" opacity="0.55" marker-end="url(#mp-arrow)"/>';
+    }
+    waypoints += '<g id="mp-wp-' + rid + '" style="cursor:pointer" onclick="mpSelect(\'' + rid + '\')">' +
+      '<circle cx="' + pc[0] + '" cy="' + pc[1] + '" r="13" fill="' + rr.c + '" stroke="#fff" stroke-width="2"/>' +
+      '<text x="' + pc[0] + '" y="' + (pc[1] + 4.5) + '" text-anchor="middle" font-size="12.5" font-weight="800" fill="#fff">' + (i + 1) + '</text>' +
+    '</g>';
+  }
+  var legend = '<g>' +
+    '<rect x="420" y="30" width="330" height="150" rx="12" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="6 4"/>' +
+    '<text x="440" y="54" font-size="12.5" font-weight="700" fill="#475569">图例 · S 形走位顺序</text>' +
+    '<line x1="440" y1="74" x2="470" y2="74" stroke="#64748b" stroke-width="2.5"/><text x="478" y="78" font-size="10.5" fill="#64748b">实线 = 已走过 · 虚线 = 还没走</text>' +
+    '<circle cx="447" cy="97" r="7.5" fill="#94a3b8" stroke="#fff" stroke-width="1.5"/><text x="462" y="101" font-size="10.5" fill="#64748b">圆点数字 = 巡游站序（1 进宫 · 10 出宫）</text>' +
+    '<rect x="438" y="114" width="38" height="15" rx="7" fill="#dc2626"/><text x="457" y="125" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">≈10年</text><text x="484" y="126" font-size="10.5" fill="#64748b">回归徽章：红≥8年 · 橙≥5年（越红越优先背）</text>' +
+    '<text x="440" y="150" font-size="10.5" fill="#94a3b8">走位：玄关→客厅→餐厅→厨房→浴室→书房</text>' +
+    '<text x="440" y="167" font-size="10.5" fill="#94a3b8">　　　→卧室→阳台→车库→花园（S 形不交叉）</text>' +
+  '</g>';
+
+  var stationChips = "";
+  MP.tour.forEach(function(id, i) {
+    var r = MP.rooms[id];
+    stationChips += '<span id="mp-chip-' + id + '" onclick="mpSelect(\'' + id + '\')" style="cursor:pointer;padding:4px 12px;border-radius:14px;border:1px solid var(--border-2);background:var(--bg-surface-high);font-size:12.5px;color:var(--text-1)">' + (i + 1) + '. ' + r.name + '<span style="color:#94a3b8;font-size:11px"> ' + r.tag.split(" · ")[0] + '</span></span>';
+  });
+
+  c.innerHTML = '<style>' +
+    '.mp-room{cursor:pointer}' +
+    '.mp-room rect.room{transition:fill-opacity .25s,stroke-width .25s}' +
+    '.mp-room:hover rect.room{fill-opacity:.24}' +
+    '.mp-room.active rect.room{fill-opacity:.34;stroke-width:2.5}' +
+    '.mp-room text{transition:font-weight .1s}' +
+    '#mp-floor line,#mp-floor circle{transition:stroke .3s,opacity .3s}' +
+    '</style>' +
+    '<div class="page-title">记忆宫殿 · 论文知识点的空间记忆</div>' +
+    '<div class="page-subtitle">参考思维宫殿法（Method of Loci）：把 8 张理论卡 + 万能项目 + 考场策略放进一套 10 站的住宅动线，每件物品锚定一个采分点——考前闭眼走一遍，考场上按题"回房间取物"</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px">' +
+      '<span style="padding:6px 14px;border-radius:20px;background:var(--bg-surface-high);font-size:13px;font-weight:600">10 站 · 38 件记忆锚点</span>' +
+      '<span style="padding:6px 14px;border-radius:20px;background:#fef3c7;color:#92400e;font-size:13px">动线即考场流程：进门定策略 → 客厅取项目 → 按题进房取理论 → 玄关对口径</span>' +
+    '</div>' +
+    '<div class="stack" style="margin-top:14px">' +
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">宫殿平面图 · S 形巡游动线</div>' +
+      '<button id="mp-tour-btn" onclick="mpStartTour()" style="padding:6px 16px;border-radius:8px;border:1px solid var(--primary-6);background:var(--primary-6);color:#fff;cursor:pointer;font-weight:600;font-size:13px">▶ 开始巡游</button></div>' +
+      '<div class="content-card-body" style="display:flex;gap:18px;flex-wrap:wrap">' +
+        '<div style="flex:1.35;min-width:560px"><svg id="mp-floor" viewBox="0 0 780 540" style="width:100%">' +
+          route + legend + roomSvg + waypoints +
+        '</svg></div>' +
+        '<div id="mp-detail" style="flex:1;min-width:340px"></div>' +
+      '</div></div>' +
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">十站站点（按巡游顺序，点任一站直达）</div></div>' +
+      '<div class="content-card-body" style="display:flex;gap:8px;flex-wrap:wrap">' + stationChips + '</div></div>' +
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">考场取用方法（三步）</div></div><div class="content-card-body" style="font-size:13.5px;line-height:2">' +
+      '<b>① 考前一周：</b>每天闭眼走完全程一遍（2 分钟），重点房间（厨房/书房/卧室/花园=回归窗口最大的四站）各停留默写口诀；' +
+      '<b>② 考场审题时：</b>读完题干第 2 问，判断它住哪个房间——"有哪些分类"进书房/卧室，"核心组成+协同"进阳台/餐厅，"权衡/评估"进花园；' +
+      '<b>③ 交卷前 8 分钟：</b>回到玄关看挂钟——全文搜一遍数字口径（50亿/28人/15服务）与专有名词（风险预警Agent）是否前后一致。</div></div>' +
+    '</div>';
+  mpSelect("foyer");
+}
+
+function mpSelect(id) {
+  var r = MP.rooms[id]; if (!r) return;
+  var idx = MP.tour.indexOf(id);
+  Object.keys(MP.rooms).forEach(function(k) {
+    var el = document.getElementById("mp-room-" + k);
+    if (el) el.classList.toggle("active", k === id);
+    var chip = document.getElementById("mp-chip-" + k);
+    if (chip) { chip.style.background = k === id ? r.c : "var(--bg-surface-high)"; chip.style.color = k === id ? "#fff" : "var(--text-1)"; chip.style.borderColor = k === id ? r.c : "var(--border-2)"; }
+    var wp = document.getElementById("mp-wp-" + k);
+    if (wp) { wp.firstChild.setAttribute("stroke", k === id ? "#1e293b" : "#fff"); wp.firstChild.setAttribute("stroke-width", k === id ? "3" : "2"); }
+  });
+  for (var i = 0; i < MP.tour.length - 1; i++) {
+    var seg = document.getElementById("mp-seg-" + i);
+    if (seg) {
+      var walked = i < idx;
+      seg.setAttribute("stroke", walked ? "#64748b" : "#cbd5e1");
+      seg.setAttribute("stroke-dasharray", walked ? "none" : "7 5");
+      seg.setAttribute("opacity", walked ? "0.9" : "0.55");
+      seg.setAttribute("marker-end", walked ? "url(#mp-arrow-walk)" : "url(#mp-arrow)");
+    }
+  }
+  var html = '<div style="border:2px solid ' + r.c + ';border-radius:12px;padding:14px 16px;background:var(--bg-card);height:100%">' +
+    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">' +
+      '<span style="font-size:19px;font-weight:800;color:' + r.c + '">第' + (idx + 1) + '站 · ' + r.name + '</span>' +
+      '<span style="padding:2px 10px;border-radius:10px;font-size:11.5px;color:#fff;background:' + r.c + '">' + r.tag + '</span>' +
+    '</div>' +
+    '<div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px">口诀：<b style="color:var(--text-1)">' + r.mnemonic + '</b></div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px">';
+  r.items.forEach(function(it) {
+    html += '<div style="border-left:3px solid ' + r.c + ';padding:2px 0 2px 10px">' +
+      '<div style="font-size:13.5px;font-weight:700;color:var(--text-1)">' + it.obj + ' <span style="font-weight:400;color:' + r.c + '">→ ' + it.theory + '</span></div>' +
+      '<div style="font-size:12.5px;line-height:1.8;color:var(--text-2);margin-top:2px">' + it.detail + '</div></div>';
+  });
+  html += '</div></div>';
+  document.getElementById("mp-detail").innerHTML = html;
+}
+
+function mpStartTour() {
+  mpStopTour(); mpTourIdx = -1;
+  var btn = document.getElementById("mp-tour-btn");
+  btn.textContent = "■ 停止巡游"; btn.onclick = mpStopTourBtn;
+  mpTourTimer = setInterval(function() {
+    mpTourIdx++;
+    if (mpTourIdx >= MP.tour.length) { mpStopTourBtn(); mpSelect("foyer"); return; }
+    mpSelect(MP.tour[mpTourIdx]);
+  }, 3500);
+  mpSelect(MP.tour[0]); mpTourIdx = 0;
+}
+function mpStopTourBtn() {
+  mpStopTour();
+  var btn = document.getElementById("mp-tour-btn");
+  if (btn) { btn.textContent = "▶ 开始巡游"; btn.onclick = mpStartTour; }
+}
+/* ============================================================
+   综合备考 (#mcq-insight) —— 综合知识 75 题考频/预算/框架卡
+   数据来源：11-mcq-analysis.md（kp 父级聚合，合计校验通过）
+   ============================================================ */
+const MQ = {
+  /* [域, 全期每卷, 机考后每卷, 档位1/2/3] */
+  domains: [
+    ["系统架构设计",12.3,19.8,1],
+    ["系统分析与设计",4.7,6.0,1],
+    ["软件工程",6.1,5.0,1],
+    ["操作系统",4.6,4.8,1],
+    ["软件测试",2.7,4.6,1],
+    ["信息安全",2.3,4.0,1],
+    ["数据库系统",3.1,4.0,1],
+    ["计算机网络",3.4,3.6,2],
+    ["法律法规与标准化",2.7,2.8,2],
+    ["数学与经济管理",1.7,2.4,2],
+    ["企业信息化战略",2.3,2.4,2],
+    ["系统可靠性",0.7,1.8,2],
+    ["项目管理",1.8,1.4,2],
+    ["专业英语",0.75,0.8,3],
+    ["计算机组成原理",1.4,1.2,3],
+    ["系统运行与维护",0.9,0.2,3]
+  ],
+  /* 叶子考点 Top20（全期题数） */
+  leaves: [
+    ["软件架构风格",45,"架构"],["软件质量属性",31,"架构"],["软件架构评估",29,"架构"],
+    ["基于构件的软件工程",27,"软工"],["开发模型",26,"软工"],["关系数据库",23,"库"],
+    ["进程管理",22,"OS"],["嵌入式系统",19,"组成"],["产权归属",19,"法规"],["设计模式",17,"软工"],
+    ["基于架构的软件开发",16,"架构"],["信息安全基础知识",16,"安全"],["结构化分析",16,"分析"],
+    ["特定领域软件架构",15,"架构"],["规划设计",13,"软工"],["文件系统",12,"OS"],
+    ["配置管理",11,"软工"],["应用数学",11,"数学"],["专业英语",11,"英语"],["进度管理",10,"项目"]
+  ],
+  tierColor: { 1:"#2563eb", 2:"#f59e0b", 3:"#94a3b8" },
+  leafDomainColor: { "架构":"#2563eb","软工":"#6366f1","分析":"#22c55e","OS":"#10b981","库":"#0ea5e9","安全":"#14b8a6","法规":"#f97316","数学":"#f59e0b","英语":"#cbd5e1","项目":"#a855f7","组成":"#94a3b8" }
+};
+
+let mqCharts = [];
+function mqDispose() { mqCharts.forEach(function(ch){ try { ch.dispose(); } catch(e){} }); mqCharts = []; }
+
+async function renderMcqInsight(c) {
+  mqDispose();
+  var sorted = MQ.domains.slice().sort(function(a,b){ return b[2]-a[2]; });
+
+  /* 75 题预算：[标签, 题量, 目标得分, 颜色] */
+  var budget = [
+    ["第一档 7 域",48.2,40,"#2563eb"],
+    ["第二档 6 域",14.4,6.5,"#f59e0b"],
+    ["明确放弃",2.2,0,"#94a3b8"],
+    ["未覆盖+长尾",10.2,0,"#e2e8f0"]
+  ];
+
+  var html = '<style>' +
+    '.mq-card summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--primary-6)}' +
+    '.mq-card{border:1px solid var(--border-2);border-radius:10px;padding:10px 14px;background:var(--bg-card)}' +
+    '.mq-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}' +
+    '.mq-table th,.mq-table td{border:1px solid var(--border-2);padding:4px 8px;text-align:left;line-height:1.6}' +
+    '.mq-table th{background:var(--bg-surface-high);font-weight:600}' +
+    '</style>' +
+    '<div class="page-title">综合备考 · 75 题考频与得分策略</div>' +
+    '<div class="page-subtitle">基于 16 卷 819 道综合知识真题（kp 父级聚合，合计校验通过）——考什么、拿多少、放弃什么、剩 24 天怎么执行</div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px">' +
+      '<span style="padding:6px 14px;border-radius:20px;background:var(--bg-surface-high);font-size:13px;font-weight:600">75 题 × 1 分 · 150 分钟 · 45 及格</span>' +
+      '<span style="padding:6px 14px;border-radius:20px;background:#dbeafe;color:#1e40af;font-size:13px;font-weight:600">机考后架构占比 30.6%（每卷 19.8 题）</span>' +
+      '<span style="padding:6px 14px;border-radius:20px;background:#dcfce7;color:#166534;font-size:13px;font-weight:600">得分模型 40 + 6.5 ≈ 46.5 过线</span>' +
+      '<span style="padding:6px 14px;border-radius:20px;background:var(--bg-surface-high);font-size:13px">目标：2026.10.24/25</span>' +
+    '</div>' +
+    '<div class="stack" style="margin-top:14px">' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">16 域考频对比：全期 vs 机考后（每卷题数）</div><span class="text-muted" style="font-size:12px">蓝=第一档必拿 · 橙=第二档套路 · 灰=战略放弃</span></div>' +
+      '<div class="content-card-body"><div id="mq-domains" style="width:100%;height:540px"></div></div></div>' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">75 题预算与得分模型</div><span class="text-muted" style="font-size:12px">上条=题量构成 · 下条=目标得分 · 红线=45 及格线</span></div>' +
+      '<div class="content-card-body"><div id="mq-budget" style="width:100%;height:200px"></div>' +
+      '<div style="margin-top:6px;font-size:13px;color:var(--text-2)">第一档 48.2 题拿 40（83%）+ 第二档 14.4 题拿 6.5（45%）≈ <b style="color:#166534">46.5 分过线</b>；架构每多稳 1 题 +1 分——<b style="color:var(--text-1)">一切增量投架构</b>。未覆盖 10.2 题是爬虫缺口+长尾冷门，本就不在计划内。</div></div></div>' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">叶子考点 Top 20（全期题数）</div><span class="text-muted" style="font-size:12px">颜色=所属域 · 架构五件套合计 136 题=全卷 16.6%</span></div>' +
+      '<div class="content-card-body"><div id="mq-leaves" style="width:100%;height:520px"></div></div></div>' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">第一档 · 六大框架卡（≈48 题/卷，目标拿 40）</div><span class="text-muted">点击展开 · 与论文宫殿/背诵卡同源</span></div>' +
+      '<div class="content-card-body" style="display:flex;flex-direction:column;gap:10px">';
+  MQ_CARD.forEach(function(cd, i) {
+    html += '<details class="mq-card"><summary>' + (i+1) + '. ' + cd.t + ' <span style="font-size:11.5px;color:#92400e;background:#fef3c7;padding:1px 8px;border-radius:8px">' + cd.tag + '</span></summary>' +
+      '<div style="font-size:12.5px;line-height:1.8;margin-top:8px;color:var(--text-1)">' + cd.body + '</div></details>';
+  });
+  html += '</div></div>' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">第二档 · 六张套路卡（14.4 题，拿 6~7）</div></div>' +
+      '<div class="content-card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px">';
+  MQ_TACTIC.forEach(function(tc) {
+    html += '<div style="border:1px solid var(--border-2);border-radius:10px;padding:10px 14px;background:var(--bg-card)">' +
+      '<div style="font-weight:700;font-size:13px;color:var(--text-1)">' + tc.t + ' <span style="font-size:11px;color:#92400e;background:#fef3c7;padding:1px 8px;border-radius:8px">' + tc.tag + '</span></div>' +
+      '<div style="font-size:12.5px;line-height:1.8;color:var(--text-2);margin-top:4px">' + tc.body + '</div></div>';
+  });
+  html += '</div></div>' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">速记总表（考前最后一遍 · 遮住右侧自测）</div><span class="text-muted" style="font-size:12px">关键词→一句话本质 · 竖线分隔</span></div>' +
+      '<div class="content-card-body">';
+  MQ_MEMO.forEach(function(m) {
+    html += '<div style="border:1px solid var(--border-2);border-radius:10px;padding:8px 12px;background:var(--bg-surface-low);margin-bottom:8px">' +
+      '<span style="display:inline-block;padding:1px 8px;border-radius:8px;background:#fff7ed;color:#c2410c;font-weight:700;font-size:11.5px;margin-right:8px">' + m[0] + '</span>' +
+      '<span style="font-size:12.5px;line-height:2;color:var(--text-1)">' + m[1] + '</span></div>';
+  });
+  html += '</div></div>' +
+
+    '<div class="grid-2">' +
+      '<div class="content-card"><div class="content-card-header"><div class="content-card-title">第三档 · 战略放弃（让出 ≈2.2 分，不许回头补）</div></div>' +
+        '<div class="content-card-body" style="font-size:13px;line-height:2">' +
+          '<span style="color:#dc2626;font-weight:700">✕ 专业英语</span>（0.8 题/卷）语感题无法突击，考场全选同一字母<br>' +
+          '<span style="color:#dc2626;font-weight:700">✕ 组成原理大部</span>（1.2 题/卷）机考后腰斩；只保留嵌入式（叶子 19 题：看门狗/JTAG/交叉开发）<br>' +
+          '<span style="color:#dc2626;font-weight:700">✕ 系统运行与维护</span>（0.2 题/卷）机考后几乎消失<br>' +
+          '<span style="color:#94a3b8">长尾冷门（Top20 之外数百节点，绝大多数 ≤2 次考频）——每年 3~5 分防不住，不防</span></div></div>' +
+      '<div class="content-card"><div class="content-card-header"><div class="content-card-title">Study Hub 工具联动</div></div>' +
+        '<div class="content-card-body" style="font-size:13px;line-height:2">' +
+          '<b>刷题战斗</b>：按域配比抽题——架构 40% / 软工+分析 20% / OS+库+安全+测试 28% / 第二档 12%，每日 30 题<br>' +
+          '<b>错题本</b>：错题按框架卡归类，回炉时按卡复习<br>' +
+          '<b>记忆宫殿</b>：架构理论题错了 → 回对应房间（风格=卧室、评估=花园）<br>' +
+          '<b>全真模拟</b>：最后两周整卷计时，练单题 ≤2 分钟<br>' +
+          '<b>论文备考页</b>：架构理论回归窗口 = 综合同考点高频依据</div></div>' +
+    '</div>' +
+
+    '<div class="content-card"><div class="content-card-header"><div class="content-card-title">24 天冲刺计划（9.30 → 10.24/25，三科并行）</div><span class="text-muted">验收线：P1 末架构 ≥85% · P2 末四域 ≥75% · P3 末模拟 ≥50</span></div>' +
+      '<div class="content-card-body" style="overflow-x:auto"><table class="mq-table" style="font-size:12.5px;min-width:640px">' +
+        '<tr><th>阶段</th><th>日期</th><th>综合知识（每日45分钟）</th><th>论文（每日60分钟）</th><th>案例（每日45分钟）</th></tr>' +
+        '<tr><td><b>P1</b></td><td>10.1–10.7</td><td>卡1 架构五件套 + 架构域刷题每日 30 题</td><td>v3 微服务范文骨架默写 3 遍</td><td>UML/质量属性小问专题</td></tr>' +
+        '<tr><td><b>P2</b></td><td>10.8–10.14</td><td>卡2~卡6 + 四域刷题</td><td>05/07 两篇范文精读改写</td><td>历年案例真题每日一题</td></tr>' +
+        '<tr><td><b>P3</b></td><td>10.15–10.21</td><td>第二档套路卡 + 错题回炉</td><td>全真模拟限时 1 篇</td><td>全真模拟 1 套</td></tr>' +
+        '<tr><td><b>P4</b></td><td>10.22–10.23</td><td>只看错题本+套路卡</td><td>只看背诵卡+宫殿巡游</td><td>只看错题</td></tr>' +
+        '<tr><td style="color:#dc2626;font-weight:700">考试</td><td colspan="4"><b>10.24/25 · 三科按准考证安排 · 放弃区从 Day1 就不碰</b></td></tr>' +
+      '</table></div></div>' +
+
+    '</div>';
+
+  c.innerHTML = html;
+  if (!window.echarts) return;
+
+  /* 图1：域考频对比 */
+  var dAll = [], dMech = [];
+  sorted.forEach(function(d) {
+    dAll.push({ value: d[1], itemStyle:{ color:"#cbd5e1" } });
+    dMech.push({ value: d[2], itemStyle:{ color: MQ.tierColor[d[3]] }, trend: d[2]>d[1]*1.15?"↑":(d[2]<d[1]*0.85?"↓":"→"), all: d[1] });
+  });
+  var dm = echarts.init(document.getElementById("mq-domains"));
+  dm.setOption({
+    tooltip: { trigger:"axis", axisPointer:{ type:"shadow" }, formatter: function(ps) {
+      var m = ps.filter(function(p){ return p.data && p.data.all !== undefined; })[0] || ps[0];
+      return "<b>" + m.name + "</b><br>全期每卷 " + m.data.all + " 题<br>机考后每卷 " + m.data.value + " 题 " + (m.data.trend||"");
+    } },
+    legend: { data:["全期每卷","机考后每卷"], top:0, textStyle:{ fontSize:11, color:"#475569" } },
+    grid: { left:8, right:52, top:28, bottom:8, containLabel:true },
+    xAxis: { type:"value", axisLabel:{ fontSize:10, color:"#94a3b8" }, splitLine:{ lineStyle:{ color:"#f1f5f9" } } },
+    yAxis: { type:"category", data: sorted.map(function(d){ return d[0]; }), inverse:true, axisLabel:{ fontSize:11.5, color:"#475569" }, axisTick:{show:false}, axisLine:{lineStyle:{color:"#e2e8f0"}} },
+    series: [
+      { name:"全期每卷", type:"bar", barWidth:9, data:dAll, itemStyle:{ borderRadius:[0,4,4,0] } },
+      { name:"机考后每卷", type:"bar", barWidth:13, data:dMech, itemStyle:{ borderRadius:[0,4,4,0] },
+        label:{ show:true, position:"right", fontSize:10.5, color:"#64748b", formatter:function(p){ return p.value.toFixed(1); } } }
+    ]
+  });
+  mqCharts.push(dm);
+
+  /* 图2：预算与得分模型 */
+  var bg = echarts.init(document.getElementById("mq-budget"));
+  var bSeries = budget.map(function(b, i) {
+    return { name:b[0], type:"bar", stack:"tot", barWidth:34,
+      data:[ b[1], b[2] ],
+      itemStyle:{ color:b[3] },
+      label:{ show:true, position:"inside", fontSize:10.5, color: i<3?"#fff":"#64748b", formatter:function(p){ return p.value>0?p.value:""; } } };
+  });
+  bSeries[0].markLine = { silent:true, symbol:"none",
+    lineStyle:{ color:"#dc2626", width:2 },
+    label:{ show:true, formatter:"45 及格线", position:"insideEndTop", fontSize:10.5, color:"#dc2626", fontWeight:700 },
+    data:[{ xAxis:45 }] };
+  bg.setOption({
+    tooltip: { trigger:"axis", axisPointer:{ type:"shadow" }, formatter:function(ps){ return ps.filter(function(p){return p.value>0;}).map(function(p){return p.seriesName+"："+p.value;}).join("<br>"); } },
+    legend: { top:0, textStyle:{ fontSize:10.5, color:"#475569" } },
+    grid: { left:8, right:24, top:30, bottom:8, containLabel:true },
+    xAxis: { type:"value", max:75, axisLabel:{ fontSize:10, color:"#94a3b8" }, splitLine:{ lineStyle:{ color:"#f1f5f9" } } },
+    yAxis: { type:"category", data:["题量构成","目标得分"], axisLabel:{ fontSize:12, color:"#475569" }, axisTick:{show:false}, axisLine:{show:false} },
+    series: bSeries
+  });
+  mqCharts.push(bg);
+
+  /* 图3：叶子 Top20 */
+  var lv = MQ.leaves.slice().reverse();
+  var lf = echarts.init(document.getElementById("mq-leaves"));
+  lf.setOption({
+    tooltip: { formatter:function(p){ return "<b>"+p.name+"</b>：全期 "+p.value+" 题"; } },
+    grid: { left:8, right:46, top:8, bottom:8, containLabel:true },
+    xAxis: { type:"value", axisLabel:{ fontSize:10, color:"#94a3b8" }, splitLine:{ lineStyle:{ color:"#f1f5f9" } } },
+    yAxis: { type:"category", data: lv.map(function(l){ return l[0]; }), axisLabel:{ fontSize:11, color:"#475569" }, axisTick:{show:false}, axisLine:{lineStyle:{color:"#e2e8f0"}} },
+    series: [{ type:"bar", barWidth:13,
+      data: lv.map(function(l){ return { value:l[1], itemStyle:{ color: MQ.leafDomainColor[l[2]] || "#94a3b8", borderRadius:[0,4,4,0] } }; }),
+      label:{ show:true, position:"right", fontSize:10.5, color:"#64748b" } }]
+  });
+  mqCharts.push(lf);
+
+  window.addEventListener("resize", function(){ mqCharts.forEach(function(ch){ try{ch.resize();}catch(e){} }); });
+}
+
+/* 框架卡内容 */
+const MQ_CARD = [
+  { t:"架构五件套 ★★★", tag:"19.8 题/卷", body:
+    '<b>① 架构风格判断</b>（叶子 45，全场第一）<table class="mq-table"><tr><th>风格</th><th>题眼/典型系统</th></tr>' +
+    '<tr><td>管道-过滤器</td><td>编译器、流处理（数据流单向）</td></tr><tr><td>分层</td><td>OSI、三层架构（层间单向调用）</td></tr>' +
+    '<tr><td>事件驱动/隐式调用</td><td>IDE 插件、消息总线（注册-回调）</td></tr><tr><td>微内核</td><td>OS 内核、浏览器、Eclipse（核心+插件）</td></tr>' +
+    '<tr><td>仓库/黑板</td><td>语音识别、专家系统（中央数据+多知识源）</td></tr><tr><td>解释器</td><td>规则引擎、脚本（自定义语言）</td></tr>' +
+    '<tr><td>MVC</td><td>Web 框架；SOA/微服务=企业集成；云原生=新趋势</td></tr></table>' +
+    '<b>② 质量属性</b>（叶子 31）：场景六元组（刺激源/刺激/环境/制品/响应/<b>响应度量</b>常被挖空）；性能=缓存/负载均衡，可用性=心跳/冗余，安全=认证/审计/入侵检测，可修改性=信息隐藏/接口分离<br>' +
+    '<b>③ 架构评估</b>（叶子 29）：SAAM 场景五步 / ATAM 权衡九步效用树 / CBAM 成本效益；<b>敏感点=单属性关键决策，权衡点=多属性冲突</b><br>' +
+    '<b>④ 设计模式 5/7/11</b>（叶子 17）：创建型 5 = 工厂方法/抽象工厂/单例/建造者/原型；结构型 7 = 适配器/桥接/组合/装饰/外观/享元/代理；行为型 11 = 策略/观察者/命令/模板方法/迭代器/状态/职责链/中介者/备忘录/访问者/解释器<br>' +
+    '<b>⑤ 4+1 视图</b>：逻辑、开发、进程、物理 + 场景（贯穿全部视图）；构件 27 = 独立部署+第三方组装+接口契约；DSSA = 特定领域参考架构（领域分析→参考需求→参考架构）' },
+  { t:"软件工程+分析与设计", tag:"11.0 题/卷", body:
+    '<b>开发模型对号</b>（叶子 26）：瀑布=需求明确；V=测试对应；原型=需求模糊；螺旋=风险驱动大型项目；增量=分期交付；RUP=四阶段九工作流迭代<br>' +
+    '<b>结构化分析</b>（16）：DFD 父图子图平衡、数据字典、加工规格<br>' +
+    '<b>OO/UML</b>：用例图属静态视图；泛化 is-a / 聚合 has-a / 组合整体消亡 / 依赖虚线<br>' +
+    '<b>构件</b>（叶子 27）：独立部署+第三方组装+接口契约；中间件分类<br>' +
+    '<b>耦合内聚排序（高频）</b>：内聚高→低 = 功能/顺序/通信/过程/时间/逻辑/偶然；耦合低→高 = 数据/标记/控制/公共/内容——目标"高内聚低耦合"<br>' +
+    '<b>敏捷</b>：Scrum 三角色（产品负责人/Scrum Master/开发团队）+ 冲刺/每日站会/评审回顾；XP = 结对编程/TDD/持续集成/重构' },
+  { t:"操作系统", tag:"4.8 题/卷", body:
+    '<b>进程管理</b>（叶子 22）：PV 操作信号量初值=资源数；前趋图每边一个信号量；死锁四条件（互斥/占有等待/不可剥夺/循环等待），<b>不死锁最少资源=Σ(nᵢ−1)+1</b>；高响应比=(等待+服务)/服务<br>' +
+    '<b>存储</b>：页式地址=页号→块号+页内偏移；LRU 最近最久未用；快表加速<br>' +
+    '<b>文件</b>（叶子 12）：索引寻址范围=直接+一级+二级；位示图=字号×字长+位号' },
+  { t:"软件测试", tag:"4.6 题/卷（机考后+70%）", body:
+    '覆盖强度：<b>语句<判定<条件<判定/条件<条件组合<路径</b><br>' +
+    'McCabe：V(G)=边−节点+2=判定节点+1=区域数<br>' +
+    '黑盒：等价类/边界值/因果图/错误推测；V 模型（验收↔需求）、W 模型双 V 全程；集成：自顶/自底/三明治<br>' +
+    '静态测试=不运行程序（走查/评审/静态分析）；测试发现错误、调试定位修复——两者不同' },
+  { t:"信息安全", tag:"4.0 题/卷（上升）", body:
+    '<table class="mq-table"><tr><th>体系</th><th>算法</th><th>特征</th></tr>' +
+    '<tr><td>对称</td><td>DES/AES/SM1/RC4</td><td>快、密钥分发难</td></tr><tr><td>非对称</td><td>RSA/ECC/SM2</td><td>慢、密钥交换</td></tr><tr><td>摘要</td><td>MD5/SHA/SM3</td><td>完整性</td></tr></table>' +
+    '<b>签名=私钥加密摘要，验证=公钥解密比对</b>（方向判断必考）；混合体制=对称传数据+非对称传密钥<br>' +
+    '攻击：重放→时间戳/一次性口令；XSS/SQL 注入→输入校验；协议：Kerberos=认证、IPSec=网络层、SSL/TLS=传输层、SET=电子支付<br>' +
+    '防火墙：包过滤/状态检测/代理服务；IDS 检测报警 vs IPS 拦截联动；访问控制 DAC 自主/MAC 强制/RBAC 用户-角色-权限' },
+  { t:"数据库系统", tag:"4.0 题/卷", body:
+    '关系代数：π 投影、σ 选择、⋈ 连接、÷ 除法（"全部/至少"题眼）<br>' +
+    'SQL：GROUP BY 后 SELECT 只能含分组列+聚合；HAVING 过组 WHERE 过行<br>' +
+    '范式：部分依赖违 2NF、传递依赖违 3NF；分解保无损+保依赖<br>' +
+    '并发三问题对号（丢失修改/不可重复读/读脏）；两段锁=可串行化；日志先写+检查点；分布式透明性（分片/复制/位置/全局）分类<br>' +
+    '隔离级别四级：读未提交（脏读）→读已提交（不可重复读）→可重复读（幻读）→串行化——逐级消除<br>' +
+    'E-R 转关系模式：实体→关系；m:n 联系单独建关系（码=双方码组合）' }
+];
+
+const MQ_TACTIC = [
+  { t:"计算机网络", tag:"3.6 题/卷", body:'子网五步：掩码→网络位/主机位→块大小 2^h→可用 2^h−2→聚合取公共前缀；协议对号（TCP/UDP=传输、HTTP/DNS=应用）；路由器隔广播域、交换机隔冲突域' },
+  { t:"法律法规与标准化", tag:"2.8 题/卷", body:'<b>产权归属 19 题必拿</b>：职务发明归单位；委托开发无约定归受托方；合作开发共有；著作权自动取得；专利三性；商标申请在先' },
+  { t:"数学与经济管理", tag:"2.4 题/卷", body:'只背三套路：线性规划→可行域顶点取最优；图论→最小生成树（加边避圈）/最短路；决策→乐观 max-max/悲观 max-min/后悔值/期望值' },
+  { t:"系统可靠性", tag:"1.8 题/卷（升）", body:'串联 R=∏Rᵢ；并联 R=1−∏(1−Rᵢ)；N 模表决多数胜；可用性 A=MTTF/(MTTF+MTTR)' },
+  { t:"项目管理", tag:"1.4 题/卷", body:'关键路径=最长路径=总时差 0；挣值 SV=EV−PV、CV=EV−AC、SPI=EV/PV、CPI=EV/AC（>1 好）' },
+  { t:"企业信息化战略", tag:"2.4 题/卷", body:'概念辨析读题即可：云三模式（IaaS 资源/PaaS 平台/SaaS 软件）、大数据 5V、AI 三要素、区块链去中心化不可篡改' }
+];
+
+/* 速记总表：关键词→一句话本质（考前最后一遍） */
+const MQ_MEMO = [
+  ["架构风格", '<b>管道-过滤器</b>→数据流单向增量 | <b>分层</b>→层间单向调用 | <b>事件驱动</b>→注册回调隐式 | <b>微内核</b>→核心最小+插件 | <b>仓库/黑板</b>→中央数据多知识源 | <b>解释器</b>→自定义文法 | <b>MVC</b>→三分离 | <b>SOA</b>→服务契约松耦合 | <b>微服务</b>→自治去中心 | <b>云原生</b>→弹性可观测自动化'],
+  ["设计模式", '<b>工厂方法</b>→子类定创建 | <b>抽象工厂</b>→产品族 | <b>建造者</b>→分步组装 | <b>原型</b>→克隆复制 | <b>单例</b>→唯一实例 | <b>适配器</b>→接口转换兼容 | <b>桥接</b>→两维独立 M+N | <b>组合</b>→部分整体树 | <b>装饰</b>→动态叠职责 | <b>外观</b>→统一入口 | <b>享元</b>→共享细粒度 | <b>代理</b>→控制访问 | <b>模板方法</b>→骨架定子类填 | <b>策略</b>→算法可切换 | <b>命令</b>→请求封装成对象 | <b>观察者</b>→一对多通知 | <b>迭代器</b>→顺序访问藏内部 | <b>职责链</b>→逐级传递 | <b>备忘录</b>→状态快照存取 | <b>状态</b>→状态改行为 | <b>访问者</b>→结构上施操作 | <b>中介者</b>→网状变星型 | <b>解释器</b>→文法解释'],
+  ["质量属性", '<b>性能</b>→缓存/并发/负载均衡 | <b>可用性</b>→心跳/冗余/投票 | <b>安全</b>→认证/审计/入侵检测 | <b>可修改性</b>→信息隐藏/接口分离 | <b>易用性</b>→界面分离/向导 | <b>可测试性</b>→断言/内置自测 | <b>六元组</b>→常挖响应度量'],
+  ["架构评估", '<b>SAAM</b>→场景五步可修改 | <b>ATAM</b>→权衡九步效用树 | <b>CBAM</b>→成本效益 ROI | <b>敏感点</b>→单属性关键 | <b>权衡点</b>→多属性冲突'],
+  ["操作系统", '<b>死锁</b>→四条件缺一不可 | <b>不死锁</b>→Σ(nᵢ−1)+1 | <b>PV</b>→初值=资源数 | <b>LRU</b>→最近最久未用 | <b>快表</b>→TLB 命中加速 | <b>位示图</b>→字号×字长+位号'],
+  ["软件测试", '<b>覆盖链</b>→语句<判定<条件<判定/条件<组合<路径 | <b>McCabe</b>→边−点+2=判定+1 | <b>静态</b>→不运行程序 | <b>集成</b>→自顶/自底/三明治'],
+  ["信息安全", '<b>对称</b>→快、分发难 | <b>非对称</b>→慢、可交换 | <b>摘要</b>→完整性 | <b>签名</b>→私钥加密摘要 | <b>验证</b>→公钥解比对 | <b>Kerberos</b>→认证 | <b>IPSec</b>→网络层 | <b>SSL/TLS</b>→传输层 | <b>RBAC</b>→用户-角色-权限 | <b>IDS/IPS</b>→报警/拦截'],
+  ["数据库", '<b>除法</b>→全部至少 | <b>HAVING</b>→过滤组 | <b>2NF</b>→消部分依赖 | <b>3NF</b>→消传递依赖 | <b>BCNF</b>→主属性对码 | <b>两段锁</b>→可串行化 | <b>隔离级别</b>→逐级消脏读/幻读 | <b>m:n</b>→联系单独建关系'],
+  ["第二档套路", '<b>子网</b>→块 2ʰ、可用−2 | <b>产权</b>→职务归单位、委托归受托 | <b>可靠性</b>→串∏、并 1−∏(1−Rᵢ) | <b>可用性A</b>→MTTF/(MTTF+MTTR) | <b>挣值</b>→SPI=EV/PV、CPI=EV/AC | <b>关键路径</b>→总时差 0 | <b>云三模式</b>→IaaS 资源/PaaS 平台/SaaS 软件']
+];

@@ -10,7 +10,8 @@ server:
 spring:
   web:
     resources:
-      static-locations: classpath:/static/, file:./data/uploads/
+      # 请求 /uploads/x → 位置 + uploads/x, 故须指向 data 父目录; 绝对路径兜底计划任务 CWD 不定
+      static-locations: classpath:/static/, file:./data/, file:E:/AiProject/study_hub/data/
   datasource:
     url: jdbc:mysql://localhost:3306/study_hub?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
     username: root

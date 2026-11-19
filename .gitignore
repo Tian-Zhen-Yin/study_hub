@@ -67,3 +67,18 @@ data/senior-arch-review/
 
 # ===== Uploads =====
 data/uploads/
+
+# ===== Cheko past-exam crawl archive (re-crawlable, do not commit) =====
+scripts/past-exam/data/
+scripts/past-exam/import-tmp.sql
+scripts/past-exam/query-tmp.sql
+
+# ===== Local artifacts, do not commit =====
+backups/
+extracted_pdf/
+screenshot-*.png
+scripts/tmp-task3/
+scripts/llm-tag/*.b64
+scripts/llm-tag/*.jsonl
+scripts/quality-pass2/*.b64
+scripts/quality-pass2/*.jsonl

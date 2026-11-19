@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>考前一小时·终极速览（2026.10 架构师）</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#222;--sub:#777;--line:#e3e5e9;--acc:#dc2626;--ok:#16a34a;--amber:#d97706}
+html.dark{--bg:#111418;--card:#1b1f24;--ink:#d8dce1;--sub:#8a919a;--line:#2a2f36;--acc:#f87171;--ok:#34d399;--amber:#fbbf24}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding-bottom:40px}
+header{position:sticky;top:0;z-index:9;background:var(--card);border-bottom:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+header b{font-size:1.05em}
+.cd{font-size:.82em;color:var(--sub)}
+.hbtn{background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:3px 9px;font-size:.85em;text-decoration:none;cursor:pointer}
+.hbtn.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#cdays{font-weight:700;color:var(--acc);font-size:.9em}
+main{padding:0 12px;max-width:900px;margin:0 auto}
+.bar{height:8px;background:var(--line);border-radius:6px;margin:12px 0 4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.pt{font-size:.85em;color:var(--sub);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.route{background:color-mix(in srgb,var(--acc) 8%,transparent);border:1px solid var(--acc);border-radius:10px;padding:8px 12px;font-size:.9em;margin:10px 0}
+details.sec{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
+details.sec summary{cursor:pointer;padding:10px 14px;font-weight:700;font-size:1em;display:flex;align-items:center;gap:8px;flex-wrap:wrap;list-style:none}
+details.sec summary::-webkit-details-marker{display:none}
+details.sec summary .tm{font-weight:400;font-size:.78em;color:var(--amber)}
+details.sec summary .ck{margin-left:auto;font-size:.8em;color:var(--sub);white-space:nowrap}
+details.sec[open] summary{border-bottom:1px solid var(--line)}
+.body{padding:10px 14px}
+h4{margin:14px 0 4px;font-size:.95em;color:var(--acc)}
+h4:first-child{margin-top:2px}
+ul{margin:4px 0;padding-left:20px}
+li{margin:2px 0}
+table{border-collapse:collapse;width:100%;font-size:.85em;margin:6px 0}
+td,th{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+b.k{color:var(--acc)}
+.tag{display:inline-block;font-size:.72em;border-radius:5px;padding:0 5px;font-weight:700;white-space:nowrap}
+.tg1{background:#fee2e2;color:#b91c1c}.tg2{background:#fef3c7;color:#b45309}.tg3{background:#dbeafe;color:#1d4ed8}
+html.dark .tg1{background:#450a0a;color:#fca5a5}html.dark .tg2{background:#451a03;color:#fcd34d}html.dark .tg3{background:#172554;color:#93c5fd}
+.mn{background:color-mix(in srgb,var(--amber) 14%,transparent);border-radius:6px;padding:1px 6px;font-weight:700}
+.fml{font-family:Consolas,Menlo,monospace;background:var(--bg);border-radius:6px;padding:2px 8px;display:inline-block;margin:2px 0;font-size:.9em}
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);font-size:.72em;color:var(--sub);padding:5px 12px;text-align:center}
+@media print{header,footer,.bar,.pt,.route{display:none}details.sec{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <b>⏰ 考前一小时</b><span class="cd">2026.10 架构师 · 综合知识+案例 终极速览</span>
+  <span id="cdays"></span>
+  <span style="margin-left:auto;display:flex;gap:6px">
+    <a class="hbtn" href="/redis-drill.html">Redis集训</a>
+    <a class="hbtn" href="/yuce-case.html">案例背诵卡</a>
+    <button class="hbtn" onclick="fsz(-1)">A−</button><button class="hbtn" onclick="fsz(1)">A＋</button><button class="hbtn" onclick="th()">◐ 夜间</button>
+    <button class="hbtn" onclick="window.print()">🖨 打印</button>
+  </span>
+</header>
+<main>
+<div class="bar"><i id="pfill"></i></div>
+<div class="pt"><span id="ptext">已过 0/9 块</span><span>全部直显不用点开答案 · 按序读完 ≈ 60 分钟</span></div>
+
+<div class="route">📍 <b>阅读路线（共 60 分钟）</b>：①考场策略 3' → ②案例第一题三件套 12'（必考）→ ③Redis 速览 12'（必考）→ ④UML/DFD 8' → ⑤综合高频·架构主线 8' → ⑥综合高频·开发与数据库 8' → ⑦安全与数学 5' → ⑧口诀与英语 4'。案例科进考场前优先再扫 ②③。</div>
+
+<details class="sec" open id="s1"><summary>① 考场策略 <span class="tm">⏱3'</span><span class="tag tg1">进考场前默念</span><span class="ck"><label><input type="checkbox" data-ck="s1"> 已读</label></span></summary>
+<div class="body">
+<ul>
+<li><b class="k">综合知识</b>：150 分钟 75 题，51 分及格线附近靠英语五连题保底（BPI/BPR 词汇送分）。不确定的题标记后跳过，留 15 分钟回头+涂卡检查。</li>
+<li><b class="k">案例</b>：90 分钟 5 选 3（每题 25 分）。开卷先花 3 分钟通览五题选熟弃生：<b>第 1 题质量属性必选</b>；Redis/缓存题必选；第三题从 UML/DFD/超纲看图填空里挑最有图的（有图=有答案定位）。每题 25 分钟，留 10 分钟补漏。</li>
+<li><b class="k">论文</b>：120 分钟 2500 字。摘要 300 字最后写；正文四段式=项目概述(400)/论点展开(1400，扣题分3-5个方面)/遇到问题与解决(400)/不足与展望(300)。写满就是胜利。</li>
+<li><b class="k">超纲看图填空三类型</b>：①分层架构填组件（接入层=网关/Nginx，消息层=Kafka/MQ，数据层按数据形态分库）②表格对比填空（协议/组件特点，从备选词性+层次推）③流程图补步骤（按「请求→处理→存储→响应」主链推）。不会的空也填满，沾边就有分。</li>
+</ul>
+</div></details>
+
+<details class="sec" open id="s2"><summary>② 案例第一题三件套：质量属性+六要素+风格 <span class="tm">⏱12'</span><span class="tag tg1">四年真题全中·必考</span><span class="ck"><label><input type="checkbox" data-ck="s2"> 已读</label></span></summary>
+<div class="body">
+<h4>质量属性判据速查（看到这些词→选那个属性）</h4>
+<table><tr><th>属性</th><th>判据关键词</th></tr>
+<tr><td><b>性能</b></td><td>吞吐量/响应时间/延迟/QPS/「X 秒内完成」</td></tr>
+<tr><td><b>可用性</b></td><td>故障/宕机/失效后「X 分钟内恢复/切换/重构」</td></tr>
+<tr><td><b>安全性</b></td><td>未授权/伪造/攻击/阻断/身份认证/保密</td></tr>
+<tr><td><b>可修改性</b></td><td>「修改 X 只需 ≤N 人天/不改其他模块」/变更成本</td></tr>
+<tr><td><b>可测试性</b></td><td>「X 分钟内完成测试/输出测试报告」</td></tr>
+<tr><td><b>可维护性</b></td><td>政策/环境变化→修改功能（外部驱动的长期维护）</td></tr>
+<tr><td><b>可伸缩性</b></td><td>「10万→100万只需加节点/分区不改代码」</td></tr>
+<tr><td><b>功能性</b></td><td>「四项操作必须全部成功完成」（做什么）</td></tr>
+<tr><td><b>可变性</b></td><td>「在现有架构上演进/不允许推翻重写」</td></tr>
+<tr><td><b>互操作性</b></td><td>对接外部系统/标准协议(OCPP)/JSON 映射</td></tr></table>
+<p style="font-size:.85em;color:var(--sub)">易混点：修改业务功能=可修改性；政策法规强制改=可维护性；容量增长加机器=可伸缩性；架构演进不重写=可变性。</p>
+<h4>六要素（口诀：<span class="mn">源激环制响度</span>）</h4>
+<p>刺激源→刺激→环境(设计时/运行时)→制品→响应→响应度量。例：用户(源)要换算法(激)在设计时(环)对算法模块(制)替换插件不改他模块(响)≤4人天(度)。</p>
+<h4>架构风格选型（近年真题问法）</h4>
+<table><tr><th>场景</th><th>选</th><th>理由关键词</th></tr>
+<tr><td>数据流式处理/逐级加工(入侵检测)</td><td><b>管道-过滤器</b>（优于批处理：边到边处理、低延迟、可并行）</td><td>流式、增量处理、松耦合</td></tr>
+<tr><td>解释执行脚本/自定义语言(模型训练平台)</td><td><b>解释器</b>（伪程序+解释引擎+两个当前状态记录）</td><td>灵活性、自定义规则</td></tr>
+<tr><td>事件触发多流程/异步通知(电池监测)</td><td><b>事件驱动</b>（优于分层：异步解耦高吞吐）</td><td>发布订阅、扇出</td></tr>
+<tr><td>传感器汇聚+中心数据+多知识源</td><td><b>仓库/黑板</b>（中央数据结构说明当前状态）</td><td>知识源独立、 opportunistically</td></tr></table>
+<h4>ATAM 一行记</h4>
+<p>效用树两维度=<b class="k">重要性×实现难度</b>（各高中低）；场景三类型=用例/增长(容量扩充)/<b>探测(超出预期的极端修改)</b>。口诀见第⑧块。</p>
+</div></details>
+
+<details class="sec" open id="s3"><summary>③ Redis 速览 <span class="tm">⏱12'</span><span class="tag tg1">五年全考·必选做</span><span class="ck"><label><input type="checkbox" data-ck="s3"> 已读</label></span></summary>
+<div class="body">
+<h4>五年考点一句话（子专题轮换）</h4>
+<p>24上=<b>分布式锁</b>死锁场景+zset 指令(zadd/zrange/zscore) → 24下=<b>旁路缓存</b>读5步写2步 → 25上=<b>主从+持久化</b> → 25下=<b>击穿两方案</b> → 26上=<b>悲观/乐观锁</b>。</p>
+<h4>击穿两方案（2025-11 原题）</h4>
+<ul><li><b>互斥锁</b>：抢锁→查库重建→写缓存→释放；他人等待重查。优=强一致；缺=锁竞争延迟。</li>
+<li><b>逻辑过期</b>：不设物理 TTL，加逻辑过期字段；过期后<b>立即返回旧数据</b>+异步重建。优=高吞吐；缺=弱一致。</li>
+<li>五维对比：复杂度(锁简单)/一致性(锁强)/性能(逻辑过期高)/内存(逻辑过期多存)/场景(锁=库存扣减，逻辑过期=详情页)。</li></ul>
+<h4>主从复制（2025-05 原题）</h4>
+<ul><li><b>全量 7 步</b>：从 PSYNC ? -1 → 主 BGSAVE 生成 RDB → 发 RDB → 从清空加载 → 主补发期间写命令 → 从执行。</li>
+<li><b>增量</b>：从带 replid+offset PSYNC → 缺失在 repl_baklog 内 → CONTINUE 从 offset 续传。</li>
+<li><b>RDB</b>=快照二进制，文件小恢复快；<b>AOF</b>=追加日志，丢失少可读性强；AOF 重写瘦身。生产 RDB+AOF 混合。</li></ul>
+<h4>旁路缓存 Cache-Aside（2024-11 原题）</h4>
+<p>读：查缓存→命中返回/未命中查库→写回缓存(设TTL)→返回。写：<b>先更新数据库，再删除缓存</b>。多线程不一致=写慢读快窗口，解法：延迟双删/设置较短 TTL/分布式锁/读写串行化。</p>
+<h4>首考候选（从未考，今年增量概率大）</h4>
+<ul><li><b>哨兵转移</b>：主观下线(单哨兵)→客观下线(≥quorum)→竞选领头(过半)→选新主(过滤→priority→offset 最大→runid 最小)→其他从库改 replicaof→旧主降从。</li>
+<li><b>雪崩</b>：大面积同时失效；三层=TTL 加随机值/热点不过期或逻辑过期 + 集群高可用 + 多级缓存限流降级。</li>
+<li><b>事务</b>：MULTI/EXEC/DISCARD/WATCH；入队错=整体放弃，<b>运行时错=其余照跑不回滚</b>；WATCH=CAS 乐观锁。</li>
+<li><b>热 Key</b>=本地缓存/副本打散/读写分离；<b>大 Key</b>=拆分/压缩/<b>UNLINK 异步删</b>。</li>
+<li><b>Cluster</b>：16384 槽 CRC16(key)；MOVED/ASK 重定向；gossip 传播；主挂由<b>半数以上主节点</b>判定、从库补选。</li></ul>
+<h4>布隆/穿透/淘汰（押题）</h4>
+<p>布隆：任一位 0→<b>一定不存在</b>直接返回；误判率可&lt;1%。穿透=查不存在的 key→布隆/空值缓存。淘汰 8 种：noeviction + volatile-{lru,lfu,ttl,random} + allkeys-{lru,lfu,random}。</p>
+</div></details>
+
+<details class="sec" open id="s4"><summary>④ UML 与结构化（DFD/ER） <span class="tm">⏱8'</span><span class="tag tg2">高频槽位·近年未出</span><span class="ck"><label><input type="checkbox" data-ck="s4"> 已读</label></span></summary>
+<div class="body">
+<h4>类分三类（口诀：<span class="mn">界面是边界、业务是控制、数据是实体</span>）</h4>
+<p>边界类=系统与外界交互（界面/APP）；控制类=业务逻辑协调（控制器/服务/消息队列）；实体类=持久信息（患者/医生/订单）。</p>
+<h4>用例图</h4>
+<ul><li><b>include</b>=必发生的子流程（包含方→被包含方）；<b>extend</b>=可选/条件分支（扩展方→被扩展方，箭头指向基础用例）。</li>
+<li>参与者=系统外的人/系统；识别：谁用系统/谁维护/与哪些外部系统交互。</li></ul>
+<h4>DFD 四件套与三大检查</h4>
+<ul><li>要素：外部实体(方框)/加工(圆/圆角框)/数据存储(双横线)/数据流(箭头)。</li>
+<li>检查：<b>父图子图平衡</b>（输入输出一致）；加工三错=<b>黑洞</b>(只有入)/<b>奇迹</b>(只有出)/<b>灰洞</b>(入不足以产出出)。</li>
+<li>结构化语言写加工逻辑：顺序+IF/ELSE 选择+WHILE 循环，变量取自说明原文。</li></ul>
+<h4>类图关系强弱</h4>
+<p>泛化(继承)＝实现 &gt; 组合(同生命周期) &gt; 聚合(可分离) &gt; 关联 &gt; 依赖。顺序图=时间序消息；状态图=事件驱动迁移；活动图=流程+并行。</p>
+</div></details>
+
+<details class="sec" open id="s5"><summary>⑤ 综合高频·架构主线（真题 25+19+19 次） <span class="tm">⏱8'</span><span class="ck"><label><input type="checkbox" data-ck="s5"> 已读</label></span></summary>
+<div class="body">
+<h4>架构风格分类树（25 次考点的骨架）</h4>
+<ul>
+<li><b>数据流</b>：批处理（完整输入顺序处理）/管道-过滤器（流式，过滤器可并行）</li>
+<li><b>调用/返回</b>：主子程序/面向对象/层次/客户端-服务器（B/S=特殊三层 C/S）</li>
+<li><b>独立构件</b>：进程通信（连接件=消息传递）/事件系统（隐式调用）</li>
+<li><b>虚拟机</b>：解释器（被解释代码+解释引擎+两个状态记录）/规则系统</li>
+<li><b>以数据为中心</b>：仓库（中央数据结构+独立构件）/黑板（知识源+黑板+控制）</li></ul>
+<h4>质量属性子特性（选择题爱考「不属于」）</h4>
+<p>可靠性=成熟性+容错性+易恢复性（<b class="k">稳定性不属于</b>）。安全性=保密性+完整性+不可否认性+可控性。可维护性=易分析+易改变+稳定+易测试+维护符合性。</p>
+<h4>架构评估三法</h4>
+<ul><li><b>SAAM</b>：最初非功能质量场景法（敏感性/权衡点）。</li>
+<li><b>ATAM</b>：效用树+场景三类型+九步（口诀第⑧块）。</li>
+<li><b>CBAM</b>=成本效益；<b>基于度量</b>=质量属性↔度量映射推导属性值。</li></ul>
+<h4>4+1 视图（7 次）</h4>
+<p>逻辑视图(功能/类)/<b>进程视图(并发同步)</b>/开发视图(模块组织)/物理视图(部署映射)/场景视图(串联其余四个)。Hofmeister 4 视图=概念/模块/<b>执行</b>/代码（无「逻辑视图」）。</p>
+<h4>ABSD 与 DSSA（12+11 次）</h4>
+<ul><li>ABSD 三基础=功能分解+选择架构风格+软件模板（<b>不含项目管理</b>）。演化六步：需求变化归类→订计划→改构件→<b>更新构件相互作用</b>→组装测试→技术评审。</li>
+<li>DSSA 三角色=领域专家/领域分析人员/领域实现人员；建立过程五阶段（并行递归反复，<b>不是原型模型</b>）。</li></ul>
+<h4>构件/CBSE（9 次）</h4>
+<p>构件=独立部署+第三方组装+无状态对外可见。组装三方式=<b>顺序/层次/叠加</b>组装。</p>
+</div></details>
+
+<details class="sec" open id="s6"><summary>⑥ 综合高频·开发/数据库/系统 <span class="tm">⏱8'</span><span class="ck"><label><input type="checkbox" data-ck="s6"> 已读</label></span></summary>
+<div class="body">
+<h4>开发模型（12 次）</h4>
+<ul><li>瀑布=需求明确；增量=分批交付；<b>螺旋=风险驱动</b>(每圈风险分析)；喷泉=面向对象迭代；V 模型=测试左移对应。</li>
+<li>RUP 四阶段：初始(愿景)→<b>细化(核心架构+计划，设计计划集中在此)</b>→构建→移交。统一过程以<b>用例驱动+架构为中心+迭代增量</b>。</li>
+<li>敏捷宣言四对：个体交互&gt;过程工具；<b>可运行软件&gt;详尽文档</b>；客户合作&gt;合同谈判；<b>响应变化&gt;遵循计划</b>。Scrum 每日构建后的自动验证测试=<b>冒烟测试</b>。</li></ul>
+<h4>设计模式与设计原则（10 次）</h4>
+<ul><li>一句话模式：<b>命令</b>=封装请求可撤销排队；<b>备忘录</b>=存状态快照供恢复；观察者=一对多通知；适配器=接口转换；策略=算法族切换；单例=唯一实例。</li>
+<li>原则：<b>依赖倒置</b>=面向接口不依赖具体类；接口隔离=小接口；开闭=扩展开放修改关闭；最少知识=只谈直接朋友；<b>迪米特=不要和陌生人说话</b>。</li></ul>
+<h4>数据库（9 次）</h4>
+<ul><li>范式判定链：存在部分函数依赖→只满足 1NF；消部分(码为整体函数依赖)→2NF；消传递→3NF；每个决定因素都含码→BCNF。主属性/非主属性分开判。</li>
+<li>三级模式：外模式(局部逻辑)=视图级、概念模式=全局逻辑、内模式=物理存储。两级映像保数据独立性。</li>
+<li>两段锁 2PL=先加后放、扩展+收缩；死锁四条件：互斥/保持等待/不剥夺/环路等待。悲观锁=SELECT…FOR UPDATE。</li></ul>
+<h4>进程/嵌入式（11+9 次）</h4>
+<ul><li>五态：运行→就绪=时间片到/<b>主动让出</b>；运行→阻塞=等待事件(I/O/请求资源)；就绪→运行=调度。wait/P 操作可能阻塞。</li>
+<li>RTOS：实时性高/资源小/启动毫秒级/但弱内存保护；Linux 反之。选型答「功能+实时+成本+功耗」四权衡。</li></ul>
+<h4>知识产权（7 次）</h4>
+<p>署名权/修改权/保护完整权=<b>无时间限制</b>；发表权+财产权=作者终身+50 年。GB=强制标准，GB/T=推荐。GPL=强传染(衍生须开源)，LGPL=可被闭源动态链接。</p>
+</div></details>
+
+<details class="sec" open id="s7"><summary>⑦ 安全与数学速算 <span class="tm">⏱5'</span><span class="ck"><label><input type="checkbox" data-ck="s7"> 已读</label></span></summary>
+<div class="body">
+<h4>密码学一句话</h4>
+<ul><li>对称(快、大批量)：<b>AES</b>&gt;DES(已不安全)；非对称(慢、密钥分发)：<b>RSA</b>/ECC。混合=非对称传对称密钥。</li>
+<li>数字签名=<b>私钥签名、公钥验证</b>（防抵赖+完整性）；数字证书=CA 私钥签名的公钥信息。</li>
+<li>IPsec：<b>AH=认证+完整性(无加密)</b>；<b>ESP=加密+认证</b>；IKE=协商密钥(SA)。IPsec 不能防 DDoS(不提供可用性)。</li>
+<li>SSH=安全远程登录；HTTPS=HTTP+TLS(443)；对称加密不能防抵赖（双方同钥）。</li></ul>
+<h4>可靠性公式（7 次）</h4>
+<ul><li><span class="fml">MTBF = MTTF + MTTR</span>（平均无故障=正常运行+修复）。可用度 <span class="fml">A = MTTF/(MTTF+MTTR)</span>。运行时间/故障数=平均间隔（注意是否扣修复时间）。</li>
+<li>串联可靠度相乘 R=R₁R₂…；并联 1-(1-R₁)(1-R₂)…。N 版本编程=相异成分规范评审+相异性确认+<b>背对背测试</b>。</li></ul>
+<h4>存储/数学（8 次）</h4>
+<ul><li>位示图：<span class="fml">容量÷页大小=页数；页数÷8=位示图字节数</span>（16GB/4KB=4M 页→512KB 图）。</li>
+<li>Dijkstra=单源最短路（逐步贪心扩展）；数据结构：n 节点无向完全图边=n(n-1)/2；二叉树 n₀=n₂+1。</li>
+<li>线性规划极点在凸多边形顶点/边界：判断选项是否落在两已知极点连线上(斜率/方程代入)。</li></ul>
+</div></details>
+
+<details class="sec" open id="s8"><summary>⑧ 口诀与英语五连 <span class="tm">⏱4'</span><span class="ck"><label><input type="checkbox" data-ck="s8"> 已读</label></span></summary>
+<div class="body">
+<h4>ATAM 九步口诀：<span class="mn">法师购柿树，惜抱栽结果</span></h4>
+<p><b>法</b>=ATAM方法表述 → <b>师(商)</b>=商业动机 → <b>购(构)</b>=架构表述 → <b>柿(识)</b>=识别架构方法 → <b>树</b>=生成质量属性效用树 → <b>惜(析)</b>=分析架构方法 → <b>抱(暴)</b>=头脑风暴定场景优先级 → <b>栽(再)</b>=<b>再次</b>分析架构方法 → <b>果</b>=结果表述。<br>陷阱：第 6 步「分析」与第 8 步「<b>再次</b>分析」仅差二字，选择题常挖这个坑。</p>
+<h4>高频口诀</h4>
+<ul><li>六要素：<b>源激环制响度</b>。</li>
+<li>类三分：<b>界面边界、业务控制、数据实体</b>。</li>
+<li>DFD 三错：<b>黑洞奇迹灰洞</b>；父子图必须<b>平衡</b>。</li>
+<li>主从全量：<b>PSYNC→BGSAVE→发RDB→补写命令</b>。</li>
+<li>写缓存：<b>先更库，后删缓存</b>。</li></ul>
+<h4>英语五连题词汇（近年主题：IT 与业务对齐）</h4>
+<table><tr><th>词</th><th>义</th></tr>
+<tr><td>Business process automation</td><td>业务流程自动化（IT 替代手工，流程不变）</td></tr>
+<tr><td>Business process improvement</td><td>业务流程优化（分析并渐进改进现有流程）</td></tr>
+<tr><td>Business process re-engineering (BPR)</td><td>业务流程再造（根本性重新设计，组织剧变）</td></tr>
+<tr><td>requirements / specification</td><td>需求 / (软件)需求规格说明书 SRS</td></tr></table>
+<p style="font-size:.85em;color:var(--sub)">技巧：先看选项词性排除，再把四个词按「从轻到重：automation→improvement→re-engineering」排序，答案常是这个演进序。</p>
+</div></details>
+
+<details class="sec" open id="s9"><summary>⑨ 最后一眼清单（进考场电梯里看这个） <span class="tm">⏱1'</span><span class="tag tg1">打印版压轴</span><span class="ck"><label><input type="checkbox" data-ck="s9"> 已读</label></span></summary>
+<div class="body">
+<ul>
+<li>案例第一题=质量属性判据 + 源激环制响度 + 风格选型三件套。</li>
+<li>Redis：击穿=锁(强一致) vs 逻辑过期(高并发)；全量=PSYNC-BGSAVE-RDB-补命令；先更库后删缓存。</li>
+<li>写缓存不一致=延迟双删；雪崩=TTL 加随机；哨兵=quorum 客观下线+offset 最大当新主。</li>
+<li>UML：include 必发生 / extend 可选；界面边界业务控制数据实体；DFD 父子平衡、黑洞奇迹灰洞。</li>
+<li>超纲填空按「接入=网关、消息=Kafka、数据按时序/关系分库」的层次套路填。</li>
+<li>稳定性不属于可靠性；AH 认证不加密、ESP 都有；AES 对称 RSA 非对称；私钥签名公钥验证。</li>
+<li>MTBF=MTTF+MTTR；细化阶段=设计+计划；命令模式=可撤销；GPL 强传染。</li>
+<li>写满就是胜利——每空都填，每题都写到底。</li>
+</ul>
+</div></details>
+</main>
+<footer>单文件可打印 · 数据支撑：题库 2013-2026 架构师真题考点频次 + 2018-2026 Redis 全史对账 + 文老师/凯恩双押题 · 进度 localStorage(fh-done)</footer>
+<script>
+const CKS=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+let done={};try{done=JSON.parse(localStorage.getItem('fh-done')||'{}')}catch(e){}
+function upd(){const n=CKS.filter(k=>done[k]).length;
+ document.getElementById('pfill').style.width=(n/CKS.length*100)+'%';
+ document.getElementById('ptext').textContent='已过 '+n+'/'+CKS.length+' 块';}
+document.querySelectorAll('[data-ck]').forEach(cb=>{
+ cb.checked=!!done[cb.dataset.ck];
+ cb.addEventListener('change',()=>{done[cb.dataset.ck]=cb.checked;if(!cb.checked)delete done[cb.dataset.ck];
+  try{localStorage.setItem('fh-done',JSON.stringify(done))}catch(e){}upd();});});
+upd();
+(function(){const ex=new Date('2026-10-24T09:00:00');const ms=ex-Date.now();
+ document.getElementById('cdays').textContent=ms>0?('⏳ 距考试 '+Math.ceil(ms/864e5)+' 天'):'📖 考试进行中';})();
+function fsz(n){var s=parseInt(document.documentElement.style.fontSize||"16px")+n;s=Math.min(23,Math.max(14,s));document.documentElement.style.fontSize=s+"px";try{localStorage.setItem("sp-fs",s)}catch(e){}}
+function th(){var k=document.documentElement.classList.toggle("dark");try{localStorage.setItem("sp-th",k?"1":"0")}catch(e){}}
+try{var f=localStorage.getItem("sp-fs");if(f)document.documentElement.style.fontSize=f+"px";if(localStorage.getItem("sp-th")==="1")document.documentElement.classList.add("dark")}catch(e){}
+</script>
+</body>
+</html>

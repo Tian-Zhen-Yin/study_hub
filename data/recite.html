@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>背诵·范文AB</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#222;--sub:#777;--line:#e3e5e9;--acc:#2563eb;--ok:#16a34a;--bl:#f59e0b}
+html.dark{--bg:#111418;--card:#1b1f24;--ink:#d8dce1;--sub:#8a919a;--line:#2a2f36;--acc:#5b8cff;--ok:#34d399;--bl:#fbbf24}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.75 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding-bottom:40px}
+header{position:sticky;top:0;z-index:9;background:var(--card);border-bottom:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+header b{font-size:1.02em}
+.cd{font-size:.82em;color:var(--sub)}
+.hbtn{background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:3px 9px;font-size:.85em;text-decoration:none;cursor:pointer}
+nav{display:flex;gap:6px;padding:10px 12px 0}
+nav button{flex:1;padding:8px 0;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px 10px 0 0;font-size:.95em;cursor:pointer}
+nav button.on{border-bottom:2px solid var(--acc);color:var(--acc);font-weight:700}
+main{padding:0 12px}
+.bar{height:8px;background:var(--line);border-radius:6px;margin:12px 0 4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.pt{font-size:.85em;color:var(--sub);display:flex;justify-content:space-between;align-items:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0}
+.card.done{border-color:var(--ok)}
+.card h3{margin:0;font-size:1em;display:flex;align-items:center;gap:8px}
+.card h3 .n{font-weight:400;font-size:.8em;color:var(--sub)}
+.cue{font-size:.9em;color:var(--sub);margin:6px 0 0;white-space:pre-line}
+.txt{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;display:none}
+.txt.show{display:block}
+.btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.btns button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:4px 12px;font-size:.85em;cursor:pointer}
+.btns button.on{border-color:var(--acc);color:var(--acc);font-weight:700}
+.btns button.dk{border-color:var(--ok);color:var(--ok)}
+.bl{display:inline-block;min-width:2.4em;text-align:center;background:color-mix(in srgb,var(--bl) 18%,transparent);border-bottom:2px solid var(--bl);border-radius:4px;padding:0 4px;margin:0 1px;cursor:pointer;font-weight:700;color:var(--bl)}
+.bl.open{background:transparent;border-bottom-color:transparent;color:inherit;cursor:default;font-weight:inherit}
+.bl.miss{color:#b91c1c;border-bottom:2px dashed #b91c1c}
+.bl.hit{color:var(--ok)}
+.bl input{width:5.5em;border:none;border-bottom:2px solid var(--acc);background:transparent;color:var(--ink);font:inherit;text-align:center;outline:none;padding:0}
+.bl .peek{font-size:.75em;color:var(--sub);cursor:pointer;border-bottom:1px dotted var(--sub);margin-left:2px}
+.card.review{border-color:var(--bl);border-style:dashed}
+.bdg{font-size:.72em;border-radius:4px;padding:0 5px;font-weight:700}
+.bdg-miss{color:#b91c1c;border:1px solid #b91c1c}
+.bdg-rev{color:var(--bl);border:1px solid var(--bl)}
+h2{font-size:1.05em;margin:18px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:.88em}
+td,th{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.warn{background:color-mix(in srgb,var(--bl) 12%,transparent);border:1px solid var(--bl);border-radius:10px;padding:8px 12px;font-size:.88em;margin:10px 0}
+.mq{font-size:.88em;color:var(--sub);margin:6px 0 2px}
+details{margin:4px 0}
+summary{cursor:pointer;font-size:.9em;color:var(--acc)}
+details .txt{display:block;border-top:1px dashed var(--line);margin-top:6px;padding-top:6px;font-size:.88em}
+.tagm{display:inline-block;font-size:.78em;border-radius:4px;padding:0 6px;margin-right:4px;font-weight:700;border:1px solid var(--line)}
+.t-main{color:var(--acc);border-color:var(--acc)}
+.t-cut{color:var(--sub)}
+.t-drop{color:#b91c1c;border-color:#b91c1c}
+footer{text-align:center;color:var(--sub);font-size:.78em;padding:18px 0}
+</style>
+</head>
+<body>
+<header>
+  <b>📖 背诵 · 范文AB</b><span class="cd" id="cd"></span>
+  <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="/redbook.html">红宝书★5</a><a class="hbtn" href="/sprint.html">← 冲刺版</a><button class="hbtn" onclick="fsz(-1)">A−</button><button class="hbtn" onclick="fsz(1)">A＋</button><button class="hbtn" onclick="th()">◐ 夜间</button></span>
+</header>
+<nav>
+  <button id="tab-a" class="on" onclick="sw('a')">范文 A · RAG</button>
+  <button id="tab-b" onclick="sw('b')">范文 B · 微服务×Agent</button>
+  <button id="tab-c" onclick="sw('c')">⚡ 四卡（今晚）</button>
+  <button id="tab-p" onclick="sw('p')">今日计划 / 锚点</button>
+  <button id="tab-m" onclick="sw('m')">论点映射</button>
+</nav>
+<main id="app"></main>
+<footer>单文件离线可用 · 配套：/sprint.html 冲刺版 · /arch.html 架构图 · 文本=裁剪终稿 2026-10-12</footer>
+<script>
+var DATA={
+A:{title:"范文A 论检索增强生成（RAG）",blocks:[
+{id:"a1",t:"摘要（必默写）",c:"2024年3月启动 → 30余家/50亿 → 三痛点（采集分散·依赖经验·风险滞后）→ 角色（整体架构+大模型应用）→ 结构三空（原理组成／知识库-链路-运营／问题效果）→ 效果（3天→2小时·75%→92%）",
+x:`2024年3月，我所在的某制造业集团启动了智能财务分析平台项目。该集团拥有30余家子公司，年营收超过50亿元，传统财务分析模式面临数据采集分散、分析依赖个人经验、风险识别滞后等问题。本人担任系统架构师，负责整体架构设计与大模型应用架构设计。本文以该项目为例，论述检索增强生成技术的设计与实践：首先阐述RAG的基本原理与核心组成部分；然后重点论述面向财务领域的混合知识库构建、检索与生成链路设计、知识库持续运营机制；最后结合项目中遇到的典型问题与解决方案，总结实施效果。项目上线后，财务分析报告生成时间从3天缩短至2小时，风险识别准确率从75%提升至92%，验证了该架构的有效性。`,
+b:["30余家","50亿","3天","2小时","75%","92%"]},
+{id:"a2",t:"一、项目概述·痛点段（固定段，与B通用）",c:"大型制造业 → 30余家/50亿 → ERP·银行对账·Excel → 三痛点带数字（2名·3天／半年以上／月度结账后）→ 例：应收 45天→68天、300万坏账",
+x:`我司是一家大型制造业集团，拥有30余家子公司，年营收超过50亿元。集团财务数据分散在ERP系统、银行对账系统及各子公司的Excel报表中，传统财务分析模式存在以下突出问题：一是数据采集依赖人工，每月需2名专职人员花费3天时间整理核对数据；二是分析依赖个人经验，新入职分析师需要半年以上才能独立工作；三是风险识别滞后，财务风险通常在月度结账后才被发现。例如2023年某子公司应收账款周转天数从45天增加到68天，待发现时已经形成300万元坏账风险。`,
+b:["2名","3天","半年","45天","68天","300万"]},
+{id:"a3",t:"一、项目概述·启动段（角色句=RAG版）",c:"2024年3月 → 目标（自动采集·智能分析·实时预警）→ 角色：整体架构 + RAG应用与知识库体系 → 28人·8个月",
+x:`为解决以上问题，集团于2024年3月启动智能财务分析平台项目，目标是实现财务数据自动采集、智能分析与实时预警。本人担任系统架构师，负责整体架构设计以及检索增强生成（RAG）应用架构与知识库体系设计。项目团队共28人，历时8个月完成一期建设。`,
+b:["2024年3月","28人","8个月"]},
+{id:"a4",t:"二、技术概述·定义+五组成（第2问采分主体）",c:"定义：检索+生成，开卷作答 vs 闭卷猜测 → 五组成各答一问：向量化层（放哪里）→ 检索层（怎么找，混合检索）→ 重排序层（未必有用）→ 生成层（变答案）→ 评估运营层（越用越准）",
+x:`检索增强生成（RAG）将信息检索与大语言模型生成相结合：生成答案前先从外部知识库检索相关内容，拼接到提示词中作为上下文，使模型"开卷作答"而非凭参数记忆"闭卷猜测"。其核心组成部分包括五个：（1）知识库与向量化层，将领域文档、规则切分成片段，由嵌入模型转换为语义向量存储，解决"知识放哪里"的问题；（2）检索层，将问题向量化后按相似度召回候选知识，常结合关键词、知识图谱形成混合检索，解决"知识怎么找"的问题；（3）重排序层，对初筛召回的候选按与问题的相关程度精排过滤，解决"找到的未必有用"的问题；（4）生成层，大语言模型基于"检索上下文+问题"组装的提示词生成答案，受角色与格式约束，解决"知识怎么变成答案"的问题；（5）评估与运营层，度量检索命中率与答案忠实度，驱动知识库持续更新，解决"如何越用越准"的问题。`,
+b:["开卷作答","嵌入模型","混合检索","重排序","忠实度"]},
+{id:"a5",t:"二、技术概述·协同链路+对比（协同采分句）",c:"链路：问题→向量化→检索→重排→提示词→生成→评估反馈运营 → 目标句：用领域事实约束生成 → vs 微调（无重训·即时更新·可追溯）→ 局限（检索定上限·延迟）",
+x:`各部分的协同链路是：用户问题经向量化进入检索层，召回结果经重排序筛选后，与问题一同组装进提示词，交给生成模型产出有据可依的答案，评估层再将质量问题反馈至知识库运营——五个环节环环相扣，共同实现"用检索到的领域事实约束模型生成"，抑制幻觉、注入私有领域知识。相比微调，RAG无需重新训练模型、知识可即时更新、来源可追溯，是企业落地大模型的首选模式；其局限在于检索质量决定生成上限，且增加了链路长度与响应延迟。`,
+b:["环环相扣","领域事实约束模型生成","微调","检索质量决定生成上限"]},
+{id:"a6",t:"三、方案设计·权衡引入",c:"直接问答（缺领域知识·泛泛）vs 微调（成本高·更新慢·法规每季变）→ 选 RAG → 三方面（知识库／链路／运营）",
+x:`架构设计之初，我们对"直接调用通用大模型"与"微调专属模型"两个方案进行了权衡：前者缺乏财务领域知识，只能给出泛泛结论；后者成本高、知识更新慢，而财务法规每季都在变化。综合权衡后选定RAG作为主架构，从知识库构建、检索生成链路、持续运营三方面展开设计。`,
+b:["泛泛","每季","三方面"]},
+{id:"a7",t:"3.1 混合知识库构建",c:"三类知识（概念-科目指标／规则-分析预警／行业-基准法规）→ 矛盾（向量语义强精度弱·关键词反）→ Neo4j 精确 + Milvus 模糊 → ES 对比（向量精度不足）→ 四基础设施之一",
+x:`知识库是RAG的地基。我组织财务专家梳理出三类领域知识：财务概念（科目、指标）、业务规则（分析、预警规则）、行业知识（基准、法规），并针对"向量检索语义强但精度弱、关键词检索精度强但语义弱"的矛盾，设计了图谱与向量双库结构：Neo4j知识图谱存储概念间的实体关系（如"毛利率—受—原材料成本影响"），支撑精确推理；Milvus向量数据库存储文档片段的语义向量，支撑模糊召回。向量库选型对比过Elasticsearch，因向量检索精度不足改用Milvus。知识库服务作为平台四个基础设施服务之一，供五个Agent服务统一调用。`,
+b:["财务专家","Neo4j","Milvus","Elasticsearch","四个基础设施"]},
+{id:"a8",t:"3.2 检索与生成链路",c:"混合检索三路（向量＋图谱＋规则）→ 切片（按章节表格，弃定长）→ Dify 四段提示词（角色/上下文/指令/格式）+ 标注依据 → 护栏（三次投票·80%转人工·高风险复核）",
+x:`检索链路采用"向量召回+图谱查询+规则匹配"的混合检索：问题先经嵌入模型向量化，在Milvus召回语义相近的片段，同时从Neo4j查询涉及的概念关系，再按相关性重排序，取最优片段进入提示词。切片策略上放弃了定长切片，改为按文档章节与表格结构切片，保证财务指标口径等语义单元不被切断。
+
+生成链路通过Dify工作流引擎编排，提示词固定为"系统角色+检索上下文+任务指令+输出格式"四段结构，要求结论必须标注依据的知识条目。同时设置置信度护栏——同一问题三次调用投票，置信度低于80%的结果必须转人工审核，高风险领域（如坏账判断）保留人工复核节点。`,
+b:["向量召回+图谱查询+规则匹配","定长切片","Dify","三次","80%"]},
+{id:"a9",t:"3.3 持续运营机制",c:"每月专家审核修订 → 每周基准更新 → 采纳/修正回流为标注 → 优化切片与检索",
+x:`知识库不是一次建成而是持续运营：每月由财务专家审核新增知识与修订条目，每周更新行业基准数据；Agent每条分析结果的"采纳/修正"记录回流为标注数据，用于优化切片与检索策略。`,
+b:["每月","每周","标注数据"]},
+{id:"a10",t:"四、问题一：检索结果不相关（护城河句）",c:"现象：毛利率案例检索回无关报表 → 根因：定长切片切断口径 → 改法：结构切片+重排 → 验证：归因句（15%→1.8·0.5%→0.5·锁价）",
+x:`问题一：检索结果不相关。上线初期，Agent分析"毛利率下降原因"时检索回的多是无关报表说明，模型只能给出泛泛结论。经排查，根因是定长切片把财务指标的口径定义切断了。改为按章节与表格结构切片并引入重排序后，检索结果能覆盖指标口径、归因规则与行业基准，模型可给出"原材料成本上涨15%贡献1.8个百分点，低毛利产品占比提升贡献0.5个百分点，建议与供应商谈判锁价"的精确归因。`,
+b:["定长切片","15%","1.8","0.5","谈判锁价"]},
+{id:"a11",t:"四、问题二：幻觉与输出不稳定",c:"编造科目数据 → 三次投票+80% → 标注来源 → 拒答句（知识库暂无此信息）",
+x:`问题二：幻觉与输出不稳定。大模型偶尔编造不存在的科目或数据。我们采用"三次调用投票+置信度评估"，置信度低于80%转人工审核，并要求结论标注知识来源，无法给出依据时明确回答"知识库暂无此信息"而非猜测。`,
+b:["三次","80%","知识库暂无此信息"]},
+{id:"a12",t:"四、问题三：外部大模型服务依赖（护城河句）",c:"可用性不可控 → 多供应商路由+熔断降级（规则引擎兜底）→ 验证：2024年12月故障2小时核心全程可用",
+x:`问题三：外部大模型服务依赖。RAG链路依赖外部大模型服务，可用性不受我们控制。我们采用多供应商路由与熔断降级：主服务商异常自动切换备选，持续故障则熔断并降级为规则引擎分析。2024年12月大模型服务商接口故障2小时，依靠该机制核心报表功能全程可用，用户无感知。`,
+b:["多供应商路由","熔断降级","规则引擎","2小时"]},
+{id:"a13",t:"五、效果+经验+暴论（暴论句必背）",c:"五数字（3天→2h·-85%·75→92·500万·40万）→ 三经验（检索定上限／专家参与／人工审核）→ 暴论：八分在数据治理、两分在算法——精准地召回过期知识",
+x:`项目于2024年11月上线，运行效果显著：报告生成时间从3天缩短至2小时；数据质量问题减少85%；风险识别准确率从75%提升至92%，提前识别高风险客户避免坏账损失约500万元；减少2名专职数据整理人员，年节约人力成本约40万元。
+
+实践中我们总结了三点经验：一是检索质量决定生成上限，知识库工程的投入产出比远高于模型选型；二是知识库质量决定Agent上限，需要业务专家深度参与建设；三是高风险领域人工审核节点不可省略，AI提效与人工把关必须结合。
+
+但系统仍有不足：知识库以文本和表格为主，未来计划引入多模态能力识别发票与合同图像。同行常把RAG视作大模型落地的银弹，我的体会恰恰相反：成败八分在数据治理、两分在算法——没有持续运营的知识库，再强的检索也只会精准地召回过期知识。`,
+b:["85%","500万","40万","检索质量决定生成上限","八分","两分","过期知识"]}
+]},
+B:{title:"范文B 论微服务架构与AI Agent融合",blocks:[
+{id:"b1",t:"摘要（必默写）",c:"结构：适配性 → 三空（DDD拆分／事件驱动协同／RAG知识库）→ 问题效果 → 数字收尾",
+x:`2024年3月，我所在的某制造业集团启动了智能财务分析平台项目。该集团拥有30余家子公司，年营收超过50亿元，传统财务分析模式面临数据采集分散、分析依赖经验、风险识别滞后等问题。本人担任系统架构师，负责整体架构设计。本文以该项目为例，论述微服务架构与AI Agent融合的设计与实践：首先阐述二者融合的适配性；然后重点论述基于领域驱动的服务拆分、多Agent协同的事件驱动机制、基于RAG的财务知识库构建；最后结合项目中遇到的典型问题与解决方案，总结实施效果。项目上线后，财务分析报告生成时间从3天缩短至2小时，风险识别准确率从75%提升至92%，验证了该架构的有效性。`,
+b:["30余家","50亿","适配性","3天","2小时","75%","92%"]},
+{id:"b2",t:"一、项目概述·痛点段（固定段，同A）",c:"与范文A完全相同的固定段——背一次用两篇",
+x:`我司是一家大型制造业集团，拥有30余家子公司，年营收超过50亿元。集团财务数据分散在ERP系统、银行对账系统及各子公司的Excel报表中，传统财务分析模式存在以下突出问题：一是数据采集依赖人工，每月需2名专职人员花费3天时间整理核对数据；二是分析依赖个人经验，新入职分析师需要半年以上才能独立工作；三是风险识别滞后，财务风险通常在月度结账后才被发现。例如2023年某子公司应收账款周转天数从45天增加到68天，待发现时已经形成300万元坏账风险。`,
+b:["2名","3天","半年","300万"]},
+{id:"b3",t:"一、项目概述·启动段（角色句=微服务版）",c:"角色：微服务架构设计·Agent能力边界·多Agent协同机制",
+x:`为解决以上问题，集团于2024年3月启动智能财务分析平台项目，目标是实现财务数据自动采集、智能分析与实时预警。本人担任系统架构师，负责微服务架构设计、AI Agent能力边界划分及多Agent协同机制设计。项目团队共28人，历时8个月完成一期建设。`,
+b:["能力边界","28人","8个月"]},
+{id:"b4",t:"二、技术概述·微服务特征",c:"定义（小组件·业务能力·独立部署伸缩·轻量通信）→ 原则（单一职责·独立数据所有权）→ 优势（异构·隔离·弹性）→ 代价（事务·治理·链路追踪）→ 适用（边界清晰·迭代频繁）",
+x:`微服务架构是将单一应用划分为一组小型服务的架构风格，每个服务围绕业务能力构建、独立部署与伸缩，服务间采用轻量级通信，遵循单一职责与独立数据所有权原则。其优势是技术异构、故障隔离、可按负载特征弹性伸缩；代价是引入分布式事务、服务治理、链路追踪等复杂度，更适合业务边界清晰、迭代频繁的系统。`,
+b:["单一职责","独立数据所有权","分布式事务","链路追踪"]},
+{id:"b5",t:"二、技术概述·Agent四模块+局限",c:"定义（感知·规划·工具）→ 四模块 → ReAct（推理与行动交替）→ 能力三 → 局限三（幻觉·慢·贵，不担确定性）",
+x:`AI Agent是能够感知环境、规划推理并调用工具执行行动的智能实体，典型构成包括感知、规划、记忆与工具调用四个模块，常见模式如ReAct（推理与行动交替）。Agent具备数据理解、因果推理、内容生成等能力，但局限明显：输出不稳定（幻觉）、响应慢、资源消耗大，难以承担确定性计算。`,
+b:["感知、规划、记忆与工具调用","ReAct","确定性计算"]},
+{id:"b6",t:"二、技术概述·融合核心思想（协同句）",c:"业务微服务=稳定骨架（确定性）／Agent=智能大脑（不确定性）→ 事件驱动解耦 → 独立伸缩互不拖累",
+x:`两者融合的核心思想是：业务微服务是稳定骨架，承担采集、存储、计算等确定性逻辑；Agent服务是智能大脑，承担分析、预测、生成等不确定性逻辑；二者通过事件驱动解耦，按各自负载特征独立伸缩，互不拖累。`,
+b:["稳定骨架","智能大脑","事件驱动"]},
+{id:"b7",t:"三、系统架构设计·权衡引入",c:"单体直调API三问题：负载特征差异／迭代节奏互拖／异步长流程要独立容错 → 融合架构三方面（拆分·协同·知识）",
+x:`架构设计之初，我们对"单体内直接调用大模型API"的方案进行了权衡：一是确定性负载与推理型负载特征差异大，单体无法针对大模型消耗独立伸缩；二是大模型迭代频繁，与业务代码同节奏发布会互相拖累；三是分析任务多为异步长流程，需要独立容错与重试。综合权衡后确定微服务与Agent融合架构，从服务拆分、协同机制、知识支撑三方面展开设计。`,
+b:["独立伸缩","异步长流程","三方面"]},
+{id:"b8",t:"3.1 基于DDD的服务拆分（枚举必背）",c:"原则（确定性vs不确定性）→ 事件风暴：42事件·10上下文 → 15=6+5+4 三层枚举（业务6／Agent5·风险预警／基础4）",
+x:`服务拆分的核心原则是：业务服务负责确定性逻辑，Agent服务负责不确定性逻辑。我们通过事件风暴梳理出"数据采集完成""风险预警已触发"等42个领域事件，识别出10个限界上下文，最终形成15个服务（业务6+Agent5+基础设施4）：
+
+业务服务层（6个）：数据采集、数据存储、报表、预算管理、成本核算、权限服务。
+
+Agent服务层（5个）：数据清洗Agent（异常检测与修复）、财务分析Agent（多维分析归因）、风险预警Agent（现金流与信用风险识别）、报告生成Agent、合规审计Agent。
+
+基础设施层（4个）：API网关、配置中心、消息队列服务、知识库服务。`,
+b:["事件风暴","42","10个限界上下文","15个服务","业务6+Agent5+基础设施4","风险预警Agent"]},
+{id:"b9",t:"3.2 事件驱动协同+三典型问题",c:"报告链4步（采集完成→清洗完成→分析&预警并行→报告通知）RocketMQ → 三问题：慢（异步任务ID+企微推送）／不稳（投票80%）／难硬编码（Dify+人工干预）",
+x:`多个Agent通过事件驱动架构实现解耦协作。以月度报告生成为例：采集服务完成采集后发布"数据采集完成"事件；清洗Agent订阅并执行检测修复，发布"数据清洗完成"事件；分析与风险预警Agent并行订阅，分别执行指标计算和风险评估；报告生成Agent在前置事件完成后整合生成报告并通知用户。消息通道采用RocketMQ。
+
+协同机制设计中我们遇到三个典型问题。一是Agent响应慢：改为异步处理，提交任务立即返回任务ID，完成后企业微信推送结果。二是输出不稳定：采用"三次调用投票+置信度评估"，低于80%转人工审核。三是复杂多步骤任务难以硬编码：使用Dify工作流引擎编排Agent执行顺序，并在关键节点设置人工干预。`,
+b:["数据采集完成","数据清洗完成","RocketMQ","任务ID","三次调用投票","80%","Dify"]},
+{id:"b10",t:"3.3 RAG知识库（压缩版）",c:"依赖领域知识 → 三类知识 → Neo4j+Milvus → 查询转向量→检索→提示词 → 毛利率前后对比（护城河句）",
+x:`Agent的分析质量高度依赖领域知识。我们组织财务专家构建了涵盖财务概念、业务规则（分析与预警）、行业知识（基准、法规）的领域知识库，Neo4j存储实体关系，Milvus存储语义向量。
+
+Agent执行分析时，先将查询转为向量，检索相关内容拼接到提示词中作为上下文，再调用大语言模型生成。分析"毛利率下降原因"时，使用RAG前Agent只能给出"可能是成本上升"的泛泛结论；使用后能给出"原材料成本上涨15%贡献1.8个百分点，低毛利产品占比提升贡献0.5个百分点，建议与供应商谈判锁价"的精确归因。`,
+b:["Neo4j","Milvus","15%","1.8","0.5"]},
+{id:"b11",t:"四、关键技术实现（三Agent各一钩）",c:"清洗=Drools+IsolationForest → 分析=思维链（算变化→归因→结论）→ 预警=Flink+规则（7天）+随机森林·三级推送（总监/经理/每周汇总）",
+x:`数据清洗Agent采用"规则引擎+机器学习"混合方案：Drools处理确定性规则（日期格式、金额非负），Isolation Forest检测统计异常（如某笔费用远高于历史均值），可修复的直接修复，不可修复的标记后转人工审核。
+
+财务分析Agent采用思维链分步推理：先计算指标变化，再从成本、售价、产品结构维度归因，最后综合结论并提供数据支撑，过程可追溯。
+
+风险预警Agent采用Flink实时消费银行流水，结合规则引擎（现金余额低于未来7天支出触发高危预警）与随机森林模型（预测违约概率），分级推送：高风险即时通知财务总监，中风险通知财务经理，低风险每周汇总。`,
+b:["Drools","Isolation Forest","思维链","Flink","7天","随机森林","财务总监"]},
+{id:"b12",t:"五、效果+经验+暴论（暴论句必背）",c:"五数字 → 三经验（边界划分／知识库定上限／人工审核）→ 暴论：拆分非越细越好·治理成本真实·Agent非替代人——先进性在于克制",
+x:`项目于2024年11月上线，运行效果显著：报告生成时间从3天缩短至2小时；数据质量问题减少85%；风险识别准确率从75%提升至92%，提前识别高风险客户避免坏账损失约500万元；减少2名专职数据整理人员，年节约人力成本约40万元。
+
+实践中我们总结了三点经验：一是服务边界划分是关键，确定性逻辑必须由业务服务承担，简单计算交给Agent反而慢且易错；二是知识库质量决定Agent上限，需要业务专家深度参与建设；三是高风险领域人工审核节点不可省略，AI提效与人工把关必须结合。
+
+但系统仍有不足：Agent目前仅支持文本和表格，未来计划引入多模态能力识别发票与合同图像。业界常把微服务与Agent视作先进性的标配，但实践告诉我：拆分并非越细越好，15个服务的治理成本真实存在；Agent更不是"替代人"，把它用在确定性计算上只会放大复杂度——架构的先进性在于克制，而非技术堆砌。`,
+b:["85%","500万","40万","服务边界划分","克制"]}
+]}
+};
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function cloze(text,blanks){
+  var h=esc(text);
+  var marks=blanks.map(function(w,i){return [w,"@@B"+i+"@@"]});
+  // 长词优先替换，防止短词嵌在长词内
+  marks.sort(function(a,b){return b[0].length-a[0].length});
+  marks.forEach(function(p){h=h.split(esc(p[0])).join(p[1])});
+  marks.forEach(function(p){
+    var sp='<span class="bl" data-a="'+esc(p[0])+'" onclick="rv(this)">?</span>';
+    h=h.split(p[1]).join(sp);
+  });
+  return h.replace(/\n/g,"<br>");
+}
+function norm(s){return s.replace(/\s/g,"").replace(/[！-～]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-0xFEE0)})}
+function recAns(a,ok,inp){
+  try{
+    var st=JSON.parse(localStorage.getItem("recite-cloze")||"{}");
+    st[a]=st[a]||{hit:0,miss:0};
+    st[a][ok?"hit":"miss"]++;
+    localStorage.setItem("recite-cloze",JSON.stringify(st));
+    clozeStat=st;
+  }catch(e){}
+}
+function rv(el){
+  if(el.classList.contains("open")||el.querySelector("input"))return;
+  var a=el.dataset.a;
+  el.innerHTML='<input placeholder="?"><i class="peek" title="直接看答案">👁</i>';
+  var inp=el.querySelector("input");
+  inp.focus();
+  inp.addEventListener("click",function(e){e.stopPropagation()});
+  inp.addEventListener("keydown",function(e){
+    if(e.key!=="Enter")return;
+    var ok=norm(inp.value)===norm(a);
+    el.classList.add("open",ok?"hit":"miss");
+    el.textContent=a;
+    if(!ok)el.title="你写的是："+inp.value;
+    recAns(a,ok,inp.value);
+  });
+  el.querySelector(".peek").addEventListener("click",function(e){
+    e.stopPropagation();
+    el.classList.add("open");el.textContent=a; // 直接看答案不计分
+  });
+}
+function revealAll(btn){
+  var box=btn.closest(".card").querySelector(".txt");
+  box.querySelectorAll(".bl").forEach(function(el){el.textContent=el.dataset.a;el.classList.add("open")});
+}
+function wc(s){return s.replace(/\s/g,"").length}
+var done={};
+try{done=JSON.parse(localStorage.getItem("recite-done")||"{}")}catch(e){}
+// 旧格式迁移：数组["a1"] → 对象{a1:时间戳}
+(function(){var mig=false;Object.keys(done).forEach(function(k){if(Array.isArray(done[k])){var o={};done[k].forEach(function(id){o[id]=Date.now()});done[k]=o;mig=true}});if(mig)saveDone()})();
+function saveDone(){try{localStorage.setItem("recite-done",JSON.stringify(done))}catch(e){}}
+// 艾宾浩斯到期判断：背熟后 +1/+3/+7 天，超过最近一个节点未复习即到期
+var REV_STEPS=[1,3,7];
+function reviewInfo(ts){
+  var days=(Date.now()-ts)/864e5;
+  if(days<REV_STEPS[0])return null;
+  // 找已过的最大节点
+  var lv=0;REV_STEPS.forEach(function(s){if(days>=s)lv=s});
+  return {days:Math.floor(days),lv:lv,done:lv>=7};
+}
+var clozeStat={};
+try{clozeStat=JSON.parse(localStorage.getItem("recite-cloze")||"{}")}catch(e){}
+function blockMiss(bk){
+  var n=0;bk.b.forEach(function(w){var s=clozeStat[w];if(s)n+=s.miss});
+  return n;
+}
+var TAB="a";
+function render(){
+  var app=document.getElementById("app");
+  if(TAB==="c"){app.innerHTML=cards4HTML();return}
+  if(TAB==="p"){app.innerHTML=planHTML();return}
+  if(TAB==="m"){app.innerHTML=mapHTML();return}
+  var d=DATA[TAB.toUpperCase()],dn=done[TAB.toUpperCase()]||{};
+  var dnIds=Object.keys(dn);
+  var head='<div class="bar"><i style="width:'+(dnIds.length/d.blocks.length*100)+'%"></i></div>'+
+    '<div class="pt"><span>'+d.title+' · 背熟 <b>'+dnIds.length+'</b>/'+d.blocks.length+'</span>'+
+    '<span><button class="hbtn" onclick="resetDone(\''+TAB+'\')">重置</button></span></div>';
+  var cards=d.blocks.map(function(bk){
+    var ts=dn[bk.id],isD=!!ts;
+    var ri=isD?reviewInfo(ts):null;
+    var needRev=ri&&!ri.done;
+    var miss=blockMiss(bk);
+    var badges='';
+    if(needRev)badges+='<span class="bdg bdg-rev">待复习·第'+ri.days+'天</span>';
+    if(miss>0)badges+='<span class="bdg bdg-miss">锚点错'+miss+'次</span>';
+    return '<div class="card'+(isD?" done":"")+(needRev?" review":"")+'" id="c-'+bk.id+'">'+
+      '<h3>'+(isD?"✅ ":"▫️ ")+bk.t+badges+'<span class="n">'+wc(bk.x)+'字</span></h3>'+
+      '<p class="cue">'+bk.c.replace(/\n/g,"<br>")+'</p>'+
+      '<div class="btns">'+
+        '<button onclick="showTxt(this,\''+bk.id+'\',\'full\')">全文</button>'+
+        '<button onclick="showTxt(this,\''+bk.id+'\',\'cloze\')">填空</button>'+
+        '<button class="'+(isD?"dk":"")+'" onclick="tg(\''+bk.id+'\')">'+(isD?(needRev?"✓ 复习完成":"取消背熟"):"✓ 已背熟")+'</button>'+
+      '</div>'+
+      '<div class="txt" id="t-'+bk.id+'"></div></div>';
+  }).join("");
+  app.innerHTML=head+cards;
+}
+function showTxt(btn,id,mode){
+  var key=TAB.toUpperCase(),box=document.getElementById("t-"+id);
+  var bk=DATA[key].blocks.filter(function(x){return x.id===id})[0];
+  var wasOn=box.style.display==="block"&&box.dataset.m===mode;
+  box.style.display=wasOn?"none":"block";box.dataset.m=mode;
+  box.innerHTML=mode==="full"?esc(bk.x).replace(/\n/g,"<br>"):cloze(bk.x,bk.b)+
+    '<div class="btns"><button onclick="revealAll(this)">揭示全部</button></div>';
+  btn.closest(".btns").querySelectorAll("button").forEach(function(x){x.classList.remove("on")});
+  if(!wasOn)btn.classList.add("on");
+}
+function tg(id){
+  var key=TAB.toUpperCase();done[key]=done[key]||{};
+  if(done[key][id]){
+    var ri=reviewInfo(done[key][id]);
+    if(ri&&!ri.done){
+      // 到期复习：刷新时间戳进入下一节点，而非取消背熟
+      done[key][id]=Date.now();
+    }else{
+      delete done[key][id];
+    }
+  }else{
+    done[key][id]=Date.now();
+  }
+  saveDone();render();
+  var el=document.getElementById("c-"+id);if(el)el.scrollIntoView({block:"center"});
+}
+function resetDone(t){if(confirm("重置该篇背熟进度？")){done[t.toUpperCase()]={};saveDone();render()}}
+function sw(t){
+  TAB=t;
+  ["a","b","c","p","m"].forEach(function(x){document.getElementById("tab-"+x).classList.toggle("on",x===t)});
+  render();window.scrollTo(0,0);
+}
+function mapHTML(){
+  function mq(q,tags,s){return '<div class="mq">'+q+'</div><div style="font-size:.88em">'+tags+'<div style="color:var(--sub);margin-top:2px">'+s+'</div></div>'}
+  var m1='<span class="tagm t-main">主写</span>',m2='<span class="tagm t-cut">压缩</span>',m3='<span class="tagm t-drop">删除</span>';
+  return ''+
+  '<div class="card"><h3>🧭 使用逻辑：素材固定，论点可变</h3>'+
+  '<p style="font-size:.9em;color:var(--sub)">考场不是现场创作，而是把背熟的素材块按题目论点重新组装。A/B 两范文的块（a1–a13 / b1–b12）即模块，读题后按本表映射取舍，段首用呼应句直接点题。</p>'+
+  '<table><tr><th>模块</th><th>对应块</th><th>弹性</th></tr>'+
+  '<tr><td>M1 项目背景</td><td>a2+a3 / b2+b3</td><td>固定约300字，任何题都写</td></tr>'+
+  '<tr><td>M2 技术原理</td><td>a4+a5 / b4+b5+b6</td><td>150–450字，考原理才全写</td></tr>'+
+  '<tr><td>M3 知识库构建</td><td>a7 / b10</td><td>300–500字</td></tr>'+
+  '<tr><td>M4 检索生成链路</td><td>a8+a9 / b9+b11</td><td>300–500字</td></tr>'+
+  '<tr><td>M5 持续运营</td><td>a9</td><td>150–400字</td></tr>'+
+  '<tr><td>M6 问题与效果</td><td>a10–a13 / b12</td><td>400–600字，任何题都写</td></tr></table></div>'+
+
+  '<div class="card"><h3>📝 摘要模板（≤300字）</h3>'+
+  '<details><summary>展开模板</summary><div class="txt">'+
+  '【时间】，我所在的【企业画像】启动了【项目名】。该企业【规模】，传统模式面临【三痛点】。本人担任【角色】，负责【职责】。本文以该项目为例，论述【考题主题】：首先阐述【论点1】；然后重点论述【论点2、论点3，与子问题逐一对应】；最后结合典型问题与解决方案总结效果。上线后【2–3个量化效果】，验证了【考题主题】的有效性。'+
+  '</div></details>'+
+  '<div class="warn">"首先/然后/最后"引出的内容，必须与考题子问题顺序一致、与正文章节标题严格对应——阅卷人30秒内据此判断是否偏题。</div></div>'+
+
+  '<div class="card"><h3>🗂 论点映射总表（9种问法）</h3>'+
+  mq('1. RAG 的基本原理与核心组成部分',m1+'M2（a4+a5）','段首直接列举五组成，每个用"解决什么问题"一句带过，结尾点出与微调的权衡。')+
+  mq('2. 说明你负责的架构设计 / 大模型应用架构',m1+'M3+M4（a7+a8）'+m2+'M2','段首"本人负责…，从知识库构建、检索生成链路两方面展开"，强调"我"的决策：双库、Milvus选型、切片策略。')+
+  mq('3. 知识库 / 知识工程的构建与运营',m1+'M3+M5（a7+a9）'+m2+'M4','M5提为独立分论点，补"回流数据驱动切片优化"；链路只留一句承上启下。')+
+  mq('4. 检索策略设计 / 检索质量优化',m1+'M4+问题一（a8+a10）'+m2+'M3','混合检索、结构切片、重排序逐层展开；问题一作反面论证紧跟，形成"设计→踩坑→修正"闭环。')+
+  mq('5. 幻觉控制 / 输出可靠性',m1+'M4护栏段+问题二（a8+a11）'+m2+'M3、M5','围绕"三次投票+80%阈值+标注来源+人工复核"；RAG本身作为"用检索事实约束生成"的第一道防线先讲。')+
+  mq('6. 系统可用性 / 可靠性 / 降级设计',m1+'问题三（a12）'+m2+'M2–M5','多供应商路由、熔断降级、2024年12月故障2小时实例展开；知识库与链路压缩为背景各一段。')+
+  mq('7. RAG vs 微调 / 大模型落地选型',m1+'M2对比段+a6'+m2+'M5','三方案各一段利弊，理由"财务法规每季变化，微调更新慢成本高"，自然过渡到RAG架构。')+
+  mq('8. 实施效果与经验教训',m1+'M6（a13）','量化效果全写，每条经验配项目实例；不足与展望保留体现反思深度。')+
+  mq('9. 数据治理 / 数据质量对AI的影响',m1+'M1痛点+M5+问题一（a2+a9+a10）'+m2+'M4','主线"八分在数据治理、两分在算法"：采集分散→切片口径→运营回流，落脚"知识库运营就是数据治理"。')+
+  '</div>'+
+
+  '<div class="card"><h3>💬 段首呼应句模板（背熟替换括号即可）</h3>'+
+  '<table><tr><th>类型</th><th>句式</th></tr>'+
+  '<tr><td>原理类</td><td>"【技术】的核心组成部分包括N个：【列举】。协同链路是：【一句话流程】。"</td></tr>'+
+  '<tr><td>设计类</td><td>"本人在该项目中负责【职责】，针对【题目所问】，从【方面1】【方面2】【方面3】三方面展开设计。"</td></tr>'+
+  '<tr><td>权衡类</td><td>"对【方案A】与【方案B】进行了权衡：前者【弊】，后者【弊】，选定【方案】，理由是【扣题理由】。"</td></tr>'+
+  '<tr><td>问题类</td><td>"典型问题主要有N个。问题一：【现象】。根因是【根因】，采用【解法】，之后【效果】。"</td></tr>'+
+  '<tr><td>效果类</td><td>"项目于【时间】上线，效果显著：【指标】从X变为Y；【指标】从X变为Y。"</td></tr></table>'+
+  '<div class="warn">禁忌：段首不写"随着…的发展""在…的背景下"这类与论点无关的套话。段首不点题＝该论点可能不得分。</div></div>'+
+
+  '<div class="card"><h3>⏱ 考场操作流程（120分钟）</h3>'+
+  '<table><tr><th>步骤</th><th>时长</th><th>动作</th></tr>'+
+  '<tr><td>1 读题圈论点</td><td>5min</td><td>3个子问题逐字圈出，标注对应模块号，判断主写哪2–3个模块</td></tr>'+
+  '<tr><td>2 列提纲定呼应句</td><td>10min</td><td>草稿写出摘要三句"首先/然后/最后"与各分论点段首呼应句</td></tr>'+
+  '<tr><td>3 默写主体</td><td>85min</td><td>M1固定300字→M2按题伸缩→主写模块各400–500字→M6收尾；每写完一段回头检查段首点题</td></tr>'+
+  '<tr><td>4 检查呼应</td><td>10min</td><td>每个子问题是否都有专门段落？摘要论点与正文标题是否一致？字数2000–2500？</td></tr>'+
+  '<tr><td>5 补漏</td><td>10min</td><td>字数不足扩写M6问题实例；超出则压缩M2——原理是全文弹性最大的模块</td></tr></table></div>';
+}
+var CARDS4=[
+{t:"卡0 · 协同型答题模板（总纲，所有卡套用）",x:
+'<p>「<b>X 的核心组成部分包括：一 A；二 B；三 C；四 D。</b>各自作用：A 负责…；B 负责…；C 负责…；D 负责…。<b>协同链路</b>：…→…→…→…，各环节环环相扣，<b>共同实现〔题面给的目标〕</b>。」</p>'+
+'<div class="warn">列完组成必须写协同句——机考后的判分分水岭。下方卡12/13 就是按此模板填好的两个实例。</div>'},
+{t:"卡3 · 微服务特点/优点 vs 单块",x:
+'<p><b>七个特征</b>：服务自治（独立开发部署伸缩）｜围绕业务能力组织｜去中心化数据治理（每服务独立库）｜轻量级通信（REST/MQ）｜故障隔离｜技术异构｜基础设施自动化。</p>'+
+'<p><b>vs 单块</b>：优点＝独立演进/弹性/容错；代价＝分布式复杂性/分布式事务/运维成本。</p>'+
+'<p><b>协同句</b>：自治服务+轻量通信+去中心化数据共同实现"独立演进、故障隔离"目标。</p>'+
+'<p><b>项目素材</b>：DDD 拆 15 服务（6+5+4）、42 领域事件、10 限界上下文、事件风暴工作坊 4 次。</p>'},
+{t:"卡12 · 分布式缓存（凯恩押题③）",x:
+'<p><b>四组成</b>：①缓存节点集群（Redis 分片+主从冗余——数据放在哪）②路由层（一致性哈希+虚拟节点，键均匀映射——请求到哪去）③多级缓存体系（本地 Caffeine→分布式 Redis→数据库——延迟逐层压）④持久化与高可用（RDB 快照+AOF 追加、主从故障转移——缓存挂了不雪崩）。</p>'+
+'<p><b>三机制（设问点名）</b>：数据组织——Key 统一规范（业务:对象:ID）+热点预热+合理序列化；缓存更新——Cache-Aside 旁路：读未命中回源回填，写<b>先更新数据库再删除缓存</b>（不是更新缓存：并发写易脏；删除失败靠重试+TTL 兜底，最终一致）；过期淘汰——TTL 加随机值防集中失效，内存达阈值按 LRU/LFU 淘汰，冷数据不进缓存。</p>'+
+'<p><b>三异常（必背区分）</b>：穿透（查不存在的 key→布隆过滤器/空值缓存）｜击穿（热点 key 过期瞬间打穿→互斥重建/逻辑过期）｜雪崩（大量 key 同时失效或实例宕机→TTL 随机化+集群高可用+限流降级）。</p>'+
+'<p><b>协同句</b>：路由层均匀分发，多级体系逐层拦截读压力，更新与淘汰机制维持命中率与一致性——共同实现"以可控弱一致换数据库压力数量级下降"。</p>'+
+'<p><b>项目素材</b>：三级缓存（Caffeine 秒级失效→Redis 1 小时→预计算结果表）+"更新库后删缓存+延迟双删"、配合读写分离，查询秒级→120ms。</p>'+
+'<p><b>护城河问题</b>：报表结果 key 集中路由到单一分片（哈希倾斜）→上调虚拟节点数重分配槽位；缓存删除延迟读到旧数据→版本号校验+本地短 TTL 兜底。</p>'},
+{t:"卡13 · 消息队列（凯恩押题④）",x:
+'<p><b>四组成</b>：Producer（发送消息）/ Broker（持久化存储与转发）/ Consumer（按能力拉取消费）/ Topic 路由（点对点与发布订阅两种模式）。</p>'+
+'<p><b>六功能（设问点名，各一句）</b>：异步处理——主链路只做校验+发消息，下游异步消费缩短响应；应用解耦——上下游只依赖消息契约，独立迭代；流量削峰——洪峰入队、后端按稳定速率消费；消息路由——按 Topic/Tag 把消息投给订阅方；可靠投递——持久化+消费确认+重试+死信队列（至少一次语义）；消费处理——批量拉取提吞吐+幂等消费（唯一索引/状态机/消费记录表判重）。</p>'+
+'<p><b>协同句</b>：生产者只管投递，Broker 缓冲并路由，消费者按自身能力拉取并幂等确认——把同步调用的阻塞与耦合，转化为异步的缓冲与最终一致。</p>'+
+'<p><b>项目素材</b>：全链路异步化（提交任务立即返回任务 ID、完成后企业微信推送）、三优先级消费组（实时预警>报告生成>批量分析）、月初结账削峰。</p>'+
+'<p><b>护城河问题</b>：固定间隔重试→高峰期消息积压+重复入账→改指数退避+超过最大重试进死信队列转人工；消费端按业务建唯一索引保证幂等。</p>'}
+];
+function cards4HTML(){
+  var h='<div class="warn">用法（今晚轮2 · 50 分钟）：每张卡 点开读一遍 → 点标题<b>收起</b> → 口头复述 → 再点开对照补漏。顺序：卡0 → 卡3 → 卡12 → 卡13。</div>';
+  CARDS4.forEach(function(c,i){
+    h+='<details class="card" open id="k4-'+i+'"><summary><h3 style="display:inline;margin:0">'+c.t+'</h3></summary><div class="txt">'+c.x+'</div></details>';
+  });
+  return h;
+}
+function planHTML(){
+  return ''+
+  '<div class="card"><h3>🌙 考前一夜方案（10-23 晚 · 距考 1 天）</h3>'+
+  '<p class="cue">手里已有：RAG 全文背诵级 ✅ + 固定段（摘要/痛点/效果 ≈1100 字，所有考题通用）✅——任何题目约 40% 的内容已经到手。今晚不再背新全文，目标＝复述级备份 + 组装路径。</p>'+
+  '<table><tr><th>轮次</th><th>时长</th><th>内容</th></tr>'+
+  '<tr><td>轮1 复述B</td><td>75min</td><td>范文B 刷到"熟练复述"级：本页 B 标签骨架过一遍 → 只做 b8/b9/b11/b12 四个硬块的填空（三层枚举 / 事件链 / 三Agent / 暴论）。练笔过的基础会回来，别逐字背。B 一个方向覆盖 微服务⑧/DDD⑥/Agent② 三个押题</td></tr>'+
+  '<tr><td>轮2 背诵卡</td><td>50min</td><td>卡0 协同模板 → 卡3 微服务 → 卡12 缓存 → 卡13 消息队列（每张：读 → 遮住复述 → 对照补漏）。有余力再扫卡16 一致性、卡15 DDD 三概念</td></tr>'+
+  '<tr><td>轮3 锚点</td><td>20min</td><td>数字锚点表（下）+ 易错清单 + 两句暴论各默写一遍</td></tr>'+
+  '<tr><td>轮4 组装</td><td>15min</td><td>口头演练："若明天考缓存 / MQ / DDD / 一致性，正文从哪抽"——对照下方组装路径表走一遍</td></tr>'+
+  '<tr><td>睡觉</td><td>—</td><td>保证 7 小时。明早只热身：默写 RAG 摘要 + 固定段各一遍，不再学任何新内容</td></tr></table></div>'+
+  '<div class="card"><h3>🌲 明日考场决策树（4 选 1，先读各题第 3 问）</h3>'+
+  '<table><tr><th>题面</th><th>应对</th></tr>'+
+  '<tr><td>RAG / 大模型 / AI 应用</td><td>范文A 直接默写；考 Agent → 第2问换卡2，正文抽 A 的 3.2 + B 的 3.1/3.2</td></tr>'+
+  '<tr><td>微服务 / DDD / 云原生</td><td>范文B 复述展开；DDD 题第2问用卡15 三概念，B 的 3.1 扩写</td></tr>'+
+  '<tr><td>缓存 / 消息队列 / 高并发</td><td>卡12/13 第2问 + 固定段 + 03类别3 两个子节组装，问题写"哈希倾斜→上调虚拟节点""固定重试→指数退避+死信"</td></tr>'+
+  '<tr><td>分布式一致性 / 事务</td><td>卡16 第2问（CAP/BASE+分级选型）+ 类别1 两个子节（Saga / 本地消息表）</td></tr>'+
+  '<tr><td>弹性伸缩</td><td>卡14 + 07 负载均衡素材迁移（月初峰值→定时+动态双策略）</td></tr>'+
+  '<tr><td>全陌生</td><td>固定段 + 卡0 模板 + 最接近主题硬组装——及格线＝切题+真实感，不是技术深度</td></tr></table></div>'+
+  '<div class="card"><h3>⚡ 组装路径速查（第3问正文从哪抽）</h3>'+
+  '<table><tr><th>若考</th><th>第2问</th><th>正文两个小节 + 问题素材</th></tr>'+
+  '<tr><td>缓存</td><td>卡12</td><td>03类别3子节1 多级缓存扩写；问题：哈希倾斜→上调虚拟节点 / 删除延迟→版本号校验+短TTL</td></tr>'+
+  '<tr><td>MQ</td><td>卡13</td><td>03类别3子节2 异步削峰 + 类别1子节2 本地消息表；问题：固定重试→指数退避+死信队列</td></tr>'+
+  '<tr><td>DDD</td><td>卡15</td><td>B 的 3.1 扩写 + 03类别5 子节2 战术落地与边界守护</td></tr>'+
+  '<tr><td>一致性</td><td>卡16</td><td>类别1 子节1 Saga + 子节2 本地消息表（2024.12 队列抖动 37 条零丢失）</td></tr>'+
+  '<tr><td>可靠性</td><td>卡5</td><td>14 号提纲直接组装（容错三件套 + 数据灾备）</td></tr></table></div>'+
+  '<div class="card"><h3>🔢 数字锚点（任何考题都用，错一处即硬伤）</h3>'+
+  '<table><tr><th>维度</th><th>唯一口径</th></tr>'+
+  '<tr><td>集团</td><td>30余家子公司 · 年营收超过50亿元</td></tr>'+
+  '<tr><td>痛点</td><td>2名专职·3天 ／ 半年以上 ／ 应收45天→68天·300万坏账</td></tr>'+
+  '<tr><td>团队</td><td>28人 · 历时8个月（2024年3月启动，11月上线）</td></tr>'+
+  '<tr><td>拆分</td><td>15个服务＝业务6+Agent5+基础设施4 · 42领域事件 · 10限界上下文</td></tr>'+
+  '<tr><td>效果</td><td>3天→2小时 · 75%→92% · -85% · 500万 · 40万 · 120ms · 99.99%</td></tr>'+
+  '<tr><td>护栏/故障</td><td>三次投票 · 置信度80%转人工 · 2024年12月故障2小时全程可用</td></tr></table></div>'+
+  '<div class="warn">考场铁律：摘要 ≤300 字符、正文 ≤2500（超出输不进，按块控量：摘要290/背景380/理论450/方案+问题1250/结尾300）；问题显式编号；第2问协同句收尾；结尾暴论；交卷前 8 分钟专查数字口径与名词统一。</div>'+
+  '<div class="card"><h3>⚠️ 易错清单</h3>'+
+  '<table><tr><td>1</td><td>命名统一"风险预警Agent"——不写"风险预测Agent"</td></tr>'+
+  '<tr><td>2</td><td>"15个服务"，不说"15个微服务"（含4个基础设施服务）</td></tr>'+
+  '<tr><td>3</td><td>摘要/正文/效果三处数字必须一致（30亿 vs 50亿 的教训）</td></tr>'+
+  '<tr><td>4</td><td>两句暴论不能丢：A"八分在数据治理、两分在算法"；B"先进性在于克制"</td></tr>'+
+  '<tr><td>5</td><td>第一人称细节句 ≥2 处（护城河：归因句/12月故障/分级推送/事件风暴说服团队）</td></tr></table></div>';
+}
+function fsz(n){var s=parseInt(document.documentElement.style.fontSize||"17px")+n;s=Math.min(23,Math.max(14,s));document.documentElement.style.fontSize=s+"px";try{localStorage.setItem("sp-fs",s)}catch(e){}}
+function th(){var k=document.documentElement.classList.toggle("dark");try{localStorage.setItem("sp-th",k?"1":"0")}catch(e){}}
+try{var f=localStorage.getItem("sp-fs");if(f)document.documentElement.style.fontSize=f+"px";if(localStorage.getItem("sp-th")==="1")document.documentElement.classList.add("dark")}catch(e){}
+(function(){
+  var ex=new Date("2026-10-24T09:00:00");
+  var dd=Math.ceil((ex-new Date())/864e5);
+  document.getElementById("cd").textContent="距架构师考试 "+dd+" 天";
+  render();
+})();
+</script>
+</body>
+</html>

@@ -20,13 +20,11 @@ public class Simulation {
     @Column(name = "sim_date", nullable = false)
     private LocalDate simDate;
 
-    @Column(name = "knowledge_score", nullable = false)
+    /** 三科分数：null 表示该科尚未交卷（按科交卷模式） */
     private Integer knowledgeScore;
 
-    @Column(name = "case_score", nullable = false)
     private Integer caseScore;
 
-    @Column(name = "essay_score", nullable = false)
     private Integer essayScore;
 
     @Column(columnDefinition = "TEXT")

@@ -28,4 +28,14 @@ public class SimulationController {
     public ResponseEntity<Map<String, Object>> submitSimulation(@RequestBody Map<String, Object> body) {
         return ResponseEntity.ok(simulationService.submitSimulation(body));
     }
+
+    /** 按科交卷：body = {section: "knowledge"|"case"|"essay", answers: [...]} */
+    @PostMapping("/{id}/submit-section")
+    public ResponseEntity<Map<String, Object>> submitSection(@PathVariable Long id,
+                                                             @RequestBody Map<String, Object> body) {
+        String section = (String) body.get("section");
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> answers = (List<Map<String, Object>>) body.getOrDefault("answers", java.util.Collections.emptyList());
+        return ResponseEntity.ok(simulationService.submitSection(id, section, answers));
+    }
 }

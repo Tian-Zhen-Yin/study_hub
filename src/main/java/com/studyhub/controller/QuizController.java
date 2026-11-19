@@ -41,4 +41,21 @@ public class QuizController {
     public ResponseEntity<AnswerResponse> answer(@RequestBody AnswerRequest req) {
         return ResponseEntity.ok(quizService.gradeAnswer(req.getQuestionId(), req.getUserAnswer(), gameService));
     }
+
+    /** 案例专项方向汇总（题干【案例题型·XX】前缀统计），供 quiz 页专项面板 */
+    @GetMapping("/quiz/case-summary")
+    public ResponseEntity<List<java.util.Map<String, Object>>> caseSummary() {
+        return ResponseEntity.ok(quizService.caseSummary());
+    }
+
+    /** 同考点变式题（举一反三） */
+    @GetMapping("/quiz/variants/{id}")
+    public ResponseEntity<List<QuestionDTO>> variants(@PathVariable Long id,
+                                                      @RequestParam(defaultValue = "3") int count) {
+        List<QuestionDTO> dtos = quizService.findVariants(id, count).stream()
+            .map(questionService::toDTOPublic)
+            .collect(Collectors.toList());
+        questionService.annotateAnsweredStatus(dtos);
+        return ResponseEntity.ok(dtos);
+    }
 }

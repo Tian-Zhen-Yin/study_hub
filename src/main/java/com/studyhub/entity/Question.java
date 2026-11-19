@@ -62,4 +62,20 @@ public class Question {
 
     @Column(name = "flagged_at")
     private java.time.LocalDateTime flaggedAt;
+
+    /** 历年真题试卷（exam_papers.id），练习题/自制题为 NULL */
+    @Column(name = "paper_id")
+    private Long paperId;
+
+    /** 题号（试卷内序号） */
+    @Column(name = "exam_sort")
+    private Integer examSort;
+
+    /** 外部来源唯一键（如 cheko:case:5），用于爬虫导入幂等 */
+    @Column(name = "external_key", length = 100)
+    private String externalKey;
+
+    /** 知识图谱考点（kp_nodes.id） */
+    @Column(name = "kp_node_id")
+    private Long kpNodeId;
 }

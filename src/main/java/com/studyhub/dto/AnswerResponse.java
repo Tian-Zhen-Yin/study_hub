@@ -12,6 +12,15 @@ public class AnswerResponse {
     private Long answerRecordId;
     private MemoryInfo memory;
     private GameDelta game;
+    /** 答错时的考点信息（举一反三入口） */
+    private AnswerMeta meta;
+
+    @Data
+    @Builder
+    public static class AnswerMeta {
+        private String knowledgePoint;
+        private Long variantCount;
+    }
 
     @Data
     @Builder

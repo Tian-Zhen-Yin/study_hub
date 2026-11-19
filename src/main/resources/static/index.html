@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="assets/echarts.min.js"></script>
 <link rel="stylesheet" href="shared/variables.css">
 <link rel="stylesheet" href="shared/layout.css">
 <link rel="stylesheet" href="colors_and_type.css">
@@ -28,6 +29,12 @@
 .material-body details{margin:8px 0;padding:8px 12px;background:var(--bg-surface-high);border-radius:6px}
 .material-body summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--primary-6)}
 .material-body blockquote{border-left:3px solid var(--primary-5);padding-left:12px;margin:8px 0;color:var(--text-2)}
+/* 题干/解析 Markdown 列表：显式声明序号与缩进，不依赖浏览器 UA 默认（部分内嵌内核为 none+0） */
+.material-body ol,.content-card-body ol{list-style-type:decimal;list-style-position:outside;padding-left:24px;margin:6px 0}
+.material-body ul,.content-card-body ul{list-style-type:disc;list-style-position:outside;padding-left:24px;margin:6px 0}
+.content-card-body ol.md-sub,.material-body ol.md-sub{list-style-type:circle;margin-top:2px;margin-bottom:2px}
+.content-card-body ul.md-sub,.material-body ul.md-sub{list-style-type:circle;margin-top:2px;margin-bottom:2px}
+.content-card-body li,.material-body li{line-height:1.8}
 .sheet-cell.hist-correct::after{content:'';position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#22c55e;z-index:10}
 .sheet-cell.hist-wrong::after{content:'';position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#ef4444;z-index:10}
 </style>
@@ -52,9 +59,14 @@
         <div class="sidenav-item active" data-page="dashboard" onclick="navigate('dashboard')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="11" y="2" width="7" height="7" rx="1"/><rect x="2" y="11" width="7" height="7" rx="1"/><rect x="11" y="11" width="7" height="7" rx="1"/></svg>仪表盘</div></div>
       <div class="sidenav-section"><div class="sidenav-section-title">战斗</div>
         <div class="sidenav-item" data-page="quiz" onclick="navigate('quiz')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2l6 8H8l2 8-6-8h4L6 2z"/></svg>刷题战斗</div>
+        <div class="sidenav-item" data-page="past-exams" onclick="navigate('past-exams')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h5a2 2 0 012 2v10a2 2 0 00-2-2H3V4z"/><path d="M17 4h-5a2 2 0 00-2 2v10a2 2 0 012-2h5V4z"/></svg>历年真题</div>
         <div class="sidenav-item" data-page="memory" onclick="navigate('memory')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2v4M10 14v4M2 10h4M14 10h4M4.93 4.93l2.83 2.83M12.24 12.24l2.83 2.83M4.93 15.07l2.83-2.83M12.24 7.76l2.83-2.83"/></svg>记忆熔炉</div>
         <div class="sidenav-item" data-page="simulation" onclick="navigate('simulation')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/></svg>全真模拟</div></div>
       <div class="sidenav-section"><div class="sidenav-section-title">分析</div>
+        <div class="sidenav-item" data-page="kp-graph" onclick="navigate('kp-graph')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="10" cy="15" r="2"/><path d="M6.5 6.5l2.5 6M13.5 6.5l-2.5 6M7 5h6"/></svg>知识图谱</div>
+        <div class="sidenav-item" data-page="essay-insight" onclick="navigate('essay-insight')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 3h9l3 3v11H4z"/><path d="M7 8h6M7 11h6M7 14h4"/></svg>论文备考</div>
+        <div class="sidenav-item" data-page="mcq-insight" onclick="navigate('mcq-insight')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>综合备考</div>
+        <div class="sidenav-item" data-page="memory-palace" onclick="navigate('memory-palace')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l7-6 7 6v8H3z"/><path d="M8 17v-5h4v5"/></svg>记忆宫殿</div>
         <div class="sidenav-item" data-page="diagnosis" onclick="navigate('diagnosis')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h14v14H3z"/><path d="M7 13l3-5 3 5"/></svg>弱点诊断</div>
         <div class="sidenav-item" data-page="plan" onclick="navigate('plan')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3h10v14H5z"/><path d="M8 7h4M8 11h4M8 15h2"/></svg>学习计划</div>
         <div class="sidenav-item" data-page="data" onclick="navigate('data')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="14" width="4" height="4" rx="1"/><rect x="8" y="8" width="4" height="10" rx="1"/><rect x="14" y="2" width="4" height="16" rx="1"/></svg>数据中心</div>        <div class="sidenav-item" data-page="bank" onclick="navigate('bank')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h12v12H4z"/><path d="M4 8h12M4 12h12M8 4v12"/></svg>题库管理</div></div>
@@ -68,7 +80,7 @@
   </footer>
 </div>
 <script src="shared/app.js?v=20260811e"></script>
-<script src="shared/pages.js?v=20260908a"></script>
+<script src="shared/pages.js?v=20261008a"></script>
 <script>lucide.createIcons();</script>
 </body>
 </html>

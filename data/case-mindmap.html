@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>脑图·案例冲刺宝典 6.0.1（2026下）</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#222;--sub:#777;--line:#e3e5e9;--canvas:#eef0f4}
+html.dark{--bg:#111418;--card:#1b1f24;--ink:#d8dce1;--sub:#8a919a;--line:#2a2f36;--canvas:#0d1013}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;display:flex;flex-direction:column}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;z-index:5}
+header b{font-size:1.05em}
+.cd{font-size:.82em;color:var(--sub)}
+.hbtn{background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:3px 9px;font-size:.85em;cursor:pointer}
+.hbtn:hover{border-color:var(--acc,#dc2626);color:var(--acc,#dc2626)}
+.hbtn.on{background:#dc2626;border-color:#dc2626;color:#fff}
+#search{background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:4px 9px;font-size:.9em;width:170px}
+#hitinfo{font-size:.8em;color:var(--sub);min-width:44px}
+#viewport{flex:1;overflow:hidden;position:relative;background:
+  radial-gradient(circle at 1px 1px, var(--line) 1px, transparent 0) 0 0/22px 22px, var(--canvas);
+cursor:grab;touch-action:none}
+#viewport.drag{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
+#links{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.node{position:absolute;left:0;top:0;background:var(--card);border:1px solid var(--line);border-left-width:4px;border-radius:8px;padding:5px 10px;max-width:270px;cursor:pointer;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.node:hover{border-color:var(--ink)}
+.node .pg{display:inline-block;font-size:.72em;color:var(--sub);margin-left:6px}
+.node .tag{display:inline-block;font-size:.7em;border-radius:5px;padding:0 5px;margin-left:6px;vertical-align:1px;white-space:nowrap}
+.node .exam{display:inline-block;font-size:.66em;border-radius:5px;padding:0 4px;margin-left:4px;vertical-align:1px;white-space:nowrap;font-weight:700}
+.exam.old{background:#dcfce7;color:#15803d}
+html.dark .exam.old{background:#052e16;color:#86efac}
+.exam.new{background:#fef9c3;color:#a16207;border:1px dashed #d97706}
+html.dark .exam.new{background:#422006;color:#fde047}
+.fold{position:absolute;right:-9px;top:50%;transform:translateY(-50%);min-width:16px;height:16px;border-radius:8px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-size:10px;line-height:14px;text-align:center;padding:0 3px}
+.node.collapsedkid{display:none}
+.node.hit{outline:2px solid #f59e0b;outline-offset:1px}
+.node.root{font-size:1.1em;font-weight:700;background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.node.group{font-weight:700}
+.lbl-super{border-left-color:#dc2626}
+.lbl-super .tag{background:#fee2e2;color:#b91c1c}
+html.dark .lbl-super .tag{background:#450a0a;color:#fca5a5}
+.lbl-key{border-left-color:#d97706}
+.lbl-key .tag{background:#fef3c7;color:#b45309}
+html.dark .lbl-key .tag{background:#451a03;color:#fcd34d}
+.lbl-minor{border-left-color:#2563eb}
+.lbl-minor .tag{background:#dbeafe;color:#1d4ed8}
+html.dark .lbl-minor .tag{background:#172554;color:#93c5fd}
+.lbl-none{border-left-color:#94a3b8}
+.lbl-none .tag{display:none}
+/* ---------- 背诵清单 ---------- */
+.tpill{display:inline-block;font-size:.68em;border-radius:5px;padding:0 5px;margin-left:5px;vertical-align:1px;font-weight:700}
+.tpill.t1{background:#fee2e2;color:#b91c1c}
+.tpill.t2{background:#fef3c7;color:#b45309}
+.tpill.t3{background:#ede9fe;color:#6d28d9}
+.tpill.ok{background:#dcfce7;color:#15803d}
+html.dark .tpill.t1{background:#450a0a;color:#fca5a5}
+html.dark .tpill.t2{background:#451a03;color:#fcd34d}
+html.dark .tpill.t3{background:#2e1065;color:#c4b5fd}
+html.dark .tpill.ok{background:#052e16;color:#86efac}
+.node.ndone{border-color:#16a34a}
+#plan{position:fixed;top:0;right:0;height:100%;width:330px;background:var(--card);border-left:1px solid var(--line);z-index:8;transform:translateX(105%);transition:transform .2s;overflow-y:auto;padding:12px 14px;box-shadow:-3px 0 10px rgba(0,0,0,.12)}
+#plan.open{transform:none}
+#plan h2{font-size:1em;margin:4px 0}
+#plan .tier{font-weight:700;margin:12px 0 2px;font-size:.9em}
+#plan .t1h{color:#dc2626}#plan .t2h{color:#d97706}#plan .t3h{color:#7c3aed}
+#plan .ti{display:flex;gap:7px;align-items:flex-start;padding:6px 2px;border-bottom:1px dashed var(--line)}
+#plan .ti input{margin-top:4px;flex:none}
+#plan .ti label{cursor:pointer;flex:1;font-size:.88em}
+#plan .ti.done label{color:var(--ok)}
+#plan .ti .tip{display:block;font-size:.78em;color:var(--sub);line-height:1.5}
+#plan .pg2{display:block;font-size:.75em;color:var(--sub);margin:6px 0 2px}
+#tip{position:fixed;left:12px;bottom:10px;font-size:.75em;color:var(--sub);z-index:5;pointer-events:none}
+</style>
+</head>
+<body>
+<header>
+  <b>🧠 案例冲刺宝典 6.0.1（2026下）</b><span class="cd">芝士架构 · 目录脑图</span>
+  <span id="stats" class="cd"></span>
+  <input id="search" type="search" placeholder="搜索节点…（/ 聚焦，回车跳转）">
+  <span id="hitinfo"></span>
+  <button class="hbtn" data-lv="1">到篇</button>
+  <button class="hbtn on" data-lv="2">到章</button>
+  <button class="hbtn" data-lv="3">到节</button>
+  <button class="hbtn" data-lv="4">到小节</button>
+  <button class="hbtn" data-lv="99">全展开</button>
+  <button class="hbtn on" data-f="all">全部</button>
+  <button class="hbtn" data-f="super">超级重点</button>
+  <button class="hbtn" data-f="key">重点+</button>
+  <button class="hbtn" data-f="minor">次重点</button>
+  <button class="hbtn" id="zin">＋</button>
+  <button class="hbtn" id="zout">－</button>
+  <button class="hbtn" id="zfit">适配</button>
+  <button class="hbtn" id="planBtn">📋 背诵清单</button>
+  <button class="hbtn" id="theme">🌙</button>
+</header>
+<aside id="plan">
+  <h2>📋 案例背诵清单（18 项）</h2>
+  <div class="pbar" style="height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0"><i id="pfill" style="display:block;height:100%;background:#16a34a;width:0;transition:width .3s"></i></div>
+  <span id="ptext" class="cd">已背 0/18</span>
+  <button class="hbtn" id="planOnlyBtn" style="margin-left:8px">只看清单节点</button>
+  <div id="planBody"></div>
+</aside>
+<div id="viewport"><div id="world"><svg id="links"></svg></div></div>
+<div id="tip">拖拽平移 · 滚轮缩放 · 点击节点折叠/展开（右侧圆点=折叠的后代数）· 数据源：PDF 书签大纲 · <span class="exam old">绿=历年已考(年份)</span> · <span class="exam new">黄虚线=首考候选</span>（对账2018-2026架构师真题的Redis小节）</div>
+<script>
+const RAW = [{"depth":1,"title":"前言","page":14},{"depth":1,"title":"考试规则","page":14},{"depth":1,"title":"命题趋势","page":15},{"depth":1,"title":"刷题形式","page":16},{"depth":1,"title":"案例题型","page":18},{"depth":1,"title":"关注范围","page":19},{"depth":1,"title":"1.上篇-需求分析（次重点★★★☆☆）","page":20},{"depth":2,"title":"1.1.结构化分析（重点★★★★★）","page":20},{"depth":3,"title":"1.1.1.数据流图DFD（重点★★★★★）","page":20},{"depth":4,"title":"1.1.1.1.基本符号（重点★★★★★）","page":20},{"depth":4,"title":"1.1.1.2.平衡原则（重点★★★★★）","page":21},{"depth":4,"title":"1.1.1.3.典型例题（重点★★★★★）","page":22},{"depth":3,"title":"1.1.2.状态转换图（次重点★★★☆☆）","page":23},{"depth":4,"title":"1.1.2.1.基本符号（重点★★★★★）","page":23},{"depth":4,"title":"1.1.2.2.典型例题（重点★★★★★）","page":24},{"depth":2,"title":"1.2.面向对象分析方法（超级重点★★★★★）","page":26},{"depth":3,"title":"1.2.1.UML引入（重点★★★★★）","page":26},{"depth":3,"title":"1.2.2.用例图（超级重点★★★★★）","page":27},{"depth":4,"title":"1.2.2.1.用例图的元素（重点★★★★★）","page":28},{"depth":4,"title":"1.2.2.2.识别参与者（重点★★★★★）","page":28},{"depth":4,"title":"1.2.2.3.合并需求获得用例（次重点★★★☆☆）","page":29},{"depth":4,"title":"1.2.2.4.细化用例描述（次重点★★★☆☆）","page":29},{"depth":4,"title":"1.2.2.5.调整用例模型（重点★★★★★）","page":30},{"depth":4,"title":"1.2.2.6.典型例题（重点★★★★★）","page":31},{"depth":3,"title":"1.2.3.类图（重点★★★★★）","page":33},{"depth":4,"title":"1.2.3.1.类关系（重点★★★★★）","page":33},{"depth":4,"title":"1.2.3.2.典型例题（重点★★★★★）","page":34},{"depth":3,"title":"1.2.4.顺序图（重点★★★★★）","page":35},{"depth":4,"title":"1.2.4.1.顺序图的元素（重点★★★★★）","page":36},{"depth":4,"title":"1.2.4.2.典型例题（重点★★★★★）","page":37},{"depth":3,"title":"1.2.5.通信图/协作图（重点★★★★★）","page":39},{"depth":4,"title":"1.2.5.1.通信图/协作图的元素（重点★★★★★）","page":39},{"depth":4,"title":"1.2.5.2.典型例题（重点★★★★★）","page":40},{"depth":3,"title":"1.2.6.活动图（重点★★★★★）","page":40},{"depth":4,"title":"1.2.6.1.活动图的元素（重点★★★★★）","page":41},{"depth":4,"title":"1.2.6.2.典型例题（重点★★★★★）","page":43},{"depth":3,"title":"1.2.7.常见图对比（重点★★★★★）","page":47},{"depth":1,"title":"2.上篇-系统设计/面向对象设计（重点★★★★★）","page":48},{"depth":2,"title":"2.1.类识别（次重点★★★☆☆）","page":48},{"depth":3,"title":"2.1.1.识别原则（次重点★★★☆☆）","page":48},{"depth":3,"title":"2.1.2.典型例题（重点★★★★★）","page":49},{"depth":2,"title":"2.2.面向对象设计原则（重点★★★★★）","page":50},{"depth":3,"title":"2.2.1.设计原则（重点★★★★★）","page":51},{"depth":3,"title":"2.2.2.典型例题（重点★★★★★）","page":51},{"depth":1,"title":"3.上篇-层次结构（次重点★★★☆☆）","page":52},{"depth":2,"title":"3.1.层次结构简介和问题（重点★★★★★）","page":52},{"depth":3,"title":"3.1.1.层次架构简介（重点★★★★★）","page":52},{"depth":3,"title":"3.1.2.污水池反模式（重点★★★★★）","page":52},{"depth":2,"title":"3.2.典型的层次架构（重点★★★★★）","page":52},{"depth":3,"title":"3.2.1.表现层层次架构（重点★★★★★）","page":53},{"depth":3,"title":"3.2.2.中间层架构设计（次重点★★★☆☆）","page":54},{"depth":3,"title":"3.2.3.数据访问层设计（重点★★★★★）","page":55},{"depth":4,"title":"3.2.3.1.数据访问模式（重点★★★★★）","page":55},{"depth":4,"title":"3.2.3.2.ORM落地（Hibernate）（次重点★★★☆☆）","page":56},{"depth":4,"title":"3.2.3.3.典型例题（重点★★★★★）","page":57},{"depth":2,"title":"3.3.物联网层次架构设计（次重点★★★☆☆）","page":59},{"depth":3,"title":"3.3.1.物联网设备接入协议：MQTT、CoAP、HTTP（重点★★★★☆）","page":59},{"depth":3,"title":"3.3.2.MQTT协议（重点★★★★★）","page":61},{"depth":4,"title":"3.3.2.1.MQTT中的Broker","page":61},{"depth":4,"title":"3.3.2.2.MQTT中的Topic","page":62},{"depth":4,"title":"3.3.2.3.MQTT中的QoS","page":63},{"depth":3,"title":"3.3.3.典型例题（重点★★★★★）","page":64},{"depth":1,"title":"4.上篇-云原生架构设计（超级重点★★★★★）","page":67},{"depth":2,"title":"4.1.云原生架构原则（重点★★★★★）","page":67},{"depth":2,"title":"4.2.云原生架构模式（重点★★★★★）","page":67},{"depth":2,"title":"4.3.不好的实践（次重点★★★☆☆）","page":69},{"depth":2,"title":"4.4.容器技术（重点★★★★★）","page":70},{"depth":3,"title":"4.4.1.容器和虚拟机对比（重点★★★★★）","page":70},{"depth":3,"title":"4.4.2.容器和容器编排技术（重点★★★★★）","page":71},{"depth":3,"title":"4.4.3.容器运维指令（重点★★★★★）","page":72},{"depth":3,"title":"4.4.4.典型例题（重点★★★★★）","page":73},{"depth":1,"title":"5.上篇-面向服务架构（超级重点★★★★★）","page":75},{"depth":2,"title":"5.1.什么是SOA（重点★★★★★）","page":75},{"depth":2,"title":"5.2.SOA/微服务/单体架构对比（重点★★★★★）","page":75},{"depth":2,"title":"5.3.服务注册模式（重点★★★★★）","page":77},{"depth":3,"title":"5.3.1.服务注册模式概念（重点★★★★★）","page":78},{"depth":3,"title":"5.3.2.UDDI、WSDL和SOAP（重点★★★★★）","page":78},{"depth":3,"title":"5.3.3.REST规范/风格（重点★★★★★）","page":79},{"depth":3,"title":"5.3.4.典型例题（重点★★★★★）","page":80},{"depth":2,"title":"5.4.ESB模式（重点★★★★★）","page":81},{"depth":3,"title":"5.4.1.ESB概念（重点★★★★★）","page":82},{"depth":3,"title":"5.4.2.典型例题（重点★★★★★）","page":82},{"depth":2,"title":"5.5.SOA设计原则（重点★★★★★）","page":83},{"depth":2,"title":"5.6.典型架构（重点★★★★★）","page":83},{"depth":3,"title":"5.6.1.某ESB架构实现（重点★★★★★）","page":84},{"depth":3,"title":"5.6.2.微服务模式（重点★★★★★）","page":84},{"depth":1,"title":"6.上篇-系统架构设计（超级重点★★★★★）","page":87},{"depth":2,"title":"6.1.软件架构风格（重点★★★★★）","page":87},{"depth":3,"title":"6.1.1.概念辨析（重点★★★★★）","page":87},{"depth":3,"title":"6.1.2.数据流风格（重点★★★★★）","page":88},{"depth":4,"title":"6.1.2.1.批处理体系结构风格","page":88},{"depth":4,"title":"6.1.2.2.管道-过滤器体系结构风格","page":89},{"depth":3,"title":"6.1.3.调用/返回体系结构风格（重点★★★★★）","page":90},{"depth":4,"title":"6.1.3.1.主程序/子程序风格","page":90},{"depth":4,"title":"6.1.3.2.面向对象体系结构风格","page":90},{"depth":4,"title":"6.1.3.3.层次型体系结构风格","page":91},{"depth":4,"title":"6.1.3.4.客户端/服务器体系结构风格","page":91},{"depth":3,"title":"6.1.4.以数据为中心的体系结构风格（重点★★★★★）","page":93},{"depth":4,"title":"6.1.4.1.仓库体系结构风格","page":93},{"depth":4,"title":"6.1.4.2.黑板体系结构风格","page":94},{"depth":3,"title":"6.1.5.虚拟机体系结构风格（重点★★★★★）","page":95},{"depth":4,"title":"6.1.5.1.解释器体系结构风格","page":95},{"depth":4,"title":"6.1.5.2.规则系统体系结构风格","page":97},{"depth":3,"title":"6.1.6.独立构件体系结构风格（重点★★★★★）","page":97},{"depth":4,"title":"6.1.6.1.进程通信体系结构风格","page":98},{"depth":4,"title":"6.1.6.2.事件系统体系结构风格","page":98},{"depth":3,"title":"6.1.7.典型例题（重点★★★★★）","page":98},{"depth":2,"title":"6.2.面向架构评估的质量属性（超级重点★★★★★）","page":99},{"depth":3,"title":"6.2.1.九大必考质量属性（超级重点★★★★★）","page":100},{"depth":3,"title":"6.2.2.典型例题（超级重点★★★★★）","page":102},{"depth":2,"title":"6.3.质量属性场景描述（超级重点★★★★★）","page":104},{"depth":3,"title":"6.3.1.质量属性场景描述的语言（重点★★★★★）","page":104},{"depth":3,"title":"6.3.2.质量属性场景描述案例（超级重点★★★★★）","page":106},{"depth":3,"title":"6.3.3.典型例题","page":110},{"depth":2,"title":"6.4.系统架构评估（重点★★★★★）","page":110},{"depth":3,"title":"6.4.1.系统架构评估方法（重点★★★★★）","page":112},{"depth":3,"title":"6.4.2.基于场景的架构分析方法SAAM（次重点★★★☆☆）","page":112},{"depth":3,"title":"6.4.3.架构权衡分析方法ATAM（重点★★★★★）","page":112},{"depth":4,"title":"6.4.3.1.质量效用树（重点★★★★★）","page":113},{"depth":4,"title":"6.4.3.2.典型例题（重点★★★★★）","page":113},{"depth":2,"title":"6.5.ATAM方法的架构评估实践（重点★★★★★）","page":115},{"depth":1,"title":"7.上篇-安全架构设计理论与实践（超级重点★★★★★）","page":117},{"depth":2,"title":"7.1.安全架构特性（次重点★★★☆☆）","page":117},{"depth":2,"title":"7.2.数据加密技术（重点★★★★★）","page":117},{"depth":3,"title":"7.2.1.对称加密概念（重点★★★★★）","page":117},{"depth":3,"title":"7.2.2.非对称加密概念（重点★★★★★）","page":118},{"depth":3,"title":"7.2.3.非对称加密的应用场景（重点★★★★★）","page":118},{"depth":3,"title":"7.2.4.对称加密和非对称加密的区别（重点★★★★★）","page":119},{"depth":2,"title":"7.3.认证技术（重点★★★★★）","page":119},{"depth":3,"title":"7.3.1.数字签名（重点★★★★★）","page":120},{"depth":4,"title":"7.3.1.1.Hash算法与数字签名（重点★★★★★）","page":120},{"depth":4,"title":"7.3.1.2.数字签名的工作原理（重点★★★★★）","page":120},{"depth":3,"title":"7.3.2.数字证书（重点★★★★★）","page":121},{"depth":3,"title":"7.3.3.非对称公钥的使用场景（重点★★★★★）","page":122},{"depth":3,"title":"7.3.4.典型例题（重点★★★★★）","page":122},{"depth":2,"title":"7.4.网络安全体系架构设计（次重点★★★☆☆）","page":124},{"depth":3,"title":"7.4.1.安全服务和安全机制（次重点★★★☆☆）","page":124},{"depth":3,"title":"7.4.2.典型软件架构的脆弱性分析（次重点★★★☆☆）","page":124},{"depth":1,"title":"8.上篇-大数据架构（次重点★★★☆☆）","page":126},{"depth":2,"title":"8.1.系统架构原则（次重点★★★☆☆）","page":126},{"depth":2,"title":"8.2.批处理架构VS流处理架构（重点★★★★★）","page":127},{"depth":2,"title":"8.3.Lambda架构（重点★★★★★）","page":128},{"depth":3,"title":"8.3.1.Lambda分层介绍（重点★★★★★）","page":128},{"depth":3,"title":"8.3.2.Lambda架构实现（重点★★★★★）","page":130},{"depth":3,"title":"8.3.3.Lambda架构优缺点（重点★★★★★）","page":131},{"depth":2,"title":"8.4.Kappa架构（重点★★★★★）","page":131},{"depth":3,"title":"8.4.1.Kappa架构的优缺点（重点★★★★★）","page":133},{"depth":3,"title":"8.4.2.Lambda VS Kappa（超级重点★★★★★）","page":134},{"depth":2,"title":"8.5.IOTA架构（次重点★★★☆☆）","page":134},{"depth":2,"title":"8.6.典型架构（重点★★★★★）","page":136},{"depth":3,"title":"8.6.1.某网奥运（重点★★★★★）","page":137},{"depth":3,"title":"8.6.2.某网络广告平台（重点★★★★★）","page":139},{"depth":3,"title":"8.6.3.某证券公司日志大数据系统（重点★★★★★）","page":140},{"depth":3,"title":"8.6.4.某电商智能决策大数据系统（重点★★★★★）","page":141},{"depth":2,"title":"8.7.典型例题（重点★★★★★）","page":142},{"depth":1,"title":"9.下篇-微服务架构（次重点★★★☆☆）","page":145},{"depth":2,"title":"9.1.微服务架构下的特定问题（重点★★★★★）","page":146},{"depth":2,"title":"9.2.基于Spring Cloud的微服务整体架构","page":147},{"depth":2,"title":"9.3.服务拆分与集群部署（重点★★★★★）","page":148},{"depth":2,"title":"9.4.Nacos服务注册与服务发现（重点★★★★★）","page":149},{"depth":2,"title":"9.5.OpenFeign：声明式远程调用（重点★★★★★）","page":150},{"depth":2,"title":"9.6.Gateway：微服务系统的统一入口（重点★★★★★）","page":152},{"depth":2,"title":"9.7.Nacos配置中心（重点★★★★☆）","page":153},{"depth":2,"title":"9.8.Sentinel服务保护与流量控制（重点★★★★★）","page":155},{"depth":3,"title":"9.8.1.Sentinel 流量控制（重点★★★★★）","page":156},{"depth":3,"title":"9.8.2.Sentinel 熔断降级（重点★★★★★）","page":157},{"depth":1,"title":"10.下篇-领域驱动设计（次重点★★★☆☆）","page":162},{"depth":2,"title":"10.1.大的边界（业务版图边界）（次重点★★★☆☆）","page":162},{"depth":3,"title":"10.1.1.领域与子域（次重点★★★☆☆）","page":162},{"depth":3,"title":"10.1.2.子域详解（重点★★★★★）","page":163},{"depth":2,"title":"10.2.小的边界（团队协作边界）（重点★★★★★）","page":163},{"depth":3,"title":"10.2.1.统一语言（重点★★★★★）","page":163},{"depth":3,"title":"10.2.2.限界上下文（重点★★★★★）","page":164},{"depth":3,"title":"10.2.3.上下文映射与边界协作关系（次重点★★★☆☆）","page":164},{"depth":2,"title":"10.3.代码边界（重点★★★★★）","page":165},{"depth":3,"title":"10.3.1.实体（Entity）（重点★★★★★）","page":165},{"depth":3,"title":"10.3.2.聚合与聚合根（重点★★★★★）","page":165},{"depth":3,"title":"10.3.3.领域服务（重点★★★★★）","page":166},{"depth":3,"title":"10.3.4.领域事件（重点★★★★★）","page":166},{"depth":3,"title":"10.3.5.仓储与工厂（重点★★★★★）","page":166},{"depth":3,"title":"10.3.6.应用编排（重点★★★★★）","page":167},{"depth":2,"title":"10.4.小结","page":167},{"depth":1,"title":"11.下篇-分布式系统（重点★★★★★）","page":168},{"depth":2,"title":"11.1.CAP理论（重点★★★★★）","page":168},{"depth":3,"title":"11.1.1.数据一致性（重点★★★★★）","page":169},{"depth":3,"title":"11.1.2.可用性（重点★★★★★）","page":169},{"depth":3,"title":"11.1.3.分区容错性（重点★★★★★）","page":170},{"depth":2,"title":"11.2.CAP理论与系统实现（重点★★★★★）","page":171},{"depth":2,"title":"11.3.BASE理论（重点★★★★★）","page":172},{"depth":2,"title":"11.4.分布式事务理论解决方案","page":173},{"depth":3,"title":"11.4.1.刚性事务2PC（重点★★★★★）","page":173},{"depth":3,"title":"11.4.2.柔性事务TCC（重点★★★★★）","page":176},{"depth":3,"title":"11.4.3.柔性事务本地消息表（重点★★★★★）","page":178},{"depth":1,"title":"12.下篇-数据库系统（重点★★★★★）","page":180},{"depth":2,"title":"12.1.数据库性能优化（重点★★★★★）","page":180},{"depth":3,"title":"12.1.1.索引建立注意事项（重点★★★★★）","page":180},{"depth":3,"title":"12.1.2.数据分片（重点★★★★★）","page":181},{"depth":4,"title":"12.1.2.1.分片分类（重点★★★★★）","page":181},{"depth":4,"title":"12.1.2.2.分片算法（重点★★★★★）","page":181},{"depth":3,"title":"12.1.3.数据分区（重点★★★★★）","page":182},{"depth":4,"title":"12.1.3.1.分区算法（重点★★★★★）","page":183},{"depth":4,"title":"12.1.3.2.分片与分区的差别（重点★★★★★）","page":183},{"depth":3,"title":"12.1.4.分库分表（重点★★★★★）","page":184},{"depth":4,"title":"12.1.4.1.分库分表方案（重点★★★★★）","page":184},{"depth":4,"title":"12.1.4.2.分库分表VS分片分区（重点★★★★★）","page":185},{"depth":2,"title":"12.2.数据库高可用模式（重点★★★★★）","page":185},{"depth":3,"title":"12.2.1.读写分离（重点★★★★★）","page":185},{"depth":3,"title":"12.2.2.主从复制（重点★★★★★）","page":186},{"depth":3,"title":"12.2.3.一致性问题（重点★★★★★）","page":188},{"depth":2,"title":"12.3.数据库的选型（重点★★★★★）","page":190},{"depth":1,"title":"13.下篇-Redis（重点★★★★★）","page":191},{"depth":2,"title":"13.1.数据类型（重点★★★★★）","page":191},{"depth":2,"title":"13.2.持久化机制（重点★★★★★）","page":192},{"depth":2,"title":"13.3.Redis集群（重点★★★★★）","page":193},{"depth":3,"title":"13.3.1.主从复制模式（重点★★★★★）","page":193},{"depth":3,"title":"13.3.2.主从复制流程（重点★★★★★）","page":194},{"depth":4,"title":"13.3.2.1.全量同步（重点★★★★★）","page":194},{"depth":4,"title":"13.3.2.2.增量同步（重点★★★★★）","page":195},{"depth":3,"title":"13.3.3.哨兵模式（重点★★★★★）","page":196},{"depth":4,"title":"13.3.3.1.哨兵模式下故障转移流程（超级重点★★★★★）","page":197},{"depth":3,"title":"13.3.4.Cluster模式（重点★★★★★）","page":198},{"depth":3,"title":"13.3.5.哨兵模式和Cluster模式区别（重点★★★★★）","page":200},{"depth":2,"title":"13.4.Redis常见生产问题（重点★★★★★）","page":201},{"depth":2,"title":"13.5.缓存和数据库一致性问题（重点★★★★★）","page":201},{"depth":2,"title":"13.6.过期数据删除策略（重点★★★★★）","page":203},{"depth":2,"title":"13.7.内存淘汰策略（重点★★★★★）","page":203},{"depth":2,"title":"13.8.热Key和大Key问题（重点★★★★★）","page":204},{"depth":3,"title":"13.8.1.大Key（重点★★★★★）","page":204},{"depth":3,"title":"13.8.2.热Key（重点★★★★★）","page":205},{"depth":2,"title":"13.9.分布式锁（重点★★★★★）","page":206},{"depth":2,"title":"13.10.布隆过滤器（重点★★★★★）","page":207},{"depth":2,"title":"13.11.Redis事务（超级重点★★★★★）","page":208},{"depth":2,"title":"13.12.Redis指令集（重点★★★★★）","page":209},{"depth":1,"title":"14.下篇-ElasticSearch（重点★★★★★）","page":211},{"depth":2,"title":"14.1.ES概述（重点★★★★★）","page":211},{"depth":3,"title":"14.1.1.分词原理（重点★★★★★）","page":211},{"depth":4,"title":"14.1.1.1.Tokenizer（分词器）（重点★★★★★）","page":212},{"depth":3,"title":"14.1.2.倒排索引（重点★★★★★）","page":213},{"depth":3,"title":"14.1.3.相关性算法（重点★★★★★）","page":214},{"depth":4,"title":"14.1.3.1.影响相关性的主要因素（重点★★★★★）","page":214},{"depth":2,"title":"14.2.ES 核心概念（重点★★★★★）","page":215},{"depth":3,"title":"14.2.1.Index索引库（次重点★★★☆☆）","page":215},{"depth":3,"title":"14.2.2.Document文档（次重点★★★☆☆）","page":217},{"depth":3,"title":"14.2.3.Field字段（次重点★★★☆☆）","page":217},{"depth":3,"title":"14.2.4.Mapping 映射（次重点★★★☆☆）","page":218},{"depth":3,"title":"14.2.5.DSL（重点★★★★★）","page":218},{"depth":3,"title":"14.2.6.Analyzer分析器（重点★★★★★）","page":219},{"depth":3,"title":"14.2.7.Shard 分片（重点★★★★★）","page":223},{"depth":2,"title":"14.3.ES与传统关系型数据库的区别（重点★★★★★）","page":224},{"depth":2,"title":"14.4.MySQL与ES 数据同步（重点★★★★★）","page":225},{"depth":1,"title":"15.下篇-MongoDB（重点★★★★★）","page":226},{"depth":2,"title":"15.1.数据类型（重点★★★★★）","page":226},{"depth":3,"title":"15.1.1.BSON（重点★★★★★）","page":226},{"depth":3,"title":"15.1.2.GeoJSON（重点★★★★★）","page":227},{"depth":2,"title":"15.2.分片集群（重点★★★★★）","page":227},{"depth":2,"title":"15.3.高可用（副本复制）（重点★★★★★）","page":228},{"depth":1,"title":"16.下篇-大模型应用（重点★★★★★）","page":230},{"depth":2,"title":"16.1.检索增强生成（RAG）（重点★★★★★）","page":230},{"depth":3,"title":"16.1.1.数据准备（重点★★★★★）","page":231},{"depth":3,"title":"16.1.2.分块策略（重点★★★★★）","page":232},{"depth":3,"title":"16.1.3.向量化Embedding（重点★★★★★）","page":233},{"depth":3,"title":"16.1.4.索引存储（重点★★★★★）","page":235},{"depth":3,"title":"16.1.5.检索增强（重点★★★★★）","page":236},{"depth":3,"title":"16.1.6.生成答案（重点★★★★★）","page":238},{"depth":2,"title":"16.2.模型上下文协议协议（MCP）（重点★★★★★）","page":238},{"depth":3,"title":"16.2.1.解决什么问题？（重点★★★★★）","page":239},{"depth":3,"title":"16.2.2.MCP 工具的组成（重点★★★★★）","page":240},{"depth":2,"title":"16.3.智能体（AGENT）（次重点★★★☆☆）","page":241},{"depth":3,"title":"16.3.1.智能体简介（次重点★★★☆☆）","page":241},{"depth":3,"title":"16.3.2.智能体架构（次重点★★★☆☆）","page":242},{"depth":3,"title":"16.3.3.ReAct模式（次重点★★★☆☆）","page":243},{"depth":3,"title":"16.3.4.规划-执行模式（次重点★★★☆☆）","page":243},{"depth":3,"title":"16.3.5.客服智能体架构探索（次重点★★★☆☆）","page":244},{"depth":3,"title":"16.3.6.Skill（重点★★★★★）","page":245},{"depth":4,"title":"16.3.6.1.为什么要有SKILL（重点★★★★★）","page":245},{"depth":4,"title":"16.3.6.2.渐进式披露（重点★★★★★）","page":248},{"depth":1,"title":"17.下篇-锁机制（重点★★★★★）","page":250},{"depth":2,"title":"17.1.为什么要使用锁（重点★★★★★）","page":250},{"depth":2,"title":"17.2.常见锁类型（重点★★★★★）","page":251},{"depth":2,"title":"17.3.乐观锁与悲观锁（重点★★★★★）","page":251},{"depth":3,"title":"17.3.1.悲观锁（重点★★★★★）","page":251},{"depth":3,"title":"17.3.2.乐观锁（重点★★★★★）","page":252},{"depth":2,"title":"17.4.实际场景中的锁方案（重点★★★★★）","page":253},{"depth":3,"title":"17.4.1.使用 synchronized 本地锁（重点★★★★☆）","page":253},{"depth":3,"title":"17.4.2.使用数据库行锁 select for update（重点★★★★★）","page":254},{"depth":3,"title":"17.4.3.使用 Redis 分布式锁（重点★★★★★）","page":255},{"depth":3,"title":"17.4.4.使用数据库乐观锁（重点★★★★★）","page":256},{"depth":3,"title":"17.4.5.几种方案对比（重点★★★★★）","page":256},{"depth":1,"title":"18.下篇-消息队列与异步架构（重点★★★★★）","page":257},{"depth":2,"title":"18.1.为什么需要消息队列（重点★★★★★）","page":257},{"depth":3,"title":"18.1.1.先看一个同步调用的问题","page":257},{"depth":2,"title":"18.2.消息队列的作用（重点★★★★★）","page":259},{"depth":3,"title":"18.2.1.异步解耦（重点★★★★★）","page":259},{"depth":3,"title":"18.2.2.削峰填谷（重点★★★★★）","page":259},{"depth":3,"title":"18.2.3.引入 MQ 的代价（重点★★★★★）","page":259},{"depth":2,"title":"18.3.消息队列核心概念（重点★★★★★）","page":260},{"depth":3,"title":"18.3.1.消息流转过程（重点★★★★★）","page":260},{"depth":3,"title":"18.3.2.Producer、Consumer、Message、Broker（重点★★★★★）","page":261},{"depth":3,"title":"18.3.3.Topic、Queue、Partition（次重点★★★☆☆）","page":263},{"depth":3,"title":"18.3.4.点对点模式与发布订阅模式（重点★★★★★）","page":264},{"depth":3,"title":"18.3.5.Consumer Group（重点★★★★★）","page":265},{"depth":3,"title":"18.3.6.消息确认机制 ACK、NACK 和 offset（重点★★★★★）","page":265},{"depth":3,"title":"18.3.7.Push 和 Pull（重点★★★★☆）","page":266},{"depth":3,"title":"18.3.8.JMS、AMQP的区别","page":267},{"depth":2,"title":"18.4.MQ 常见生产问题（重点★★★★★）","page":267},{"depth":3,"title":"18.4.1.消息丢失（重点★★★★★）","page":268},{"depth":3,"title":"18.4.2.消息重复消费（重点★★★★★）","page":269},{"depth":3,"title":"18.4.3.死信队列（DLQ）（重点★★★★★）","page":270},{"depth":3,"title":"18.4.4.顺序性（重点★★★★★）","page":272},{"depth":3,"title":"18.4.5.消息积压（重点★★★★★）","page":272},{"depth":2,"title":"18.5.MQ 与分布式事务（重点★★★★★）","page":273},{"depth":3,"title":"18.5.1.本地消息表（重点★★★★★）","page":273},{"depth":2,"title":"18.6.常见 MQ 对比（次重点★★★★☆）","page":274},{"depth":1,"title":"19.下篇-秒杀场景设计（重点★★★★★）","page":276},{"depth":2,"title":"19.1.秒杀系统的核心痛点（重点★★★★★）","page":276},{"depth":2,"title":"19.2.秒杀系统的整体架构（重点★★★★★）","page":276},{"depth":2,"title":"19.3.访问层设计（重点★★★★★）","page":277},{"depth":2,"title":"19.4.中间转发层设计（重点★★★★☆）","page":278},{"depth":2,"title":"19.5.服务层设计（重点★★★★☆）","page":279},{"depth":2,"title":"19.6.Redis 扣库存（重点★★★★★）","page":280},{"depth":2,"title":"19.7.消息队列层设计（重点★★★★★）","page":282},{"depth":2,"title":"19.8.数据层设计（重点★★★★★）","page":282},{"depth":2,"title":"19.9.异常补偿与最终一致性（次重点★★★☆☆）","page":284},{"depth":2,"title":"19.10.用户体验设计（次重点★★★★☆）","page":285},{"depth":1,"title":"20.下篇-知识图谱（次重点★★★☆☆）","page":287},{"depth":2,"title":"20.1.知识图谱的由来（次重点★★★☆☆）","page":287},{"depth":2,"title":"20.2.知识图谱相比关系型数据库的优势（重点★★★★★）","page":288},{"depth":2,"title":"20.3.知识图谱的基本属性与 Neo4j（重点★★★★★）","page":291},{"depth":3,"title":"20.3.1.实体、关系、属性、标签和路径（重点★★★★★）","page":291},{"depth":3,"title":"20.3.2.Neo4j（重点★★★★★）","page":292},{"depth":2,"title":"20.4.医药知识图谱问答实例（重点★★★★★）","page":293},{"depth":3,"title":"20.4.1.使用 BERT 识别实体（次重点★★★☆☆）","page":295},{"depth":3,"title":"20.4.2.使用 BERT 识别关系（次重点★★★☆☆）","page":297},{"depth":3,"title":"20.4.3.医药问答例子：查询疾病症状（重点★★★★★）","page":299},{"depth":3,"title":"20.4.4.医药问答例子：查询药物相互作用（重点★★★★★）","page":300},{"depth":3,"title":"20.4.5.现实应用差距与落地问题（重点★★★★★）","page":301},{"depth":1,"title":"21.后记","page":304}];
+
+/* ---------- 解析标题：剥离（重点★★★★★）标注 ---------- */
+/* Redis 相关小节考史标记(对账2018-2026架构师真题)：old=已考年份, new=首考候选 */
+const EXAM_OLD = {'12.1.2':'22分片','13.1':'20·21','13.2':'20·25','13.3.1':'18','13.3.2':'25','13.3.2.1':'25','13.3.2.2':'25','13.4':'19·22·25','13.5':'5次(18-24)','13.6':'19·20','13.7':'19·20','13.9':'24·25·26','13.10':'22','13.12':'24·25','17.3':'26','17.4.3':'24','19.6':'26'};
+const EXAM_NEW = {'13.3.3':'首考','13.3.3.1':'首考','13.3.4':'首考','13.3.5':'首考','13.8':'首考','13.8.1':'首考','13.8.2':'首考','13.11':'首考'};
+function examBadge(t){
+  const keys = Object.keys(EXAM_OLD).concat(Object.keys(EXAM_NEW)).sort((a,b)=>b.length-a.length);
+  for(const k of keys){ if(t.startsWith(k+' ')){ return EXAM_OLD[k] ? {cls:'old',txt:'已考 '+EXAM_OLD[k]} : {cls:'new',txt:EXAM_NEW[k]+'候选'}; } }
+  return null;
+}
+function parseTitle(it){
+  let t = it.title, label = null, stars = '';
+  const m = t.match(/（(超级重点|重点|次重点)([★☆]*)）/);
+  if(m){ label = m[1]; stars = m[2]; t = t.slice(0, m.index) + t.slice(m.index + m[0].length); }
+  t = t.replace(/^(\d+(?:\.\d+)*)\.\s*/, '$1 ').trim();
+  return {title:t, label, stars, page: it.page==null? null : it.page+1, children:[], parent:null,
+          collapsed:false, rendered:true, el:null, x:0,y:0,w:0,h:0,depth:0, exam:examBadge(t)};
+}
+
+/* ---------- 建树（书签 depth 保证只增 1） ---------- */
+const root = parseTitle({title:'案例冲刺宝典 6.0.1（2026下）', page:null});
+root.isRoot = true;
+let stack = [{d:0, node:root}];
+for(const it of RAW){
+  const n = parseTitle(it);
+  while(stack.length>1 && stack[stack.length-1].d >= it.depth) stack.pop();
+  const p = stack[stack.length-1].node;
+  n.parent = p; p.children.push(n);
+  stack.push({d:it.depth, node:n});
+}
+
+/* ---------- 前言子项归位：书签里「考试规则」等与章平级，降为前言的子节点 ---------- */
+(function nestPreface(){
+  const kids = root.children;
+  const at = kids.findIndex(n => n.title === '前言');
+  if(at < 0) return;
+  const pre = kids[at];
+  const moved = [];
+  for(let i = at+1; i < kids.length; i++){
+    const t = kids[i].title;
+    if(/^\d+ /.test(t) || t.startsWith('上篇') || t.startsWith('下篇') || t === '后记') break;
+    moved.push(kids[i]);
+  }
+  pre.children = moved.map(m => (m.parent = pre, m));
+  root.children = kids.filter(n => n !== pre && !moved.includes(n));
+  root.children.push(pre);
+})();
+
+/* ---------- 上篇/下篇分组（章级归拢，标题去掉"上篇-"/"下篇-"前缀） ---------- */
+function group(prefix, gtitle){
+  const picked = root.children.filter(c => new RegExp('^\\d+ '+prefix).test(c.title));
+  if(!picked.length) return;
+  const g = parseTitle({title:gtitle, page:null});
+  g.isGroup = true;
+  const at = root.children.indexOf(picked[0]);
+  picked.forEach(c => {
+    c.title = c.title.replace(new RegExp('^(\\d+) '+prefix+'-?'), '$1 ');
+    c.parent = g; g.children.push(c);
+  });
+  root.children = root.children.filter(c => !picked.includes(c));
+  g.parent = root; root.children.splice(Math.min(at, root.children.length), 0, g);
+}
+group('上篇','上篇 · 架构设计理论（第1-8章）');
+group('下篇','下篇 · 技术与组件（第9-20章）');
+root.children.sort((a,b)=> ord(a).localeCompare(ord(b)));
+function ord(n){
+  if(n.title==='前言') return '0';
+  if(n.title.startsWith('上篇')) return '1';
+  if(n.title.startsWith('下篇')) return '2';
+  if(n.title.startsWith('后记')) return '3';
+  return '1.5'; // 兜底
+}
+(function markDepth(n,d){ n.depth=d; n.children.forEach(c=>markDepth(c,d+1)); })(root,0);
+
+/* ---------- 统计（分组节点不计入考点统计，但参与布局） ---------- */
+const groups = root.children.filter(n => n.isGroup);
+const all = [];
+(function walk(n){ if(!n.isRoot && !n.isGroup) all.push(n); n.children.forEach(walk); })(root);
+const pool = [root].concat(groups, all);
+
+/* ---------- 背诵清单：18 项 × 三档（依据：书内星级 + 命题规律 + 真题考频） ---------- */
+const CHECKLIST = [
+  {tier:1, name:'九大质量属性＋场景六要素', tip:'每属性定义+战术各一句；六要素（刺激源/刺激/环境/制品/响应/响应度量）能现场写；ATAM 口诀"法师购柿树，惜抱栽结果"',
+   nodes:['6.2 面向架构评估的质量属性','6.2.1 九大必考质量属性','6.3 质量属性场景描述','6.4 系统架构评估','6.5 ATAM方法的架构评估实践']},
+  {tier:1, name:'软件架构风格', tip:'管道-过滤器/分层/C-S/B-S/事件驱动/微内核/仓库黑板：结构+优点+缺点+场景三件套',
+   nodes:['6.1 软件架构风格']},
+  {tier:1, name:'UML 建模（高频回归）', tip:'类图 5 次居案例第2题之首、近三次未出，回归概率最大：include/extend 方向区别、类图六关系强弱序、顺序图/活动图元素',
+   nodes:['1.2 面向对象分析方法','1.2.2 用例图','1.2.3 类图','1.2.4 顺序图','1.2.5 通信图/协作图','1.2.6 活动图','1.2.7 常见图对比']},
+  {tier:1, name:'DFD 与状态转换图', tip:'DFD 四种符号、父图子图平衡原则（数量守恒+分解一致）——第1题经典题型',
+   nodes:['1.1 结构化分析','1.1.1 数据流图DFD','1.1.2 状态转换图']},
+  {tier:1, name:'SOA 概念组', tip:'SOA 特征、ESB 作用、UDDI/WSDL/SOAP 各管什么、REST 约束——概念对比型高发',
+   nodes:['5.1 什么是SOA','5.3 服务注册模式','5.3.2 UDDI、WSDL和SOAP','5.3.3 REST规范/风格','5.4 ESB模式']},
+  {tier:1, name:'安全：加密与认证', tip:'对称 vs 非对称（算法举例+优缺点）、数字签名流程、混合加密、PKI/数字证书',
+   nodes:['7.2 数据加密技术','7.3 认证技术']},
+  {tier:1, name:'OO 设计原则', tip:'单一职责/开闭/里氏替换/依赖倒置/接口隔离/组合复用/迪米特：名字+一句解释+例子',
+   nodes:['2.2 面向对象设计原则']},
+  {tier:1, name:'云原生与容器', tip:'容器 vs 虚拟机对比表、云原生架构原则与模式',
+   nodes:['4.1 云原生架构原则','4.2 云原生架构模式','4.4.1 容器和虚拟机对比']},
+  {tier:2, name:'Redis 核心', tip:'两个超级重点：哨兵故障转移流程（按顺序背）、Redis 事务；缓存穿透/击穿/雪崩、RDB/AOF、缓存一致性、内存淘汰、热key大key、分布式锁',
+   nodes:['13.1 数据类型','13.2 持久化机制','13.3 Redis集群','13.3.3.1 哨兵模式下故障转移流程','13.4 Redis常见生产问题','13.5 缓存和数据库一致性问题','13.7 内存淘汰策略','13.8 热Key和大Key问题','13.9 分布式锁','13.11 Redis事务']},
+  {tier:2, name:'数据库优化与高可用', tip:'性能优化手段（索引/读写分离/分库分表）、主从复制/双机热备、关系型 vs NoSQL vs NewSQL 选型',
+   nodes:['12.1 数据库性能优化','12.2 数据库高可用模式','12.3 数据库的选型']},
+  {tier:2, name:'MongoDB', tip:'副本集角色（Primary/Secondary/Arbiter）、分片集群三组件（mongos/config/分片）',
+   nodes:['15.2 分片集群','15.3 高可用（副本复制）']},
+  {tier:2, name:'ElasticSearch', tip:'核心概念映射（Index≈表、Document≈行、分片/副本）、MySQL 同步四方案（双写/Canal/Logstash 等）',
+   nodes:['14.2 ES 核心概念','14.4 MySQL与ES 数据同步']},
+  {tier:3, name:'大模型 RAG / MCP / Agent', tip:'押题方向：RAG 全流程（分块→向量化→检索→重排→生成）+ 为什么用 RAG；MCP 解决什么；Agent 概念',
+   nodes:['16.1 检索增强生成（RAG）','16.2 模型上下文协议协议（MCP）','16.3 智能体（AGENT）']},
+  {tier:3, name:'CAP / BASE / 分布式事务', tip:'CAP 三选二取舍场景、BASE 三要素、2PC/3PC/TCC/本地消息表/SAGA 优缺点——薄弱档升二档',
+   nodes:['11.1 CAP理论','11.2 CAP理论与系统实现','11.3 BASE理论','11.4 分布式事务理论解决方案']},
+  {tier:3, name:'消息队列', tip:'三大作用（异步/解耦/削峰）+ 四大生产问题（丢失/重复/乱序/积压的对策）+ 常见 MQ 对比',
+   nodes:['18.2 消息队列的作用','18.4 MQ 常见生产问题','18.6 常见 MQ 对比']},
+  {tier:3, name:'秒杀架构', tip:'解决方案简述型满分模板：访问层→中间转发→服务层→Redis 扣库存→MQ→数据层，每层一个手段',
+   nodes:['19.2 秒杀系统的整体架构','19.3 访问层设计','19.6 Redis 扣库存','19.7 消息队列层设计']},
+  {tier:3, name:'Lambda vs Kappa', tip:'超级重点：两层批/流对比、Kappa 为何只需一层；批处理 vs 流处理差异',
+   nodes:['8.2 批处理架构VS流处理架构','8.4.2 Lambda VS Kappa']},
+  {tier:3, name:'MQTT 物联网', tip:'QoS 0/1/2 语义、Topic 通配符——物联网题唯一考点',
+   nodes:['3.3.2 MQTT协议','3.3.2.3 MQTT中的QoS']},
+];
+const titleMap = {};
+pool.forEach(n => titleMap[n.title] = n);
+CHECKLIST.forEach((it, i) => {
+  it.id = i;
+  it._nodes = (it.nodes || []).map(t => titleMap[t]).filter(Boolean);
+  it._nodes.forEach(n => n._item = it);
+});
+const planMissed = CHECKLIST.filter(it => it._nodes.length < (it.nodes||[]).length).map(it => it.name + ' ' + (it.nodes.length - it._nodes.length) + '个未命中');
+let checked = new Set();
+try{ checked = new Set(JSON.parse(localStorage.caseMindPlan || '[]')); }catch(e){}
+let planOnly = false;
+const cnt = {超级重点:0,重点:0,次重点:0,无标注:0};
+all.forEach(n=>cnt[n.label||'无标注']++);
+document.getElementById('stats').textContent =
+  `${all.length} 个考点节点 · 超级重点 ${cnt['超级重点']} · 重点 ${cnt['重点']} · 次重点 ${cnt['次重点']} · 未标注 ${cnt['无标注']}`;
+
+/* ---------- DOM 构建 ---------- */
+const world = document.getElementById('world'), viewport = document.getElementById('viewport');
+const svg = document.getElementById('links');
+const lblCls = n => n.isRoot? 'root' : n.isGroup? 'group lbl-super' :
+  (n.label==='超级重点'?'lbl-super':n.label==='重点'?'lbl-key':n.label==='次重点'?'lbl-minor':'lbl-none');
+(function build(n){
+  const el = document.createElement('div');
+  el.className = 'node ' + lblCls(n);
+  let html = n.title;
+  if(n.label) html += `<span class="tag">${n.label}${n.stars?' '+n.stars:''}</span>`;
+  if(n.exam) html += `<span class="exam ${n.exam.cls}">${n.exam.txt}</span>`;
+  if(n.page!=null) html += `<span class="pg">P${n.page}</span>`;
+  if(n._item) html += `<span class="tpill t${n._item.tier}">${'ⅠⅡⅢ'[n._item.tier-1]}</span>`;
+  el.innerHTML = html;
+  el._n = n; n.el = el;
+  if(n.children.length){
+    const f = document.createElement('span'); f.className='fold'; el.appendChild(f);
+    el.addEventListener('click', e => { e.stopPropagation(); n.collapsed = !n.collapsed; render(); });
+  } else {
+    el.addEventListener('click', e => e.stopPropagation());
+  }
+  world.appendChild(el);
+  n.children.forEach(build);
+})(root);
+
+/* ---------- 过滤：命中自身或有命中后代 ---------- */
+let filterMode = 'all';
+function passes(n){
+  if(filterMode==='super') return n.label==='超级重点';
+  if(filterMode==='key') return n.label==='超级重点'||n.label==='重点';
+  if(filterMode==='minor') return n.label==='次重点';
+  return true;
+}
+function computeRendered(){
+  (function down(n, ancCol){
+    let kidVisible = false;
+    n.children.forEach(c=>{ down(c, ancCol || n.collapsed); if(c.rendered) kidVisible = true; });
+    n._planOk = !n._item ? n.children.some(c=>c._planOk) : true;
+    const planPass = !planOnly || n._item || n.children.some(c=>c._planOk);
+    n.rendered = !ancCol && planPass && (filterMode==='all' ? true : (passes(n) || kidVisible));
+    n._kids = n.children.filter(c=>c.rendered);
+  })(root, false);
+}
+
+/* ---------- 布局（横排 tidy tree） ---------- */
+const HGAP = 46, VGAP = 14;
+function countAll(n){ return n.children.reduce((s,c)=>s+1+countAll(c),0); }
+function layout(){
+  computeRendered();
+  const every = pool;
+  every.forEach(n=> n.el.classList.toggle('collapsedkid', !n.rendered));
+  const nodes = every.filter(n=>n.rendered);
+  const colW = {};
+  nodes.forEach(n=>{ colW[n.depth] = Math.max(colW[n.depth]||0, n.w); });
+  const colX = {}; let acc = 30;
+  Object.keys(colW).map(Number).sort((a,b)=>a-b).forEach(d=>{ colX[d] = acc; acc += colW[d] + HGAP; });
+  let cursor = 30;
+  function shift(n,dy){ n.y += dy; n._kids.forEach(k=>shift(k,dy)); }
+  function place(n){
+    if(!n._kids.length){
+      n.y = cursor + n.h/2; cursor += n.h + VGAP;
+    } else {
+      const start = cursor;
+      n._kids.forEach(place);
+      const block = cursor - VGAP - start;
+      if(n.h > block){
+        const off = (n.h - block)/2;
+        n._kids.forEach(k=>shift(k,off));
+        cursor = start + n.h + VGAP;
+      }
+      n.y = (n._kids[0].y + n._kids[n._kids.length-1].y)/2;
+    }
+    n.x = colX[n.depth];
+  }
+  place(root);
+  nodes.forEach(n=>{
+    n.el.style.transform = `translate(${n.x}px,${n.y - n.h/2}px)`;
+    const fold = n.el.querySelector('.fold');
+    if(fold) fold.textContent = (n._kids.length < n.children.length) ? countAll(n) : '–';
+  });
+  /* 连线：按子节点优先级分色 */
+  const dd = {super:'',key:'',minor:'',none:''};
+  nodes.forEach(n=> n._kids.forEach(c=>{
+    const x1=n.x+n.w, y1=n.y, x2=c.x, y2=c.y, mx=(x1+x2)/2;
+    const k = c.label==='超级重点'?'super':c.label==='重点'?'key':c.label==='次重点'?'minor':'none';
+    dd[k] += `M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2} `;
+  }));
+  svg.innerHTML =
+    `<path d="${dd.none}" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-opacity=".4"/>`+
+    `<path d="${dd.minor}" fill="none" stroke="#2563eb" stroke-width="1.6" stroke-opacity=".5"/>`+
+    `<path d="${dd.key}"   fill="none" stroke="#d97706" stroke-width="1.8" stroke-opacity=".55"/>`+
+    `<path d="${dd.super}" fill="none" stroke="#dc2626" stroke-width="2"   stroke-opacity=".6"/>`;
+  let maxX=0, maxY=0;
+  nodes.forEach(n=>{ maxX=Math.max(maxX,n.x+n.w); maxY=Math.max(maxY,n.y+n.h/2); });
+  svg.setAttribute('width', maxX+60); svg.setAttribute('height', maxY+60);
+  world.style.width = (maxX+60)+'px'; world.style.height = (maxY+60)+'px';
+}
+function measure(){
+  world.style.width = '900px';  // 测量前先给可用宽度，否则 shrink-to-fit 逐字换行、高度全错
+  pool.forEach(n=>{
+    n.el.style.visibility='hidden';
+    n.w = n.el.offsetWidth; n.h = n.el.offsetHeight;
+    n.el.style.visibility='';
+  });
+}
+
+/* ---------- 平移缩放 ---------- */
+let z=1, px=40, py=20;
+function applyT(){ world.style.transform = `translate(${px}px,${py}px) scale(${z})`; }
+function fit(){
+  const nodes = pool.filter(n=>n.rendered);
+  if(nodes.length<2) return;
+  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+  nodes.forEach(n=>{ minX=Math.min(minX,n.x); minY=Math.min(minY,n.y-n.h/2); maxX=Math.max(maxX,n.x+n.w); maxY=Math.max(maxY,n.y+n.h/2); });
+  const vw=viewport.clientWidth, vh=viewport.clientHeight;
+  z = Math.max(.3, Math.min(1, vw/(maxX-minX+80), vh/(maxY-minY+80)));
+  px = (vw-(maxX-minX)*z)/2 - minX*z; py = (vh-(maxY-minY)*z)/2 - minY*z;
+  applyT();
+}
+let dragging=false, lx=0, ly=0;
+viewport.addEventListener('mousedown', e=>{ dragging=true; lx=e.clientX; ly=e.clientY; viewport.classList.add('drag'); });
+window.addEventListener('mousemove', e=>{ if(!dragging) return; px+=e.clientX-lx; py+=e.clientY-ly; lx=e.clientX; ly=e.clientY; applyT(); });
+window.addEventListener('mouseup', ()=>{ dragging=false; viewport.classList.remove('drag'); });
+viewport.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const r = viewport.getBoundingClientRect(), cx=e.clientX-r.left, cy=e.clientY-r.top;
+  const nz = Math.min(2.5, Math.max(.2, z * (e.deltaY<0? 1.12 : 1/1.12)));
+  px = cx - (cx-px)*nz/z; py = cy - (cy-py)*nz/z; z = nz; applyT();
+}, {passive:false});
+document.getElementById('zin').onclick = ()=>{ z=Math.min(2.5,z*1.2); applyT(); };
+document.getElementById('zout').onclick = ()=>{ z=Math.max(.2,z/1.2); applyT(); };
+document.getElementById('zfit').onclick = ()=> fit();
+
+/* ---------- 工具栏 ---------- */
+document.querySelectorAll('[data-lv]').forEach(b=> b.onclick = ()=>{
+  document.querySelectorAll('[data-lv]').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  pool.forEach(n=> n.collapsed = n.depth >= +b.dataset.lv);
+  render(); fit();
+});
+document.querySelectorAll('[data-f]').forEach(b=> b.onclick = ()=>{
+  document.querySelectorAll('[data-f]').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  filterMode = b.dataset.f; render();
+});
+document.getElementById('theme').onclick = function(){
+  document.documentElement.classList.toggle('dark');
+  const dark = document.documentElement.classList.contains('dark');
+  this.textContent = dark? '☀️':'🌙';
+  try{ localStorage.caseMindDark = dark?1:0; }catch(e){}
+};
+try{ if(localStorage.caseMindDark==1){ document.documentElement.classList.add('dark'); document.getElementById('theme').textContent='☀️'; } }catch(e){}
+
+/* ---------- 搜索 ---------- */
+const sbox = document.getElementById('search'), hitinfo = document.getElementById('hitinfo');
+let hits=[], hitIdx=-1;
+function centerOn(n){
+  const vw=viewport.clientWidth, vh=viewport.clientHeight;
+  px = vw/2 - (n.x + n.w/2)*z; py = vh/2 - n.y*z; applyT();
+}
+sbox.addEventListener('input', ()=>{
+  const q = sbox.value.trim().toLowerCase();
+  pool.forEach(n=> n.el.classList.remove('hit'));
+  hits = q? pool.filter(n=> !n.isRoot && n.title.toLowerCase().includes(q)) : [];
+  if(q && filterMode!=='all'){       // 搜索时回到全量视图，避免被过滤隐藏
+    filterMode='all';
+    document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on', x.dataset.f==='all'));
+  }
+  if(q){
+    hits.forEach(n=>{ let p=n.parent; while(p){ p.collapsed=false; p=p.parent; } });
+    render();
+    hits.forEach(n=> n.el.classList.add('hit'));
+    hitIdx = hits.length? 0 : -1;
+    if(hitIdx>=0) centerOn(hits[0]);
+  }
+  hitinfo.textContent = q? (hits.length? `${hits.length} 处` : '无匹配') : '';
+});
+sbox.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && hits.length){ hitIdx=(hitIdx+1)%hits.length; centerOn(hits[hitIdx]); hitinfo.textContent=`${hitIdx+1}/${hits.length}`; }
+});
+window.addEventListener('keydown', e=>{
+  if(e.key==='/' && document.activeElement!==sbox){ e.preventDefault(); sbox.focus(); sbox.select(); }
+});
+
+/* ---------- 背诵清单面板 ---------- */
+const planBtn = document.getElementById('planBtn'), planEl = document.getElementById('plan');
+const planBody = document.getElementById('planBody'), pfill = document.getElementById('pfill'), ptext = document.getElementById('ptext');
+planBtn.onclick = () => planEl.classList.toggle('open');
+const tierName = {1:'第一档 · 必做题保命（上篇概念）', 2:'第二档 · 选做主战场（数据库/缓存）', 3:'第三档 · 趋势热点（押题防身）'};
+(function buildPanel(){
+  [1,2,3].forEach(t => {
+    const h = document.createElement('div');
+    h.className = 'tier t'+t+'h'; h.textContent = tierName[t];
+    planBody.appendChild(h);
+    CHECKLIST.filter(it=>it.tier===t).forEach(it => {
+      const row = document.createElement('div');
+      row.className = 'ti' + (checked.has(it.id)?' done':'');
+      row.dataset.id = it.id;
+      row.innerHTML = `<input type="checkbox" ${checked.has(it.id)?'checked':''}><label>${it.name}<span class="tip">${it.tip}</span></label>`;
+      row.querySelector('input').addEventListener('change', e => {
+        e.stopPropagation();
+        if(e.target.checked) checked.add(it.id); else checked.delete(it.id);
+        try{ localStorage.caseMindPlan = JSON.stringify([...checked]); }catch(err){}
+        syncPlan();
+      });
+      row.querySelector('label').addEventListener('click', e => {
+        e.preventDefault();   // 避免触发 checkbox 双态
+        const n = it._nodes[0];
+        if(!n) return;
+        let p = n.parent;
+        while(p){ p.collapsed = false; p = p.parent; }
+        render(); centerOn(n);
+      });
+      planBody.appendChild(row);
+    });
+  });
+})();
+function syncPlan(){
+  CHECKLIST.forEach(it => {
+    const on = checked.has(it.id);
+    it._nodes.forEach(n => {
+      const p = n.el && n.el.querySelector('.tpill');
+      if(p){ p.className = 'tpill ' + (on?'ok':'t'+it.tier); p.textContent = on?'✓':'ⅠⅡⅢ'[it.tier-1]; }
+      if(n.el) n.el.classList.toggle('ndone', on);
+    });
+  });
+  document.querySelectorAll('#plan .ti').forEach(row => {
+    const on = checked.has(+row.dataset.id);
+    row.classList.toggle('done', on);
+    row.querySelector('input').checked = on;
+  });
+  pfill.style.width = (checked.size / CHECKLIST.length * 100) + '%';
+  ptext.textContent = `已背 ${checked.size}/${CHECKLIST.length}`;
+}
+document.getElementById('planOnlyBtn').onclick = function(){
+  planOnly = !planOnly;
+  this.classList.toggle('on', planOnly);
+  render();
+};
+
+/* ---------- 渲染入口 ---------- */
+function render(){ layout(); applyT(); }
+pool.forEach(n=> n.collapsed = n.depth >= 2);  // 默认展开到"章"
+measure(); render(); syncPlan(); requestAnimationFrame(()=>fit());
+if(planMissed.length) console.warn('清单节点未命中：', planMissed);
+window.addEventListener('resize', ()=>fit());
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<div class="material-body" style="padding:12px 14px;font-size:12px;line-height:1.85;color:var(--text-2)">
+  <div style="font-weight:700;font-size:13px;color:var(--primary-6);margin-bottom:6px">📊 出题频率一览（架构师卷 2013–2026 共 16 个场次真题统计）</div>
+  <table style="border-collapse:collapse;width:100%;margin:6px 0 12px;font-size:11px">
+    <tr>
+      <th style="border:1px solid var(--border-2);padding:4px 8px;text-align:left;background:var(--bg-surface-high,#f5f5f5)">方向</th>
+      <th style="border:1px solid var(--border-2);padding:4px 8px;text-align:left;background:var(--bg-surface-high,#f5f5f5)">频率</th>
+      <th style="border:1px solid var(--border-2);padding:4px 8px;text-align:left;background:var(--bg-surface-high,#f5f5f5)">真题常见形态</th>
+    </tr>
+    <tr><td style="border:1px solid var(--border-2);padding:4px 8px"><strong>架构评估与质量属性</strong></td><td style="border:1px solid var(--border-2);padding:4px 8px">≈10/16 场，常驻第1题</td><td style="border:1px solid var(--border-2);padding:4px 8px">8~11 条需求判属性、敏感点/权衡点、ATAM、故障检测对比</td></tr>
+    <tr><td style="border:1px solid var(--border-2);padding:4px 8px"><strong>UML 建模</strong></td><td style="border:1px solid var(--border-2);padding:4px 8px">9/16 场，第2题槽位</td><td style="border:1px solid var(--border-2);padding:4px 8px">类图与实体建模×5、顺序图、活动图、UML 行为建模</td></tr>
+    <tr><td style="border:1px solid var(--border-2);padding:4px 8px"><strong>缓存与数据库性能</strong></td><td style="border:1px solid var(--border-2);padding:4px 8px">≈10/16 场，近年每场都有</td><td style="border:1px solid var(--border-2);padding:4px 8px">穿透/击穿/雪崩、Cache Aside、RDB vs AOF、分库分表、ES</td></tr>
+    <tr><td style="border:1px solid var(--border-2);padding:4px 8px">微服务 / 云原生 / DDD</td><td style="border:1px solid var(--border-2);padding:4px 8px">近期 3 场出 2 次</td><td style="border:1px solid var(--border-2);padding:4px 8px">单体 vs 微服务、限界上下文、TCC/Saga、熔断降级限流</td></tr>
+    <tr><td style="border:1px solid var(--border-2);padding:4px 8px">云边端 / 嵌入式</td><td style="border:1px solid var(--border-2);padding:4px 8px">近 4 场出 2 次</td><td style="border:1px solid var(--border-2);padding:4px 8px">云边端分层职责、RTOS vs Linux 选型、端侧 AI</td></tr>
+    <tr><td style="border:1px solid var(--border-2);padding:4px 8px">安全架构</td><td style="border:1px solid var(--border-2);padding:4px 8px">2024.11 在考</td><td style="border:1px solid var(--border-2);padding:4px 8px">STRIDE→对策、等保三级、零信任与国密 PKI</td></tr>
+    <tr><td style="border:1px solid var(--border-2);padding:4px 8px">大数据架构</td><td style="border:1px solid var(--border-2);padding:4px 8px">2 场</td><td style="border:1px solid var(--border-2);padding:4px 8px">Lambda/Kappa、湖仓一体、三层+CDN+LB</td></tr>
+    <tr><td style="border:1px solid var(--border-2);padding:4px 8px">冷门轮换</td><td style="border:1px solid var(--border-2);padding:4px 8px">各 1 次</td><td style="border:1px solid var(--border-2);padding:4px 8px">知识图谱、区块链、软件 FMEA、构件化、Scrum</td></tr>
+  </table>
+
+  <div style="font-weight:700;font-size:13px;color:var(--danger-6);margin-bottom:4px">🥇 第一梯队：几乎必考</div>
+
+  <div style="margin-bottom:10px;padding:8px 10px;border-left:3px solid var(--primary-5);background:var(--bg-card);border-radius:0 6px 6px 0">
+    <div style="font-weight:600;color:var(--text-1)">① 架构评估与质量属性</div>
+    <div style="margin-top:3px"><strong>触发词→属性</strong>：7×24/故障切换→可用性；并发/吞吐/低延迟→性能；新增协议/插件化→可修改性；越权/加密/审计→安全性。每条需求按"属性+题干原话"一句话作答，一问一条不合并。<br><strong>四类点</strong>：敏感点=单属性关键决策；权衡点=多属性取舍（性能vs安全）；风险点=威胁目标；非风险点=安全做法。拿不准写"提升X的同时可能影响Y"。<br><strong>风格选型</strong>：结论先行，按质量属性逐条对比（流水线→吞吐、分层→可修改、微内核→灵活、微服务→独立伸缩）。</div>
+  </div>
+
+  <div style="margin-bottom:10px;padding:8px 10px;border-left:3px solid var(--primary-5);background:var(--bg-card);border-radius:0 6px 6px 0">
+    <div style="font-weight:600;color:var(--text-1)">② UML 建模（重点：类图 &gt; 用例图 &gt; 顺序图 &gt; 活动图）</div>
+    <div style="margin-top:3px"><strong>类图</strong>：名词→类、形容词→属性、动词→关系；多重性看业务数字；泛化=是/是一个，组合=部分不可独立，聚合=可独立，关联=一般联系。<br><strong>用例图</strong>：参与者=系统外的用户和对接系统；<strong>include=必然执行的公共前置</strong>（登录/权限/校验类），<strong>extend=条件触发的可选扩展</strong>（处方/重试类），口诀"必走 include，可选 extend"。<br><strong>顺序图</strong>：按"参与者→边界→控制→实体"链路补消息，分支 alt、可选 opt。<br><strong>防漏</strong>：清单式罗列——参与者清单→用例清单→关系清单，宁多勿漏。</div>
+  </div>
+
+  <div style="margin-bottom:4px;padding:8px 10px;border-left:3px solid var(--primary-5);background:var(--bg-card);border-radius:0 6px 6px 0">
+    <div style="font-weight:600;color:var(--text-1)">③ 缓存与数据库性能</div>
+    <div style="margin-top:3px"><strong>三大问题模板</strong>：穿透→布隆过滤器+空值缓存；击穿→互斥锁/热点key不过期；雪崩→过期加随机+多级缓存+限流降级。<br><strong>一致性</strong>：先更库后删缓存→延迟双删→binlog 异步补偿，按"方案→解决的问题→剩余风险"链式写。<br><strong>对比题</strong>（RDB vs AOF、各中间件）：画四维对比表（性能/数据安全/开销/恢复速度），别写大段落。</div>
+  </div>
+
+  <div style="font-weight:700;font-size:13px;color:var(--warning-6,#b45309);margin:10px 0 4px">🥈 第二梯队：近年高频</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div style="padding:8px 10px;background:var(--bg-card);border-radius:6px;border:1px solid var(--border-1)"><strong>微服务 / DDD</strong><br>拆分三原则：业务能力+团队边界+数据独立；分布式事务按"一致性强度/性能/复杂度/场景"对比 TCC、Saga、本地消息表；治理四件套：熔断→降级→限流→负载均衡。</div>
+    <div style="padding:8px 10px;background:var(--bg-card);border-radius:6px;border:1px solid var(--border-1)"><strong>云边端 / 嵌入式</strong><br>分层题：感知层(采集)→边缘层(本地实时处理)→云端(统一管控)，逐层一句职责；选型题按"实时性/资源/生态/成本"四维对比+结论。嵌入式没把握就别选做。</div>
+    <div style="padding:8px 10px;background:var(--bg-card);border-radius:6px;border:1px solid var(--border-1)"><strong>安全架构</strong><br>STRIDE 一一映射：仿冒→强认证、篡改→签名/完整性、抵赖→签名+审计、泄露→加密、DoS→限流冗余；零信任按"边界→身份→数据"三层展开。</div>
+    <div style="padding:8px 10px;background:var(--bg-card);border-radius:6px;border:1px solid var(--border-1)"><strong>大数据</strong><br>Lambda vs Kappa 按"批流/复杂度/成本"对比；链路题按"数据源→采集→存储→计算→服务"管线式作答。</div>
+  </div>
+
+  <div style="font-weight:700;font-size:13px;color:var(--text-3);margin:10px 0 4px">🥉 第三梯队：轮换冷门，认脸即可</div>
+  <div style="padding:8px 10px;background:var(--bg-card);border-radius:6px;border:1px solid var(--border-1)">知识图谱、区块链、软件 FMEA、构件化与插件、数据治理、Scrum。<strong>套路</strong>：定义→组成→典型场景→优缺点四段式，答案尽量从题干材料摘词改写——案例按点给分，材料本身就是提示库。</div>
+</div>

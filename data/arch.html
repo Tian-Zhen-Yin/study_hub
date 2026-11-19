@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a"><title>智能财务分析平台 · 15服务架构图</title><style>
+:root{--bg:#f1f5f9;--card:#fff;--tx:#0f172a;--tx2:#475569;--line:#e2e8f0;--biz:#3b82f6;--bizbg:#dbeafe;--ag:#8b5cf6;--agbg:#ede9fe;--inf:#64748b;--infbg:#f1f5f9;--dat:#f59e0b;--datbg:#fef3c7;--ext:#94a3b8;--note:#fffbeb;--noteline:#fcd34d}
+html.dark{--bg:#0b1120;--card:#151d2e;--tx:#e2e8f0;--tx2:#94a3b8;--line:#2a3650;--biz:#7ea2f8;--bizbg:#1c2740;--ag:#b39df8;--agbg:#251d3d;--inf:#94a3b8;--infbg:#1a2233;--dat:#fbbf24;--datbg:#33270e;--ext:#64748b;--note:#2a2313;--noteline:#7c5f10}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif}
+header{position:sticky;top:0;z-index:9;background:linear-gradient(135deg,#1e3a8a,#312e81);color:#fff;padding:10px 14px calc(10px + env(safe-area-inset-top))}
+header .h1{font-size:16.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hd-row{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:#c7d2fe;flex-wrap:wrap}
+.days{background:#dc2626;color:#fff;border-radius:14px;padding:1px 10px;font-weight:800}
+a.hbtn,button.hbtn{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:8px;padding:3px 10px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none}
+main{max-width:760px;margin:0 auto;padding:12px 12px 30px}
+.band{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px 12px;margin:0}
+.band .bt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.band .bt b{font-size:14.5px}
+.band .bt .sub{font-size:12px;color:var(--tx2)}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.svc{border:1px solid var(--line);border-left:4px solid var(--biz);border-radius:9px;padding:7px 9px;background:var(--bg)}
+.svc .n{font-weight:800;font-size:13.5px;line-height:1.45}
+.svc .t{font-size:11.5px;color:var(--tx2);line-height:1.5;margin-top:2px}
+.b-biz{border-left-color:var(--biz)}.b-ag{border-left-color:var(--ag)}.b-inf{border-left-color:var(--inf)}.b-dat{border-left-color:var(--dat)}.b-ext{border-left-color:var(--ext);border-style:dashed}
+.k-biz{color:var(--biz)}.k-ag{color:var(--ag)}
+.arrow{display:flex;flex-direction:column;align-items:center;padding:5px 0;color:var(--tx2);font-size:11.5px;line-height:1.5}
+.arrow .a{font-size:17px;color:var(--inf);line-height:1}
+.bus{background:var(--card);border:1.5px dashed var(--inf);border-radius:12px;padding:9px 12px;text-align:center;margin:0}
+.bus b{font-size:14px}.bus .s{font-size:11.5px;color:var(--tx2)}
+.duo{display:flex;justify-content:center;gap:0;font-size:11.5px;color:var(--tx2);padding:3px 0}
+.duo span{padding:0 18px}
+.chain{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px}
+.chain .step{display:flex;align-items:stretch;gap:8px;margin:7px 0}
+.chain .no{flex:0 0 26px;height:26px;border-radius:50%;background:var(--agbg);color:var(--ag);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.chain .sc{flex:1;border-left:3px solid var(--ag);padding:2px 0 2px 10px}
+.chain .sc b{font-size:13.5px}.chain .sc .d{font-size:12px;color:var(--tx2)}
+.legend{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--tx2);margin:10px 2px 12px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.note{background:var(--note);border:1px solid var(--noteline);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px;line-height:1.85}
+h3.sec{font-size:15px;margin:16px 0 8px;padding-left:9px;border-left:4px solid var(--biz)}
+footer{max-width:760px;margin:8px auto 0;padding:0 14px;color:var(--tx2);font-size:12px;text-align:center}
+</style></head><body>
+<header>
+  <div class="h1">📐 智能财务分析平台 · 15 服务架构图</div>
+  <div class="hd-row"><span class="days">距考 <span id="dd">--</span> 天</span>
+    <span>业务6 + Agent5 + 基础设施4 · 42领域事件 · 10限界上下文</span>
+    <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="/sprint.html">← 冲刺版</a><button class="hbtn" onclick="fsz(-1)">A−</button><button class="hbtn" onclick="fsz(1)">A＋</button><button class="hbtn" onclick="th()">◐ 夜间</button></span>
+  </div>
+</header>
+<main>
+
+<div class="legend">
+  <span><i style="background:var(--biz)"></i>业务服务 ×6（确定性逻辑）</span>
+  <span><i style="background:var(--ag)"></i>Agent服务 ×5（不确定性逻辑）</span>
+  <span><i style="background:var(--inf)"></i>基础设施 ×4</span>
+  <span><i style="background:var(--dat)"></i>数据与缓存</span>
+  <span><i style="background:var(--ext)"></i>外部系统（虚线）</span>
+</div>
+
+<div class="band"><div class="bt"><b>用户层</b><span class="sub">30余家子公司</span></div>
+<div class="chips">
+  <div class="svc b-ext"><div class="n">财务分析师</div><div class="t">Web端 · 发起分析/查询报表</div></div>
+  <div class="svc b-ext"><div class="n">财务总监/经理</div><div class="t">企业微信接收分级预警（高/中/低）</div></div>
+</div></div>
+<div class="arrow"><span class="a">▼</span>HTTPS · 统一入口</div>
+
+<div class="band"><div class="bt"><b class="k-biz">基础设施层（1/4）· 接入</b><span class="sub">所有请求必经</span></div>
+<div class="chips">
+  <div class="svc b-inf"><div class="n">API网关</div><div class="t">鉴权（对接权限服务RBAC）· 令牌桶限流1000QPS · 路由</div></div>
+</div></div>
+<div class="arrow"><span class="a">▼</span>路由分发</div>
+
+<div class="band"><div class="bt"><b class="k-biz">业务服务层 ×6</b><span class="sub">稳定的骨架 · 确定性逻辑（采集/存储/计算）</span></div>
+<div class="chips">
+  <div class="svc b-biz"><div class="n">数据采集服务</div><div class="t">对接ERP/银行/Excel · 发布"数据采集完成"</div></div>
+  <div class="svc b-biz"><div class="n">数据存储服务</div><div class="t">MySQL主从 · 四层数仓ODS→ADS</div></div>
+  <div class="svc b-biz"><div class="n">报表服务</div><div class="t">读写分离+两级缓存 · 核心查询120ms</div></div>
+  <div class="svc b-biz"><div class="n">预算管理服务</div><div class="t">Saga分布式事务（Camunda编排）</div></div>
+  <div class="svc b-biz"><div class="n">成本核算服务</div><div class="t">Saga · 凭证聚合（借贷平衡内聚）</div></div>
+  <div class="svc b-biz"><div class="n">权限服务</div><div class="t">RBAC · 财务数据分级 · 审计留痕</div></div>
+</div></div>
+
+<div class="duo"><span>↑ 发布事件</span><span>↓ 订阅事件</span></div>
+<div class="bus"><b>RocketMQ · 消息队列服务（基础设施 2/4）</b><div class="s">事件总线 · 42个领域事件 · 削峰填谷 · 同步刷盘+主从（消息不丢）· 本地消息表保最终一致</div></div>
+<div class="duo"><span>↑ Agent结果回流</span><span>↓ 触发Agent</span></div>
+
+<div class="band"><div class="bt"><b class="k-ag">Agent服务层 ×5</b><span class="sub">智能的大脑 · 不确定性逻辑（分析/预测/生成）· Dify编排</span></div>
+<div class="chips">
+  <div class="svc b-ag"><div class="n">数据清洗Agent</div><div class="t">Drools硬规则 + Isolation Forest统计异常</div></div>
+  <div class="svc b-ag"><div class="n">财务分析Agent</div><div class="t">思维链CoT分步归因 · 三次投票+置信度80%</div></div>
+  <div class="svc b-ag"><div class="n">风险预警Agent</div><div class="t">Flink实时流水 + 随机森林违约预测 · 分级推送</div></div>
+  <div class="svc b-ag"><div class="n">报告生成Agent</div><div class="t">RAG检索增强生成 · 结论标注知识来源</div></div>
+  <div class="svc b-ag"><div class="n">合规审计Agent</div><div class="t">会计准则合规检查（规则驱动）</div></div>
+</div></div>
+<div class="arrow"><span class="a">▼</span>调用支撑设施</div>
+
+<div class="band"><div class="bt"><b>基础设施层（3-4/4）· 支撑</b></div>
+<div class="chips">
+  <div class="svc b-inf"><div class="n">配置中心</div><div class="t">3/4 · Spring Cloud Config · 动态参数（熔断阈值等）</div></div>
+  <div class="svc b-inf"><div class="n">知识库服务</div><div class="t">4/4 · Neo4j图谱（概念/规则）+ Milvus向量（语义召回）· RAG地基</div></div>
+</div></div>
+<div class="arrow"><span class="a">▼</span>读写</div>
+
+<div class="band"><div class="bt"><b>数据与缓存层</b><span class="sub">横切支撑业务/报表服务</span></div>
+<div class="chips">
+  <div class="svc b-dat"><div class="n">MySQL 主从</div><div class="t">半同步复制 · 异地binlog RPO≈0 · 30秒故障切换</div></div>
+  <div class="svc b-dat"><div class="n">Redis + Caffeine</div><div class="t">两级缓存 · 热点指标/分析结果 · 延迟双删保一致</div></div>
+</div></div>
+<div class="arrow"><span class="a">▲</span>数据源 / 模型能力</div>
+
+<div class="band" style="border-style:dashed"><div class="bt"><b>外部系统</b><span class="sub">不受控 · 需容错设计</span></div>
+<div class="chips">
+  <div class="svc b-ext"><div class="n">ERP 系统</div><div class="t">凭证数据源 · 防腐层对接SAP</div></div>
+  <div class="svc b-ext"><div class="n">银行对账系统</div><div class="t">流水实时拉取 → Flink消费</div></div>
+  <div class="svc b-ext"><div class="n">子公司 Excel</div><div class="t">模板化导入 · 清洗规则校验</div></div>
+  <div class="svc b-ext"><div class="n">大模型服务商</div><div class="t">多供应商路由+Resilience4j熔断 · 2024.12故障2小时无感切换</div></div>
+</div></div>
+
+<h3 class="sec">事件驱动链示例 · 月度分析报告生成（范文B 3.2 可视化）</h3>
+<div class="chain">
+  <div class="step"><div class="no">1</div><div class="sc"><b>数据采集服务</b><div class="d">采齐30家子公司数据 → 发布「数据采集完成」事件</div></div></div>
+  <div class="step"><div class="no">2</div><div class="sc"><b>数据清洗Agent</b><div class="d">订阅 → Drools规则校验+异常检测修复 → 发布「数据清洗完成」</div></div></div>
+  <div class="step"><div class="no">3</div><div class="sc"><b>财务分析Agent ∥ 风险预警Agent</b><div class="d">并行订阅 → 一个算指标做归因，一个跑Flink+随机森林评风险</div></div></div>
+  <div class="step"><div class="no">4</div><div class="sc"><b>报告生成Agent</b><div class="d">前置事件齐备 → RAG检索知识拼提示词 → 生成自然语言报告</div></div></div>
+  <div class="step"><div class="no">5</div><div class="sc"><b>企业微信推送用户</b><div class="d">异步任务闭环：提交即返回任务ID，完成推送（3天→2小时）</div></div></div>
+</div>
+
+<div class="note">
+<b>答题三句话：</b><br>
+① 业务服务管<b>确定性逻辑</b>（骨架），Agent服务管<b>不确定性逻辑</b>（大脑），二者以事件驱动解耦、按各自负载独立伸缩——这是服务拆分的总原则。<br>
+② 15个服务=业务6+Agent5+基础设施4，来自10个限界上下文、42个领域事件（事件风暴识别）。<br>
+③ 外部大模型是最大故障源：多供应商路由+熔断降级兜底（护城河细节：2024.12故障2小时核心功能全程可用）。
+</div>
+
+</main>
+<footer>单文件离线可用 · 配套：/sprint.html 冲刺版 · 数字口径对齐 04-backbone.md · 2026-10-10</footer>
+<script>
+var d=Math.ceil((new Date("2026-10-24")-Date.now())/864e5);document.getElementById("dd").textContent=d>0?d:0;
+function fsz(n){var s=parseInt(document.documentElement.style.fontSize||"17px")+n;s=Math.min(23,Math.max(14,s));document.documentElement.style.fontSize=s+"px";try{localStorage.setItem("sp-fs",s)}catch(e){}}
+function th(){var k=document.documentElement.classList.toggle("dark");try{localStorage.setItem("sp-th",k?"1":"0")}catch(e){}}
+try{var f=localStorage.getItem("sp-fs");if(f)document.documentElement.style.fontSize=f+"px";if(localStorage.getItem("sp-th")==="1")document.documentElement.classList.add("dark")}catch(e){}
+</script></body></html>
