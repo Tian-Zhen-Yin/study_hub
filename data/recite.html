@@ -60,7 +60,7 @@ footer{text-align:center;color:var(--sub);font-size:.78em;padding:18px 0}
 <body>
 <header>
   <b>📖 背诵 · 范文AB</b><span class="cd" id="cd"></span>
-  <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="/redbook.html">红宝书★5</a><a class="hbtn" href="/sprint.html">← 冲刺版</a><button class="hbtn" onclick="fsz(-1)">A−</button><button class="hbtn" onclick="fsz(1)">A＋</button><button class="hbtn" onclick="th()">◐ 夜间</button></span>
+  <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="core-knowledge.html">核心考点★5</a><a class="hbtn" href="sprint.html">← 冲刺版</a><button class="hbtn" onclick="fsz(-1)">A−</button><button class="hbtn" onclick="fsz(1)">A＋</button><button class="hbtn" onclick="th()">◐ 夜间</button></span>
 </header>
 <nav>
   <button id="tab-a" class="on" onclick="sw('a')">范文 A · RAG</button>
@@ -366,14 +366,14 @@ var CARDS4=[
 '<p><b>vs 单块</b>：优点＝独立演进/弹性/容错；代价＝分布式复杂性/分布式事务/运维成本。</p>'+
 '<p><b>协同句</b>：自治服务+轻量通信+去中心化数据共同实现"独立演进、故障隔离"目标。</p>'+
 '<p><b>项目素材</b>：DDD 拆 15 服务（6+5+4）、42 领域事件、10 限界上下文、事件风暴工作坊 4 次。</p>'},
-{t:"卡12 · 分布式缓存（凯恩押题③）",x:
+{t:"卡12 · 分布式缓存（高频专题）",x:
 '<p><b>四组成</b>：①缓存节点集群（Redis 分片+主从冗余——数据放在哪）②路由层（一致性哈希+虚拟节点，键均匀映射——请求到哪去）③多级缓存体系（本地 Caffeine→分布式 Redis→数据库——延迟逐层压）④持久化与高可用（RDB 快照+AOF 追加、主从故障转移——缓存挂了不雪崩）。</p>'+
 '<p><b>三机制（设问点名）</b>：数据组织——Key 统一规范（业务:对象:ID）+热点预热+合理序列化；缓存更新——Cache-Aside 旁路：读未命中回源回填，写<b>先更新数据库再删除缓存</b>（不是更新缓存：并发写易脏；删除失败靠重试+TTL 兜底，最终一致）；过期淘汰——TTL 加随机值防集中失效，内存达阈值按 LRU/LFU 淘汰，冷数据不进缓存。</p>'+
 '<p><b>三异常（必背区分）</b>：穿透（查不存在的 key→布隆过滤器/空值缓存）｜击穿（热点 key 过期瞬间打穿→互斥重建/逻辑过期）｜雪崩（大量 key 同时失效或实例宕机→TTL 随机化+集群高可用+限流降级）。</p>'+
 '<p><b>协同句</b>：路由层均匀分发，多级体系逐层拦截读压力，更新与淘汰机制维持命中率与一致性——共同实现"以可控弱一致换数据库压力数量级下降"。</p>'+
 '<p><b>项目素材</b>：三级缓存（Caffeine 秒级失效→Redis 1 小时→预计算结果表）+"更新库后删缓存+延迟双删"、配合读写分离，查询秒级→120ms。</p>'+
 '<p><b>护城河问题</b>：报表结果 key 集中路由到单一分片（哈希倾斜）→上调虚拟节点数重分配槽位；缓存删除延迟读到旧数据→版本号校验+本地短 TTL 兜底。</p>'},
-{t:"卡13 · 消息队列（凯恩押题④）",x:
+{t:"卡13 · 消息队列（高频专题）",x:
 '<p><b>四组成</b>：Producer（发送消息）/ Broker（持久化存储与转发）/ Consumer（按能力拉取消费）/ Topic 路由（点对点与发布订阅两种模式）。</p>'+
 '<p><b>六功能（设问点名，各一句）</b>：异步处理——主链路只做校验+发消息，下游异步消费缩短响应；应用解耦——上下游只依赖消息契约，独立迭代；流量削峰——洪峰入队、后端按稳定速率消费；消息路由——按 Topic/Tag 把消息投给订阅方；可靠投递——持久化+消费确认+重试+死信队列（至少一次语义）；消费处理——批量拉取提吞吐+幂等消费（唯一索引/状态机/消费记录表判重）。</p>'+
 '<p><b>协同句</b>：生产者只管投递，Broker 缓冲并路由，消费者按自身能力拉取并幂等确认——把同步调用的阻塞与耦合，转化为异步的缓冲与最终一致。</p>'+
@@ -432,7 +432,7 @@ function fsz(n){var s=parseInt(document.documentElement.style.fontSize||"17px")+
 function th(){var k=document.documentElement.classList.toggle("dark");try{localStorage.setItem("sp-th",k?"1":"0")}catch(e){}}
 try{var f=localStorage.getItem("sp-fs");if(f)document.documentElement.style.fontSize=f+"px";if(localStorage.getItem("sp-th")==="1")document.documentElement.classList.add("dark")}catch(e){}
 (function(){
-  var ex=new Date("2026-10-24T09:00:00");
+  var ex=(function(){var s=localStorage.getItem("studyhub_exam_date");if(s)return new Date(s);var n=new Date(),y=n.getFullYear(),c=[y+"-05-24",y+"-11-08",(y+1)+"-05-24"];for(var i=0;i<c.length;i++)if(new Date(c[i])>n)return new Date(c[i]);return new Date((y+1)+"-05-24")})();
   var dd=Math.ceil((ex-new Date())/864e5);
   document.getElementById("cd").textContent="距架构师考试 "+dd+" 天";
   render();

@@ -49,8 +49,8 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:
   <b>⏰ 考前一小时</b><span class="cd">2026.10 架构师 · 综合知识+案例 终极速览</span>
   <span id="cdays"></span>
   <span style="margin-left:auto;display:flex;gap:6px">
-    <a class="hbtn" href="/redis-drill.html">Redis集训</a>
-    <a class="hbtn" href="/yuce-case.html">案例背诵卡</a>
+    <a class="hbtn" href="redis-drill.html">Redis集训</a>
+    <a class="hbtn" href="case-drills.html">案例背诵卡</a>
     <button class="hbtn" onclick="fsz(-1)">A−</button><button class="hbtn" onclick="fsz(1)">A＋</button><button class="hbtn" onclick="th()">◐ 夜间</button>
     <button class="hbtn" onclick="window.print()">🖨 打印</button>
   </span>
@@ -230,7 +230,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:
 </ul>
 </div></details>
 </main>
-<footer>单文件可打印 · 数据支撑：题库 2013-2026 架构师真题考点频次 + 2018-2026 Redis 全史对账 + 文老师/凯恩双押题 · 进度 localStorage(fh-done)</footer>
+<footer>单文件可打印 · 数据支撑：题库 2013-2026 架构师真题考点频次 + 2018-2026 Redis 全史对账 + 重点专题考前复盘清单 · 进度 localStorage(fh-done)</footer>
 <script>
 const CKS=['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
 let done={};try{done=JSON.parse(localStorage.getItem('fh-done')||'{}')}catch(e){}
@@ -242,7 +242,7 @@ document.querySelectorAll('[data-ck]').forEach(cb=>{
  cb.addEventListener('change',()=>{done[cb.dataset.ck]=cb.checked;if(!cb.checked)delete done[cb.dataset.ck];
   try{localStorage.setItem('fh-done',JSON.stringify(done))}catch(e){}upd();});});
 upd();
-(function(){const ex=new Date('2026-10-24T09:00:00');const ms=ex-Date.now();
+(function(){const ex=(function(){var s=localStorage.getItem("studyhub_exam_date");if(s)return new Date(s);var n=new Date(),y=n.getFullYear(),c=[y+"-05-24",y+"-11-08",(y+1)+"-05-24"];for(var i=0;i<c.length;i++)if(new Date(c[i])>n)return new Date(c[i]);return new Date((y+1)+"-05-24")})();const ms=ex-Date.now();
  document.getElementById('cdays').textContent=ms>0?('⏳ 距考试 '+Math.ceil(ms/864e5)+' 天'):'📖 考试进行中';})();
 function fsz(n){var s=parseInt(document.documentElement.style.fontSize||"16px")+n;s=Math.min(23,Math.max(14,s));document.documentElement.style.fontSize=s+"px";try{localStorage.setItem("sp-fs",s)}catch(e){}}
 function th(){var k=document.documentElement.classList.toggle("dark");try{localStorage.setItem("sp-th",k?"1":"0")}catch(e){}}

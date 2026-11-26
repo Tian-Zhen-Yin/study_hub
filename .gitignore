@@ -77,9 +77,14 @@ scripts/past-exam/data/
 scripts/past-exam/import-tmp.sql
 scripts/past-exam/query-tmp.sql
 
-# ===== Local artifacts, do not commit =====
-.backups/
-.extracted_pdf/
+# ===== Local artifacts & embedded DB, do not commit =====
+backups/
+extracted_pdf/
+data/studyhub*.db
+data/*.mv.db
+data/*.trace.db
+*.mv.db
+*.trace.db
 .screenshot-*.png
 scripts/tmp-task3/
 scripts/llm-tag/*.b64

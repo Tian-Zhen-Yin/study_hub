@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $env:Path = "C:\Windows\System32;C:\Windows;" + $env:Path
 
-$caseDir = "E:\AiProject\study_hub\data\senior-arch-review\past-papers\case-types"
+$caseDir = Join-Path $PSScriptRoot "..\senior-arch-review\past-papers\case-types"
 $topicNames = @{
   "01"="架构评估ATAM"; "02"="数据库设计"; "03"="架构风格比较"; "04"="UML建模";
   "05"="微服务重构"; "06"="消息与缓存"; "07"="安全架构"; "08"="嵌入式与构件"; "09"="大数据架构"

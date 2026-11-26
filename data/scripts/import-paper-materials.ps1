@@ -5,7 +5,7 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $env:Path = "C:\Windows\System32;C:\Windows;" + $env:Path
 
-$papersDir = "E:\AiProject\study_hub\data\papers"
+$papersDir = Join-Path $PSScriptRoot "..\papers"
 $api = "http://localhost:8080/api/questions"
 $marker = "论文万能模板备考资料"
 

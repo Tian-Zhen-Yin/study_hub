@@ -36,7 +36,7 @@ footer{text-align:center;color:var(--sub);font-size:.78em;padding:18px 0}
 <body>
 <header>
   <b>🦴 骨架记忆</b><span class="cd" id="cd"></span>
-  <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="/sprint.html">← 冲刺版</a><a class="hbtn" href="/recite.html">背诵版</a><button class="hbtn" onclick="document.body.classList.toggle('dark')">◐ 夜间</button></span>
+  <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="sprint.html">← 冲刺版</a><a class="hbtn" href="recite.html">背诵版</a><button class="hbtn" onclick="document.body.classList.toggle('dark')">◐ 夜间</button></span>
 </header>
 <nav>
   <button class="on" onclick="sw(this,'g1')">六段式总骨架</button>
@@ -48,7 +48,7 @@ footer{text-align:center;color:var(--sub);font-size:.78em;padding:18px 0}
 <main id="app"></main>
 <footer>骨架记忆 · 只看线索背全文 · 配套：/sprint.html /recite.html · 2026-10-12</footer>
 <script>
-var EXAM=new Date("2026-10-24T09:00:00");
+var EXAM=(function(){var s=localStorage.getItem("studyhub_exam_date");if(s)return new Date(s);var n=new Date(),y=n.getFullYear(),c=[y+"-05-24",y+"-11-08",(y+1)+"-05-24"];for(var i=0;i<c.length;i++)if(new Date(c[i])>n)return new Date(c[i]);return new Date((y+1)+"-05-24")})();
 function tick(){var d=Math.ceil((EXAM-new Date())/864e5);document.getElementById("cd").textContent=d>0?"⏳ 距考试 "+d+" 天":"📅 考试日"}
 tick();setInterval(tick,6e4);
 function sw(btn,id){document.querySelectorAll("nav button").forEach(function(b){b.classList.remove("on")});btn.classList.add("on");render(id)}

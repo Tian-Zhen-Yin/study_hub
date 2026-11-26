@@ -42,7 +42,7 @@ footer{max-width:760px;margin:8px auto 0;padding:0 14px;color:var(--tx2);font-si
   <div class="h1">📐 智能财务分析平台 · 15 服务架构图</div>
   <div class="hd-row"><span class="days">距考 <span id="dd">--</span> 天</span>
     <span>业务6 + Agent5 + 基础设施4 · 42领域事件 · 10限界上下文</span>
-    <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="/sprint.html">← 冲刺版</a><button class="hbtn" onclick="fsz(-1)">A−</button><button class="hbtn" onclick="fsz(1)">A＋</button><button class="hbtn" onclick="th()">◐ 夜间</button></span>
+    <span style="margin-left:auto;display:flex;gap:6px"><a class="hbtn" href="sprint.html">← 冲刺版</a><button class="hbtn" onclick="fsz(-1)">A−</button><button class="hbtn" onclick="fsz(1)">A＋</button><button class="hbtn" onclick="th()">◐ 夜间</button></span>
   </div>
 </header>
 <main>
@@ -133,7 +133,7 @@ footer{max-width:760px;margin:8px auto 0;padding:0 14px;color:var(--tx2);font-si
 </main>
 <footer>单文件离线可用 · 配套：/sprint.html 冲刺版 · 数字口径对齐 04-backbone.md · 2026-10-10</footer>
 <script>
-var d=Math.ceil((new Date("2026-10-24")-Date.now())/864e5);document.getElementById("dd").textContent=d>0?d:0;
+var d=Math.ceil(((function(){var s=localStorage.getItem("studyhub_exam_date");if(s)return new Date(s);var n=new Date(),y=n.getFullYear(),c=[y+"-05-24",y+"-11-08",(y+1)+"-05-24"];for(var i=0;i<c.length;i++)if(new Date(c[i])>n)return new Date(c[i]);return new Date((y+1)+"-05-24")})()-Date.now())/864e5);document.getElementById("dd").textContent=d>0?d:0;
 function fsz(n){var s=parseInt(document.documentElement.style.fontSize||"17px")+n;s=Math.min(23,Math.max(14,s));document.documentElement.style.fontSize=s+"px";try{localStorage.setItem("sp-fs",s)}catch(e){}}
 function th(){var k=document.documentElement.classList.toggle("dark");try{localStorage.setItem("sp-th",k?"1":"0")}catch(e){}}
 try{var f=localStorage.getItem("sp-fs");if(f)document.documentElement.style.fontSize=f+"px";if(localStorage.getItem("sp-th")==="1")document.documentElement.classList.add("dark")}catch(e){}

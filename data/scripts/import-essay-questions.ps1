@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $env:Path = "C:\Windows\System32;C:\Windows;" + $env:Path
 
-$base = "E:\AiProject\study_hub\data\senior-arch-review\past-papers"
+$base = Join-Path $PSScriptRoot "..\senior-arch-review\past-papers"
 $essayFile = "$base\essay-questions-by-year.md"
 $topicsDir = "$base\paper-topics"
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>脑图·案例冲刺宝典 6.0.1（2026下）</title>
+<title>脑图·案例分析高频考点目录</title>
 <style>
 :root{--bg:#f5f6f8;--card:#fff;--ink:#222;--sub:#777;--line:#e3e5e9;--canvas:#eef0f4}
 html.dark{--bg:#111418;--card:#1b1f24;--ink:#d8dce1;--sub:#8a919a;--line:#2a2f36;--canvas:#0d1013}
@@ -76,7 +76,7 @@ html.dark .tpill.ok{background:#052e16;color:#86efac}
 </head>
 <body>
 <header>
-  <b>🧠 案例冲刺宝典 6.0.1（2026下）</b><span class="cd">芝士架构 · 目录脑图</span>
+  <b>🧠 案例分析高频考点目录</b><span class="cd">案例分析 · 知识结构脑图</span>
   <span id="stats" class="cd"></span>
   <input id="search" type="search" placeholder="搜索节点…（/ 聚焦，回车跳转）">
   <span id="hitinfo"></span>
@@ -126,7 +126,7 @@ function parseTitle(it){
 }
 
 /* ---------- 建树（书签 depth 保证只增 1） ---------- */
-const root = parseTitle({title:'案例冲刺宝典 6.0.1（2026下）', page:null});
+const root = parseTitle({title:'案例分析高频考点目录', page:null});
 root.isRoot = true;
 let stack = [{d:0, node:root}];
 for(const it of RAW){
