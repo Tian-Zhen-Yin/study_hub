@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a">
+<title>Study Hub · 软考系统架构设计师开源备考手册</title>
+<meta name="description" content="一次通关软考系统架构设计师的实战开源备考手册：机考硬限裁剪范文、论文六段式骨架、案例分析 34 卡、Redis 专项精练、知识脑图与考前一小时清单。">
+<style>
+:root{
+  --bg:#f8fafc;--card:#ffffff;--tx:#0f172a;--tx2:#475569;--tx3:#64748b;
+  --line:#e2e8f0;--acc:#1d4ed8;--acc2:#4f46e5;--accbg:#eff6ff;
+  --tag1-bg:#fee2e2;--tag1-tx:#991b1b;
+  --tag2-bg:#fef3c7;--tag2-tx:#92400e;
+  --tag3-bg:#dbeafe;--tag3-tx:#1e40af;
+  --tag4-bg:#dcfce7;--tag4-tx:#166534;
+  --code-bg:#0f172a;--code-tx:#e2e8f0;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.04);
+}
+html.dark{
+  --bg:#0b1120;--card:#131c31;--tx:#f1f5f9;--tx2:#94a3b8;--tx3:#64748b;
+  --line:#24324d;--acc:#60a5fa;--acc2:#818cf8;--accbg:#172554;
+  --tag1-bg:#451a1a;--tag1-tx:#fca5a5;
+  --tag2-bg:#422c0c;--tag2-tx:#fcd34d;
+  --tag3-bg:#172554;--tag3-tx:#93c5fd;
+  --tag4-bg:#113825;--tag4-tx:#86efac;
+  --code-bg:#070c18;--code-tx:#cbd5e1;
+  --shadow:0 4px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);background:rgba(15,23,42,.88);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+.topbar-in{max-width:1080px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px;letter-spacing:.2px}
+.brand-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#60a5fa,#a78bfa)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:.15s}
+.pill:hover{background:rgba(255,255,255,.16)}
+.pill.countdown{background:#dc2626;border-color:#ef4444}
+.pill.star{background:linear-gradient(135deg,#2563eb,#4f46e5);border-color:transparent}
+
+.hero{background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 52%,#312e81 100%);color:#fff;padding:48px 18px 44px}
+.hero-in{max-width:1080px;margin:0 auto}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:12.5px;color:#e0e7ff;font-weight:600}
+.hero h1{margin:0 0 12px;font-size:clamp(26px,4.2vw,38px);line-height:1.25;letter-spacing:-.3px}
+.hero p{margin:0 0 24px;max-width:740px;color:#cbd5e1;font-size:15.5px;line-height:1.8}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;font-weight:700;font-size:14.5px;transition:.15s;cursor:pointer;border:none}
+.btn-primary{background:#fff;color:#1e3a8a}
+.btn-primary:hover{background:#eff6ff;transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.24)}
+.btn-ghost:hover{background:rgba(255,255,255,.2);transform:translateY(-1px)}
+
+.stats-bar{max-width:1080px;margin:-22px auto 26px;padding:0 18px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat-num{font-size:22px;font-weight:800;color:var(--acc);line-height:1.2}
+.stat-label{font-size:12.5px;color:var(--tx2);margin-top:4px}
+
+main{max-width:1080px;margin:0 auto;padding:0 18px 56px}
+.section{margin-top:34px}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sec-title{margin:0;font-size:19px;font-weight:800;display:flex;align-items:center;gap:8px}
+.sec-sub{font-size:13px;color:var(--tx2)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--acc)}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.card-title{font-size:16px;font-weight:800;color:var(--tx)}
+.tag{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.t1{background:var(--tag1-bg);color:var(--tag1-tx)}
+.t2{background:var(--tag2-bg);color:var(--tag2-tx)}
+.t3{background:var(--tag3-bg);color:var(--tag3-tx)}
+.t4{background:var(--tag4-bg);color:var(--tag4-tx)}
+.card-desc{font-size:13.5px;color:var(--tx2);margin:0 0 14px;flex:1}
+.card-foot{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--acc);font-weight:700}
+
+.system-box{margin-top:42px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center}
+.system-box h2{margin:0 0 10px;font-size:21px}
+.system-box p{margin:0 0 14px;color:var(--tx2);font-size:14px}
+.feat-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 18px;padding:0;list-style:none;font-size:13.5px}
+.feat-list li{padding:6px 10px;border-radius:8px;background:var(--accbg);color:var(--tx);font-weight:600}
+.code-box{background:var(--code-bg);color:var(--code-tx);border-radius:12px;padding:16px;font:13px/1.7 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;overflow-x:auto}
+.code-comment{color:#64748b}
+
+footer{max-width:1080px;margin:0 auto;padding:22px 18px 40px;border-top:1px solid var(--line);color:var(--tx2);font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer a{color:var(--acc);font-weight:600}
+
+@media(max-width:800px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .system-box{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .feat-list{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="brand-dot"></span><span>Study Hub · 架构师备考手册</span></div>
+    <div class="top-actions">
+      <button class="pill countdown" id="exam-pill" onclick="editExamDate()" title="点击自定义你的考试日期">距考 <span id="dd">--</span> 天 ✎</button>
+      <button class="pill" onclick="toggleTheme()">◐ 夜间</button>
+      <a class="pill star" href="https://github.com/Tian-Zhen-Yin/study_hub" target="_blank" rel="noopener">⭐ GitHub 源码</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-in">
+    <div class="badge-row">
+      <span class="hero-badge">🎓 作者已一次通关 · 软考系统架构设计师</span>
+      <span class="hero-badge">📱 手机 / 电脑免安装直读 · 进度本地自动保存</span>
+      <span class="hero-badge">🆓 Apache-2.0 开源免费</span>
+    </div>
+    <h1>软考系统架构设计师 · 开源实战备考手册</h1>
+    <p>把备考期间亲自打磨并验证有效的 <b>机考硬限论文范文（摘要 ≤300 / 正文 ≤2500）</b>、<b>六段式骨架</b>、<b>案例高频 34 卡</b>、<b>Redis 专项精练</b>、<b>知识脑图</b> 与 <b>考前一小时清单</b> 全部整理为离线友好的网页手册，打开即背、零门槛使用。</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="sprint.html">🔥 直达论文冲刺总集</a>
+      <a class="btn btn-ghost" href="final-hour.html">⚡ 考前一小时极速清单</a>
+      <a class="btn btn-ghost" href="https://github.com/Tian-Zhen-Yin/study_hub" target="_blank" rel="noopener">⚔️ 部署完整 AI+RPG 刷题系统</a>
+    </div>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num">11 页</div><div class="stat-label">三科全覆盖离线交互手册</div></div>
+    <div class="stat-card"><div class="stat-num">8 篇</div><div class="stat-label">机考硬限裁剪终稿范文</div></div>
+    <div class="stat-card"><div class="stat-num">34 卡</div><div class="stat-label">案例分析高频题型背诵卡</div></div>
+    <div class="stat-card"><div class="stat-num">1 分钟</div><div class="stat-label">本地零依赖运行全栈系统</div></div>
+  </div>
+</div>
+
+<main>
+  <section class="section">
+    <div class="sec-head">
+      <h2 class="sec-title">✍️ 一、论文武器库（机考 2500 字硬限实战）</h2>
+      <span class="sec-sub">统一项目事实口径 + 模块化组装 + 反 AI 模板护城河细节</span>
+    </div>
+    <div class="cards">
+      <a class="card" href="sprint.html">
+        <div class="card-top"><span class="card-title">论文冲刺总集</span><span class="tag t1">核心必读</span></div>
+        <p class="card-desc">唯一项目事实卡、摘要公式、17 张核心理论背诵卡、三档命题方向与考场交卷前核查清单。</p>
+        <div class="card-foot"><span>阅读冲刺版</span><span>进入 →</span></div>
+      </a>
+      <a class="card" href="essays.html">
+        <div class="card-top"><span class="card-title">8 篇硬限裁剪范文汇编</span><span class="tag t1">考场终稿</span></div>
+        <p class="card-desc">覆盖 RAG、微服务+Agent、架构评估、高并发负载均衡、性能测试、湖仓一体、数据集成等核心主题。</p>
+        <div class="card-foot"><span>摘要 ≤300 · 正文 ≤2500</span><span>进入 →</span></div>
+      </a>
+      <a class="card" href="recite.html">
+        <div class="card-top"><span class="card-title">论文移动端背诵卡</span><span class="tag t2">通勤刷背</span></div>
+        <p class="card-desc">专为手机屏幕与夜间阅读优化的分段背诵卡，支持字号缩放与本地记忆进度勾选。</p>
+        <div class="card-foot"><span>支持夜间模式</span><span>进入 →</span></div>
+      </a>
+      <a class="card" href="backbone.html">
+        <div class="card-top"><span class="card-title">六段式骨架 + 模块骨架</span><span class="tag t3">写作公式</span></div>
+        <p class="card-desc">固定项目主干不动，按考题动态抽换第 2 问理论与第 3 问实践模块，考场稳写不跑题。</p>
+        <div class="card-foot"><span>结构化套路</span><span>进入 →</span></div>
+      </a>
+      <a class="card" href="arch.html">
+        <div class="card-top"><span class="card-title">15 服务系统架构全景图</span><span class="tag t3">架构参照</span></div>
+        <p class="card-desc">论文主线项目（智能财务分析平台）业务 6 + Agent 5 + 基础设施 4 完整架构分层与事件链路。</p>
+        <div class="card-foot"><span>架构图速览</span><span>进入 →</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head">
+      <h2 class="sec-title">🧩 二、案例分析突破（必考题型 + 高频专项）</h2>
+      <span class="sec-sub">攻克质量属性、架构风格、Redis 缓存与分布式系统案例大题</span>
+    </div>
+    <div class="cards">
+      <a class="card" href="case-drills.html">
+        <div class="card-top"><span class="card-title">案例分析高频专题 · 34 卡</span><span class="tag t1">高分提分</span></div>
+        <p class="card-desc">围绕质量属性效用树、架构权衡、数据库与缓存、微服务治理提炼的 34 张问答背诵卡。</p>
+        <div class="card-foot"><span>带本地进度记录</span><span>进入 →</span></div>
+      </a>
+      <a class="card" href="redis-drill.html">
+        <div class="card-top"><span class="card-title">Redis 缓存高频专题精练</span><span class="tag t2">每年必考</span></div>
+        <p class="card-desc">系统梳理缓存击穿（互斥锁 vs 逻辑过期）、穿透、雪崩、主从同步与持久化等案例常考套路。</p>
+        <div class="card-foot"><span>对比表 + 答题模板</span><span>进入 →</span></div>
+      </a>
+      <a class="card" href="case-mindmap.html">
+        <div class="card-top"><span class="card-title">案例分析考点目录脑图</span><span class="tag t3">全景检索</span></div>
+        <p class="card-desc">交互式展开/搜索案例分析核心专题脉络，考前快速自查盲区与题型套路。</p>
+        <div class="card-foot"><span>支持关键词搜索</span><span>进入 →</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head">
+      <h2 class="sec-title">📚 三、综合知识速记与考前冲刺</h2>
+      <span class="sec-sub">抓大放小，优先拿下 80% 高频核心分值</span>
+    </div>
+    <div class="cards">
+      <a class="card" href="core-knowledge.html">
+        <div class="card-top"><span class="card-title">核心高频考点 ★5 背诵卡</span><span class="tag t1">高频速记</span></div>
+        <p class="card-desc">按软考大纲五星级高频考点整理的交互式翻卡背诵页，适合碎片时间高频巩固。</p>
+        <div class="card-foot"><span>离线可用</span><span>进入 →</span></div>
+      </a>
+      <a class="card" href="arch-mindmap.html">
+        <div class="card-top"><span class="card-title">选择题知识点全景脑图</span><span class="tag t3">可视化图谱</span></div>
+        <p class="card-desc">完整覆盖计算机系统、操作系统、数据库、网络、软工、架构与安全的交互式思维导图。</p>
+        <div class="card-foot"><span>支持缩放拖拽</span><span>进入 →</span></div>
+      </a>
+      <a class="card" href="final-hour.html">
+        <div class="card-top"><span class="card-title">考前一小时极速检查单</span><span class="tag t4">可打印</span></div>
+        <p class="card-desc">汇总最高频易混淆概念、计算公式、Redis 对账要点与机考时间分配，考前 60 分钟必看。</p>
+        <div class="card-foot"><span>支持打印 / 勾选</span><span>进入 →</span></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="system-box">
+    <div>
+      <h2>⚔️ 想要 AI 错题导师 + RPG 刷题系统？</h2>
+      <p>这份在线手册只是 <b>Study Hub</b> 开源项目的静态备考模块。完整版是一套基于 <b>Spring Boot 3 + 多模型 AI + SM-2 间隔重复 + RPG 游戏化</b> 的自部署备考指挥中心：</p>
+      <ul class="feat-list">
+        <li>🎮 RPG 血量/经验/连击刷题大厅</li>
+        <li>🤖 AI 错题辅导与周期弱点诊断</li>
+        <li>🔌 支持 DeepSeek / 智谱 / 豆包 / Ollama</li>
+        <li>🧠 交互式考点知识图谱与记忆熔炉</li>
+      </ul>
+      <div class="hero-cta">
+        <a class="btn btn-primary" style="background:var(--acc);color:#fff" href="https://github.com/Tian-Zhen-Yin/study_hub" target="_blank" rel="noopener">⭐ 前往 GitHub 获取完整源码</a>
+      </div>
+    </div>
+    <div class="code-box">
+      <div class="code-comment"># 方式一：单 Jar 零依赖启动（内置 H2 数据库）</div>
+      git clone https://github.com/Tian-Zhen-Yin/study_hub.git<br>
+      cd study_hub &amp;&amp; ./scripts/start.sh<br><br>
+      <div class="code-comment"># 方式二：Docker Compose 一键部署（含 MySQL 8）</div>
+      cp .env.example .env<br>
+      docker compose up -d<br><br>
+      <div class="code-comment"># 访问 http://localhost:8080 开始备考！</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div>开源协议：Apache-2.0 · 纯个人通关备考笔记与学习工具分享，不含受版权保护的商业题库。</div>
+  <div>Made with ❤️ by <a href="https://github.com/Tian-Zhen-Yin" target="_blank" rel="noopener">@Tian-Zhen-Yin</a> · <a href="https://github.com/Tian-Zhen-Yin/study_hub/issues" target="_blank" rel="noopener">反馈与纠错</a></div>
+</footer>
+
+<script>
+function getExamDate(){
+  var s=localStorage.getItem("studyhub_exam_date");
+  if(s && /^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  var n=new Date(),y=n.getFullYear(),c=[y+"-05-24",y+"-11-08",(y+1)+"-05-24"];
+  for(var i=0;i<c.length;i++) if(new Date(c[i])>n) return c[i];
+  return (y+1)+"-05-24";
+}
+function renderCountdown(){
+  var target=getExamDate();
+  var d=Math.ceil((new Date(target)-Date.now())/864e5);
+  document.getElementById("dd").textContent=d>=0?d:0;
+  document.getElementById("exam-pill").title="目标考试日期："+target+"（点击自定义）";
+}
+function editExamDate(){
+  var cur=getExamDate();
+  var v=prompt("请输入你的目标考试日期（格式 YYYY-MM-DD）：",cur);
+  if(!v) return;
+  v=v.trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)||isNaN(new Date(v).getTime())){alert("日期格式错误，请输入如 2027-05-29");return;}
+  localStorage.setItem("studyhub_exam_date",v);
+  renderCountdown();
+}
+function toggleTheme(){
+  document.documentElement.classList.toggle("dark");
+  localStorage.setItem("studyhub_docs_dark",document.documentElement.classList.contains("dark")?"1":"0");
+}
+if(localStorage.getItem("studyhub_docs_dark")==="1") document.documentElement.classList.add("dark");
+renderCountdown();
+</script>
+</body>
+</html>

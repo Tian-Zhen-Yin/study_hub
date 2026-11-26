@@ -1,0 +1,23 @@
+name: 💡 功能建议 / 备考需求
+description: 提出新功能想法、交互优化或新的备考专题建议
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么备考痛点？
+      placeholder: 例如：写论文练习时希望能实时统计摘要/正文字符数并让 AI 按评分维度打分
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望的实现方式
+      placeholder: 描述你理想中的页面形态或交互流程
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: 参与意愿
+      options:
+        - label: 我愿意在讨论确认后提交 PR 参与实现

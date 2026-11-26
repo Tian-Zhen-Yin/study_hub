@@ -1,0 +1,31 @@
+name: 🐛 Bug 反馈
+description: 反馈系统运行异常、界面错误或备考资料勘误
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 清晰描述你遇到的 Bug 或资料中的错误点
+      placeholder: 例如：在 H2 模式下打开知识图谱提示...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 启动方式（单 Jar / Docker / GitHub Pages）
+        2. 操作路径
+        3. 预期结果 vs 实际结果
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      placeholder: 例如：macOS 15 / JDK 17 / Docker / Chrome 130
+  - type: textarea
+    id: logs
+    attributes:
+      label: 错误日志或截图（可选）
+      render: shell

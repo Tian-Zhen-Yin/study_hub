@@ -1,0 +1,27 @@
+name: CI Build & Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Maven tests (unit + H2 smoke integration)
+        run: mvn -B test
+
+      - name: Validate Markdown question bank parser
+        run: python3 scripts/parse_markdown_questions.py examples/sample-bank /tmp/sample-check.json
