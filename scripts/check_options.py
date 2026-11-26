@@ -1,8 +1,8 @@
 """Check option quality: empty, duplicate, abnormally long options."""
-import json, sys
+import json, sys, os
 import pymysql
 
-conn = pymysql.connect(host="localhost", user="root", password="root", database="study_hub", charset="utf8mb4")
+conn = pymysql.connect(host="localhost", user="root", password=os.getenv("DB_PASSWORD", "root"), database="study_hub", charset="utf8mb4")
 cur = conn.cursor()
 cur.execute("SELECT id, source_file, stem, options_json, answer FROM questions WHERE source='GITHUB'")
 rows = cur.fetchall()

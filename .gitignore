@@ -65,6 +65,10 @@ __pycache__/
 # ===== Nested separate repository (has its own GitHub remote) =====
 data/senior-arch-review/
 
+# === Tool working directories (unsuitable for external display) ===
+.video_agent/
+.v2c/
+
 # ===== Uploads =====
 data/uploads/
 
@@ -74,11 +78,14 @@ scripts/past-exam/import-tmp.sql
 scripts/past-exam/query-tmp.sql
 
 # ===== Local artifacts, do not commit =====
-backups/
-extracted_pdf/
-screenshot-*.png
+.backups/
+.extracted_pdf/
+.screenshot-*.png
 scripts/tmp-task3/
 scripts/llm-tag/*.b64
 scripts/llm-tag/*.jsonl
 scripts/quality-pass2/*.b64
 scripts/quality-pass2/*.jsonl
+
+# === Trae planning artifacts (empty/placeholder, do not commit) ===
+.trae/

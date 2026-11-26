@@ -1,5 +1,5 @@
 """Cross-verify stored answers vs ✅ markers in source markdown files."""
-import json, re, sys
+import json, re, sys, os
 from pathlib import Path
 import pymysql
 

@@ -1,8 +1,9 @@
 """Audit RUANKAO questions: options count, answer validity, duplicates, quality."""
 import json
+import os
 import pymysql
 
-conn = pymysql.connect(host="localhost", user="root", password="root", database="study_hub", charset="utf8mb4")
+conn = pymysql.connect(host="localhost", user="root", password=os.getenv("DB_PASSWORD", "root"), database="study_hub", charset="utf8mb4")
 cur = conn.cursor()
 
 cur.execute("SELECT COUNT(*) FROM questions WHERE source='RUANKAO'")
