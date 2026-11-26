@@ -36,12 +36,14 @@ public abstract class AbstractOpenAiLlmClient implements LlmClient {
             new org.springframework.http.client.SimpleClientHttpRequestFactory();
         factory.setConnectTimeout((int) java.time.Duration.ofSeconds(timeoutSeconds()).toMillis());
         factory.setReadTimeout((int) java.time.Duration.ofSeconds(timeoutSeconds()).toMillis());
-        this.restClient = RestClient.builder()
+        RestClient.Builder builder = RestClient.builder()
             .baseUrl(baseUrl())
             .requestFactory(factory)
-            .defaultHeader("Authorization", "Bearer " + apiKey())
-            .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-            .build();
+            .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        if (apiKey() != null && !apiKey().isBlank()) {
+            builder.defaultHeader("Authorization", "Bearer " + apiKey());
+        }
+        this.restClient = builder.build();
         log.info("{} initialized: model={}, timeout={}s, cache={}",
             providerName(), model(), timeoutSeconds(), this.cache != null ? "enabled" : "disabled");
     }
@@ -64,8 +66,17 @@ public abstract class AbstractOpenAiLlmClient implements LlmClient {
         return response;
     }
 
+    private boolean isLocalEndpoint(String url) {
+        if (url == null) return false;
+        String lower = url.toLowerCase();
+        return lower.contains("://localhost")
+            || lower.contains("://127.0.0.1")
+            || lower.contains("://host.docker.internal")
+            || lower.contains("://[::1]");
+    }
+
     private LlmResponse doChat(LlmRequest request) {
-        if (apiKey() == null || apiKey().isBlank()) {
+        if ((apiKey() == null || apiKey().isBlank()) && !isLocalEndpoint(baseUrl())) {
             throw new LlmUnavailableException("AUTH_FAILED",
                 providerName() + " API Key 未配置,无法调用 LLM");
         }

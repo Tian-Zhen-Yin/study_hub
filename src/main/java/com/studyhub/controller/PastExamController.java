@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-/** 历年真题：按试卷浏览（参考芝士架构 past_exam 模式） */
+/** 历年真题：按试卷浏览（按试卷浏览与展开作答） */
 @RestController
 @RequestMapping("/api/past-exam")
 public class PastExamController {

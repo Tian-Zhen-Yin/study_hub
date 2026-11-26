@@ -8,6 +8,7 @@ public enum ProviderType {
     ARK("火山引擎 Ark"),
     ZHIPU("智谱 GLM"),
     DEEPSEEK("DeepSeek"),
+    OPENAI_COMPAT("OpenAI 兼容 / Ollama"),
     MOCK("Mock(不调用真实模型)");
 
     private final String label;

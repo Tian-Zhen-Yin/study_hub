@@ -7,6 +7,7 @@ import com.studyhub.entity.StudyLog;
 import com.studyhub.entity.WeeklyTask;
 import com.studyhub.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,9 @@ public class DashboardService {
     private final StudyLogRepository studyLogRepository;
     private final SimulationRepository simulationRepository;
     private final WeeklyTaskRepository weeklyTaskRepository;
+
+    @Value("${app.week-start-date:}")
+    private String weekStartDate;
 
     @Transactional(readOnly = true)
     public DashboardDTO getDashboard() {
@@ -140,10 +144,17 @@ public class DashboardService {
     }
 
     private int getCurrentWeekIdx() {
-        // 基于 plan-start-date 计算当前周序号
-        LocalDate planStart = LocalDate.of(2026, 7, 28);
-        long days = ChronoUnit.DAYS.between(planStart, LocalDate.now());
-        int week = (int) (days / 7) + 1;
-        return Math.max(1, Math.min(13, week));
+        // 基于配置的 week-start-date 计算当前周序号；未配置时默认第 1 周
+        if (weekStartDate == null || weekStartDate.isBlank()) {
+            return 1;
+        }
+        try {
+            LocalDate planStart = LocalDate.parse(weekStartDate.trim());
+            long days = ChronoUnit.DAYS.between(planStart, LocalDate.now());
+            int week = (int) (days / 7) + 1;
+            return Math.max(1, Math.min(13, week));
+        } catch (Exception e) {
+            return 1;
+        }
     }
 }

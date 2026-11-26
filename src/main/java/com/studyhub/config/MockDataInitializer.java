@@ -29,8 +29,19 @@ public class MockDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (questionRepo.count() > 0) {
-            log.info("Mock 数据已存在,跳过初始化");
+        if (answerRecordRepo.count() > 0) {
+            log.info("演示作答记录已存在,跳过 Mock 初始化");
+            return;
+        }
+
+        List<Question> existing = questionRepo.findAll().stream()
+            .filter(q -> q.getType() == null || q.getType().isEmpty() || "MCQ".equalsIgnoreCase(q.getType()))
+            .toList();
+        if (existing.size() >= 25) {
+            log.warn("====== 基于已有 {} 道示例题生成演示作答记录与游戏状态 ======", existing.size());
+            createAnswerRecords(existing.subList(0, 25));
+            createGameState();
+            createMemoryCards(existing.subList(0, 25));
             return;
         }
 

@@ -4,6 +4,7 @@ import com.studyhub.dto.DashboardDTO;
 import com.studyhub.repository.AnswerRecordRepository;
 import com.studyhub.service.DashboardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,20 @@ public class DashboardController {
     private final DashboardService dashboardService;
     private final AnswerRecordRepository answerRecordRepo;
 
+    @Value("${app.exam-date:}")
+    private String examDate;
+
+    @Value("${app.week-start-date:}")
+    private String weekStartDate;
+
+    @GetMapping("/config")
+    public Map<String, Object> getConfig() {
+        Map<String, Object> cfg = new LinkedHashMap<>();
+        cfg.put("examDate", examDate == null ? "" : examDate.trim());
+        cfg.put("weekStartDate", weekStartDate == null ? "" : weekStartDate.trim());
+        return Map.of("code", 200, "data", cfg, "message", "ok");
+    }
+
     @GetMapping("/dashboard")
     public Map<String, Object> getDashboard() {
         DashboardDTO data = dashboardService.getDashboard();
@@ -40,10 +55,11 @@ public class DashboardController {
         LocalDate today = LocalDate.now();
         LocalDate start = today.minusDays(days - 1L);
 
-        // 从 DB 聚合：日期 -> {answered, correct}
+        // 从 DB 聚合：日期 -> {answered, correct}（兼容 MySQL java.sql.Date 与 H2 LocalDate）
         Map<LocalDate, long[]> raw = new HashMap<>();
         for (Object[] row : answerRecordRepo.dailyStatsSince(start.atStartOfDay())) {
-            LocalDate d = ((java.sql.Date) row[0]).toLocalDate();
+            LocalDate d = toLocalDate(row[0]);
+            if (d == null) continue;
             long answered = ((Number) row[1]).longValue();
             long correct = ((Number) row[2]).longValue();
             raw.put(d, new long[]{answered, correct});
@@ -75,5 +91,13 @@ public class DashboardController {
         data.put("series", series);
 
         return Map.of("code", 200, "data", data, "message", "ok");
+    }
+
+    private LocalDate toLocalDate(Object val) {
+        if (val == null) return null;
+        if (val instanceof LocalDate ld) return ld;
+        if (val instanceof java.sql.Date sd) return sd.toLocalDate();
+        if (val instanceof java.sql.Timestamp ts) return ts.toLocalDateTime().toLocalDate();
+        return LocalDate.parse(val.toString().substring(0, 10));
     }
 }

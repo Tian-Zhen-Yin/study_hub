@@ -2,7 +2,20 @@
    app.js - SPA Shell: Routing, Navigation, API Helpers
    ============================================================ */
 
-const API = "http://localhost:8080/api";
+const API = "/api";
+
+function getDefaultExamDate() {
+  const saved = localStorage.getItem("studyhub_exam_date");
+  if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
+  // 自动推算下一次软考高项/架构师考试日期（每年 5 月最后一个周六或 11 月第一个周六）
+  const now = new Date();
+  const y = now.getFullYear();
+  const candidates = [`${y}-05-24`, `${y}-11-08`, `${y + 1}-05-24`];
+  for (const c of candidates) {
+    if (new Date(c) > now) return c;
+  }
+  return `${y + 1}-05-24`;
+}
 
 const state = {
   page: "dashboard",
@@ -11,7 +24,7 @@ const state = {
   level: 1,
   coin: 0,
   streak: 0,
-  examDate: "2026-10-24",
+  examDate: getDefaultExamDate(),
   domains: [],
   territories: [],
   gameState: null
@@ -107,20 +120,38 @@ function updateBottomBar() {
   const streak = document.getElementById("bottombar-streak");
   if (days) {
     const d = Math.ceil((new Date(state.examDate) - new Date()) / 86400000);
-    days.textContent = d;
+    days.textContent = d >= 0 ? d : 0;
+    days.parentElement.title = "目标考试日期：" + state.examDate + "（点击自定义）";
   }
   if (streak) streak.textContent = state.streak;
 }
 
+function editExamDate() {
+  const input = prompt("请输入你的目标考试日期（格式 YYYY-MM-DD）：", state.examDate);
+  if (!input) return;
+  const trimmed = input.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed) || isNaN(new Date(trimmed).getTime())) {
+    alert("日期格式不正确，请输入如 2027-05-29");
+    return;
+  }
+  state.examDate = trimmed;
+  localStorage.setItem("studyhub_exam_date", trimmed);
+  updateBottomBar();
+}
+
 async function init() {
   try {
-    const [domains, territories, gameState] = await Promise.all([
+    const [domains, territories, gameState, appConfig] = await Promise.all([
       apiGet("/domains").catch(() => []),
       apiGet("/territories").catch(() => []),
-      apiGet("/game/state").catch(() => null)
+      apiGet("/game/state").catch(() => null),
+      apiGet("/config").catch(() => null)
     ]);
     state.domains = Array.isArray(domains) ? domains : [];
     state.territories = Array.isArray(territories) ? territories : [];
+    if (!localStorage.getItem("studyhub_exam_date") && appConfig && appConfig.examDate) {
+      state.examDate = appConfig.examDate;
+    }
     if (gameState) {
       state.hp = gameState.hp ?? 100;
       state.maxHp = gameState.maxHp ?? 100;
@@ -153,6 +184,7 @@ window.addEventListener("hashchange", () => {
 
 window.addEventListener("DOMContentLoaded", init);
 window.navigate = navigate;
+window.editExamDate = editExamDate;
 window.apiGet = apiGet;
 window.apiPost = apiPost;
 window.apiPut = apiPut;

@@ -2952,7 +2952,7 @@ async function renderLlmSettings(c) {
     var badges = '';
     if (isActive) badges += '<span style="padding:2px 8px;border-radius:999px;background:var(--success-1);color:var(--success-6);font-size:12px">生效中</span>';
     if (!cfg.enabled) badges += '<span style="padding:2px 8px;border-radius:999px;background:var(--danger-2);color:var(--danger-6);font-size:12px">已禁用</span>';
-    if (!cfg.hasApiKey && cfg.provider !== 'MOCK') badges += '<span style="padding:2px 8px;border-radius:999px;background:var(--warning-1);color:var(--warning-6);font-size:12px">未填 Key</span>';
+    if (!cfg.hasApiKey && cfg.provider !== 'MOCK' && cfg.provider !== 'OPENAI_COMPAT') badges += '<span style="padding:2px 8px;border-radius:999px;background:var(--warning-1);color:var(--warning-6);font-size:12px">未填 Key</span>';
 
     var actions = '';
     if (!isActive) actions += '<button onclick="setActiveLlm(' + cfg.id + ')" style="padding:4px 10px;border:1px solid var(--success-5);border-radius:6px;background:var(--success-1);color:var(--success-6);cursor:pointer;font-size:12px">设为生效</button>';
@@ -3023,11 +3023,18 @@ function onLlmProviderChange() {
   sel.innerHTML = '<option value="">常用模型...</option>' + presets.map(function(m) {
     return '<option value="' + m + '">' + m + '</option>';
   }).join("");
-  // mock 不需要 Key/URL/模型
+  // mock 不需要 Key/URL/模型；OPENAI_COMPAT 本地 Ollama 允许留空 Key
   var isMock = prov === 'MOCK';
   ["llm-apikey","llm-baseurl","llm-model"].forEach(function(id) {
     document.getElementById(id).disabled = isMock;
   });
+  if (prov === 'OPENAI_COMPAT') {
+    document.getElementById("llm-apikey").placeholder = "本地 Ollama 可留空；OpenAI/OpenRouter/硅基流动请填 Key";
+    document.getElementById("llm-baseurl").placeholder = "如 http://localhost:11434/v1 或 https://api.openai.com/v1";
+  } else if (!editingLlmId) {
+    document.getElementById("llm-apikey").placeholder = "新建必填;编辑留空表示不修改";
+    document.getElementById("llm-baseurl").placeholder = "留空使用默认";
+  }
 }
 
 var editingLlmId = null;
@@ -3084,7 +3091,7 @@ async function saveLlmConfig() {
   if (!body.displayName) { alert("请填写显示名称"); return; }
   if (body.provider !== 'MOCK') {
     if (!body.model) { alert("请填写模型名称"); return; }
-    if (!editingLlmId && !body.apiKey) { alert("新建配置时 API Key 必填"); return; }
+    if (!editingLlmId && !body.apiKey && body.provider !== 'OPENAI_COMPAT') { alert("新建配置时 API Key 必填"); return; }
   }
   try {
     if (editingLlmId) {
@@ -3144,7 +3151,7 @@ function esc(s) {
 }
 
 /* ============================================================
-   历年真题（参考芝士架构 past_exam：按试卷浏览 → 题目展开）
+   历年真题（按试卷浏览 → 题目展开）
    ============================================================ */
 var pastExamState = { subject: "全部", openPaperId: null, detailCache: {}, paperTab: {}, qCache: {} };
 
@@ -4163,8 +4170,8 @@ async function renderEssayInsight(c) {
     '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;margin:2px 4px 2px 0">08 性能测试(2025.11真题)</span>' +
     '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#dcfce7;color:#166534;margin:2px 4px 2px 0">09 架构评估(回归预测)</span>' +
     '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fef3c7;color:#92400e;margin:2px 4px 2px 0">10 理论重复分析+背诵卡</span>' +
-    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;margin:2px 4px 2px 0">13 AI-RAG范文(2026.10押题·一档头名)</span>' +
-    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fef3c7;color:#92400e;margin:2px 4px 2px 0">14 可靠性组装提纲(二档押题)</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;margin:2px 4px 2px 0">13 AI-RAG范文(一档高频主题)</span>' +
+    '<span style="display:inline-block;padding:3px 10px;border-radius:8px;background:#fef3c7;color:#92400e;margin:2px 4px 2px 0">14 可靠性组装提纲(二档高频主题)</span>' +
     '<a href="/sprint.html" style="text-decoration:none;display:inline-block;padding:3px 10px;border-radius:8px;background:#1e40af;color:#ffffff;margin:2px 4px 2px 0">15 冲刺版总集(📱手机页 /sprint.html)</a>' +
     '<br><span class="text-muted">考场组合策略：主干事实不变 → 从最接近的范文抽 2 个小节 + 从 03-modules 抽 1 个模块重组；交卷前 5–8 分钟专查数字口径与专有名词一致性。</span>' +
   '</div></div></div>';

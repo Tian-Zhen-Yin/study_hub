@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   servlet:
     encoding:
       charset: UTF-8
@@ -10,13 +10,19 @@ server:
 spring:
   web:
     resources:
-      # 请求 /uploads/x → 位置 + uploads/x, 故须指向 data 父目录; 绝对路径兜底计划任务 CWD 不定
+      # 请求 /uploads/x 或 /sprint.html → 指向静态目录与 ./data/
       static-locations: classpath:/static/, file:./data/
+  # 默认使用内置 H2 文件库（MySQL 兼容模式），一条命令零依赖启动；
+  # 如需使用 MySQL 8，请启用 profile: --spring.profiles.active=mysql
   datasource:
-    url: jdbc:mysql://localhost:3306/study_hub?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:h2:file:./data/studyhub;MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=DAY,VALUE,USER,KEY;AUTO_SERVER=TRUE}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+  h2:
+    console:
+      enabled: ${H2_CONSOLE_ENABLED:false}
+      path: /h2-console
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,20 +30,22 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
 
 app:
-  exam-date: 2026-10-24
-  week-start-date: 2026-07-28
+  # 默认考试日期（可在前端底部栏点击自定义并持久化到浏览器）
+  exam-date: ${APP_EXAM_DATE:}
+  week-start-date: ${APP_WEEK_START_DATE:}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8080,http://127.0.0.1:8080}
 
 studyhub:
-  # mock 数据开关: 设为 true 时加载 25 道题+作答记录, 用于本地验证
+  # 演示作答记录开关: 设为 true 时额外加载演示作答历史与 Lv.3 游戏状态
   mock:
     enabled: ${MOCK_ENABLED:false}
-  # LLM 提供商(仅决定首次启动播种哪一行为生效;之后可在前端「AI 模型」页运行时切换):
-  # ark(火山引擎) | zhipu(智谱 GLM) | deepseek(DeepSeek 官方) | mock(无需 API Key)
+  # LLM 提供商(仅决定首次启动默认激活哪一行，之后可在前端「AI 模型」页随时切换):
+  # mock(默认,无需Key) | deepseek | ark(火山引擎) | zhipu(智谱GLM) | openai_compat(通用OpenAI/Ollama/OpenRouter)
   llm:
-    provider: ${LLM_PROVIDER:ark}
+    provider: ${LLM_PROVIDER:mock}
     cache:
       enabled: true
       max-size: 500
@@ -57,16 +65,21 @@ studyhub:
     base-url: https://api.deepseek.com/v1
     model: ${DEEPSEEK_MODEL:deepseek-chat}
     timeout-seconds: 30
+  openai-compat:
+    api-key: ${OPENAI_API_KEY:}
+    base-url: ${OPENAI_BASE_URL:http://localhost:11434/v1}
+    model: ${OPENAI_MODEL:qwen2.5:7b}
+    timeout-seconds: 60
   diagnosis:
     auto-generate: true
     cron: "0 0 22 ? * SUN"
     min-records: 20
 
-# ===== 本地验证配置示例 =====
-# 1. 无需 API Key 验证完整流程:
-#    设置环境变量 MOCK_ENABLED=true 和 LLM_PROVIDER=mock
-# 2. 真实 AI 验证(任选其一,启动后也可在前端「AI 模型」页随时切换/补填 Key):
-#    ARK_API_KEY=你的key      (LLM_PROVIDER=ark, 默认)
-#    ZHIPU_API_KEY=你的key    (LLM_PROVIDER=zhipu, 模型可填 glm-5.2 / glm-4-flash 等)
-#    DEEPSEEK_API_KEY=你的key (LLM_PROVIDER=deepseek)
-# 3. 清空重来: 删除 MySQL study_hub 数据库后重启即可自动重建
+# ===== 快速启动说明 =====
+# 1. 零依赖本地启动 (内置 H2 文件库 + Mock AI):
+#    ./scripts/start.sh   或   mvn spring-boot:run
+# 2. 使用 MySQL 8:
+#    SPRING_PROFILES_ACTIVE=mysql DB_PASSWORD=your_password mvn spring-boot:run
+# 3. 接入真实 AI (任选其一，也可启动后在前端「AI 模型」页直接配置):
+#    LLM_PROVIDER=deepseek DEEPSEEK_API_KEY=sk-xxx
+#    LLM_PROVIDER=openai_compat OPENAI_BASE_URL=http://localhost:11434/v1 OPENAI_MODEL=qwen2.5:7b (Ollama 免 Key)

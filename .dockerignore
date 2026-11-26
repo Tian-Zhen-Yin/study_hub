@@ -1,0 +1,13 @@
+target/
+.git/
+.m2/
+.idea/
+.vscode/
+backups/
+extracted_pdf/
+data/uploads/
+data/senior-arch-review/
+data/*.mv.db
+data/*.trace.db
+*.log
+.env

@@ -71,7 +71,7 @@ public class Question {
     @Column(name = "exam_sort")
     private Integer examSort;
 
-    /** 外部来源唯一键（如 cheko:case:5），用于爬虫导入幂等 */
+    /** 外部来源唯一键（如 import:case:5），用于题库导入幂等去重 */
     @Column(name = "external_key", length = 100)
     private String externalKey;
 

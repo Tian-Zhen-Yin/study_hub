@@ -34,6 +34,7 @@ public class LlmSettingsController {
         ProviderType.ARK, List.of("doubao-seed-2-0-mini-260428", "doubao-pro-32k", "doubao-pro-4k", "doubao-lite-32k"),
         ProviderType.ZHIPU, List.of("glm-5.2", "glm-4-plus", "glm-4", "glm-4-flash", "glm-4-long"),
         ProviderType.DEEPSEEK, List.of("deepseek-chat", "deepseek-reasoner", "deepseek-coder"),
+        ProviderType.OPENAI_COMPAT, List.of("qwen2.5:7b", "deepseek-r1:8b", "gpt-4o-mini", "Qwen/Qwen2.5-72B-Instruct"),
         ProviderType.MOCK, List.of()
     );
 

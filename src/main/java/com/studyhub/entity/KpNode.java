@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 /**
- * 知识图谱节点（考点）。层级来自芝士架构真题库的 kpId/parentKpId，
- * question_count / freq / essence 由导入脚本按题库实际数据统计写入。
+ * 知识图谱节点（考点）。支持父子层级树结构，
+ * question_count / freq / essence 由题库统计或导入流程写入。
  */
 @Data
 @NoArgsConstructor

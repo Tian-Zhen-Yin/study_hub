@@ -31,8 +31,9 @@ public class LlmProviderRegistry {
     private final ArkProperties arkProperties;
     private final ZhipuProperties zhipuProperties;
     private final DeepSeekProperties deepSeekProperties;
+    private final OpenAiCompatProperties openAiCompatProperties;
 
-    @Value("${studyhub.llm.provider:ark}")
+    @Value("${studyhub.llm.provider:mock}")
     private String startupProvider;
 
     /** configId -> 已初始化的 LlmClient,避免每次调用重建 RestClient */
@@ -239,6 +240,9 @@ public class LlmProviderRegistry {
         repo.save(buildSeed(ProviderType.DEEPSEEK, "DeepSeek",
             deepSeekProperties.apiKey(), deepSeekProperties.baseUrl(), deepSeekProperties.model(),
             deepSeekProperties.timeoutSeconds(), startup == ProviderType.DEEPSEEK, now));
+        repo.save(buildSeed(ProviderType.OPENAI_COMPAT, "本地 Ollama / OpenAI 兼容",
+            openAiCompatProperties.apiKey(), openAiCompatProperties.baseUrl(), openAiCompatProperties.model(),
+            openAiCompatProperties.timeoutSeconds(), startup == ProviderType.OPENAI_COMPAT, now));
         repo.save(buildSeed(ProviderType.MOCK, "Mock 本地验证",
             null, null, null, 30, startup == ProviderType.MOCK, now));
     }
@@ -278,12 +282,14 @@ public class LlmProviderRegistry {
     }
 
     private ProviderType parseStartupProvider() {
-        if (startupProvider == null) return ProviderType.ARK;
+        if (startupProvider == null) return ProviderType.MOCK;
         return switch (startupProvider.trim().toLowerCase()) {
+            case "ark" -> ProviderType.ARK;
             case "zhipu" -> ProviderType.ZHIPU;
             case "deepseek" -> ProviderType.DEEPSEEK;
+            case "openai_compat", "openai", "ollama" -> ProviderType.OPENAI_COMPAT;
             case "mock" -> ProviderType.MOCK;
-            default -> ProviderType.ARK;
+            default -> ProviderType.MOCK;
         };
     }
 
@@ -320,6 +326,7 @@ public class LlmProviderRegistry {
             case ARK -> arkProperties.baseUrl();
             case ZHIPU -> zhipuProperties.baseUrl();
             case DEEPSEEK -> deepSeekProperties.baseUrl();
+            case OPENAI_COMPAT -> openAiCompatProperties.baseUrl();
             case MOCK -> null;
         };
     }
@@ -329,6 +336,7 @@ public class LlmProviderRegistry {
             case ARK -> arkProperties.model();
             case ZHIPU -> zhipuProperties.model();
             case DEEPSEEK -> deepSeekProperties.model();
+            case OPENAI_COMPAT -> openAiCompatProperties.model();
             case MOCK -> null;
         };
     }
